@@ -41,7 +41,7 @@ Address conventions are loaded as **data, not code**. A region pack holds the lo
 street and estate names, how people say entrances, the landmarks everyone navigates by — and those
 terms are given to the speech recogniser before it listens, so it stops mangling them.
 
-Three packs ship: **UK / London**, **Nigeria / Lagos**, **Pakistan / Karachi**.
+Three packs ship: **UK / London**, **Nigeria / Lagos**, **Pakistan / Lahore**.
 
 Swapping the pack retargets the product to a new market without touching the schema, the
 follow-up logic, or the agent.

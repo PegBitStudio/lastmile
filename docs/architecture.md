@@ -244,7 +244,7 @@ So we can work in parallel across a four-hour timezone gap without blocking each
 ```jsonc
 // regions/<id>.json
 {
-  "id": "pk-karachi",
+  "id": "pk-lahore",
   "language": "en",                     // en, with code-switching expected
   "currency": "PKR",
   "vocabulary": {
@@ -270,22 +270,22 @@ pack_id, utterance_id, ground_truth, transcript_no_keyterms, transcript_with_key
 | Area | Owner |
 |---|---|
 | Voice Agent config, tools, follow-up table, `/drive`, `/board`, Postgres, audio | Dami |
-| Region packs: **Pakistan** (city your call) and **UK/London** | Yashfa |
+| Region packs: **Pakistan / Lahore** and **UK / London** | Yashfa |
 | Region pack: **Nigeria/Lagos** | Dami |
 | ~20 spoken addresses per pack, plus keyterms on/off measurement | Yashfa |
 | GPS check — data and threshold | Dami, from Yashfa's spec |
 | Video, deck, cover image, README | Both, week 4 |
 
-Note: the spec still lists **US/urban** as the third pack. **Pakistan replaces it** — the keyterm
-gain will be much larger, and "London, Lagos, Karachi" is a far stronger generality claim than a
-second Western city.
+Note: the third pack was originally planned as US/urban. **Lahore replaces it** — the keyterm gain
+will be much larger, "London, Lagos, Lahore" is a far stronger generality claim than a second
+Western city, and it is the one pack a team member can record natively.
 
 ---
 
 ## 9. Open questions — settle this week
 
-1. Which Pakistani city, and does the pack need Urdu-script keyterm variants or is romanised
-   enough? (Yashfa's call.)
+1. Does the Lahore pack need Urdu-script keyterm variants, or is romanised text enough?
+   (Yashfa's call.)
 2. GPS threshold: 200m or 300m? Needs one real test, not a guess.
 3. Do we score word error rate, or exact match on the address span only? Exact match is a blunter
    measure but a much clearer slide.

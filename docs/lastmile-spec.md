@@ -196,11 +196,11 @@ touching the schema, the follow-up table, or the agent logic.
 ```
 
 Reference packs to ship: **UK/London** (buzzers, flats, porters), **Nigeria/Lagos** (estates,
-gates, gatemen), **Pakistan/Karachi** (phases, blocks, chowkidars, landmark-based directions).
+gates, gatemen), **Pakistan/Lahore** (phases, blocks, chowkidars, landmark-based directions).
 Three packs is enough to prove generality; more is padding.
 
 Pakistan replaces the originally planned US/urban pack. Two reasons: the keyterm-biasing gain is
-far larger where the vocabulary is non-Western, and "London, Lagos, Karachi" is a much stronger
+far larger where the vocabulary is non-Western, and "London, Lagos, Lahore" is a much stronger
 generality claim than a second Western city. It is also the one pack a team member can record
 natively.
 
