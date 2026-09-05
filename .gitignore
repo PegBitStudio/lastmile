@@ -1,0 +1,55 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# environment — never commit the AssemblyAI key
+.env
+.env*.local
+.env.production
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# os
+.DS_Store
+Thumbs.db
+
+# audio captured during testing — can be large, and may contain real voices
+/recordings/
+*.webm
+*.wav
+
+# ---------------------------------------------------------------------------
+# Internal team documents. This repo is public.
+#
+# These are notes between the two of us. They discuss prize money, tax forms,
+# and who gets named on the payout. That is nobody else's business, and once
+# it is in a public git history it is very hard to take back.
+#
+# They are shared privately instead:
+#   - the working plan is a shared page, link in Discord
+#   - the rest live in this folder on our own machines
+#
+# If we decide we want any of these public, delete the line and commit it.
+# ---------------------------------------------------------------------------
+docs/build-plan.md
+docs/working-plan.html
+docs/hackathon-brief.md
+docs/lastmile-partner-brief.html
