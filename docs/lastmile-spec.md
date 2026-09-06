@@ -37,8 +37,28 @@ back-and-forth conversation is a distraction whether or not hands are involved.
 So the product is **park, speak, go** — capture right after the stop, while the memory is fresh
 and the vehicle is still.
 
-Implementation: check the Geolocation API `speed` reading before opening the session. Above a low
-threshold the driver screen shows *"Waiting until you've stopped"* and the microphone stays shut.
+### Implementing it, including the awkward part
+
+Check speed before opening the session. Above a low threshold (start at 5 km/h) the driver screen
+shows *"Waiting until you've stopped"* and the microphone stays shut.
+
+**`GeolocationCoordinates.speed` is null on a lot of hardware**, including most laptops and some
+phones. That has to be handled deliberately or this feature quietly does nothing, or worse, blocks
+everything:
+
+1. Read `coords.speed`. If it is a number, use it.
+2. If it is null, derive speed from two consecutive positions and their timestamps.
+3. If it is still unknown, **allow the session** and record
+   `observed.stationary: "unknown"` rather than `true`.
+
+Step 3 matters. Blocking on unknown would make the product unusable on the devices that cannot
+report speed, and would make the demo impossible to record. An honest "unknown" in the record is
+better than a false "stationary" or a dead app.
+
+**For the video, we need a way to fake motion.** A dev-only speed override (a query parameter is
+fine) so the gate can be filmed refusing and then allowing. Without it, the opening beat of the
+video cannot be shot from a desk. Build the override in week 2, at the same time as the gate, not
+on the 23rd.
 
 This also removes a technical problem. A dash-mounted phone holding a live microphone socket in a
 moving car is the worst case for a mobile browser — backgrounding, wake lock, Bluetooth routing.
@@ -134,7 +154,7 @@ Used directly as the JSON Schema for the `log_delivery_event` tool.
         "occurred_at": { "type": "string", "format": "date-time" },
         "coords":      { "type": "object", "properties": { "lat": {"type":"number"}, "lng": {"type":"number"} } },
         "gps_delta_m": { "type": "number", "description": "Metres from the manifest drop address" },
-        "stationary":  { "type": "boolean", "description": "Safety gate satisfied at capture time" },
+        "stationary":  { "type": "string", "enum": ["yes", "no", "unknown"], "description": "Safety gate state at capture. Unknown when the device cannot report speed, see section 1.1" },
         "scan_ref":    { "type": "string", "description": "Barcode, where the order was scanned" }
       }
     },
@@ -261,12 +281,13 @@ does not — and this is precisely the reliability point to make in the writeup.
 ### System prompt (shape, not final copy)
 
 ```
-You are a dispatch assistant for delivery drivers who are on the road, often with
-their hands full and traffic noise around them.
+You are a dispatch assistant for a delivery driver who has just finished a stop.
+They have parked, they are standing on the street or sitting in a stopped van, and
+they want to be moving again. There is street noise around them.
 
 Rules:
 - Ask about ONE missing field at a time. Never batch questions.
-- Keep every utterance under 12 words. Drivers are driving.
+- Keep every utterance under 12 words. The driver wants to get going.
 - NEVER invent or assume a field value. If you did not hear it, ask.
 - If the driver gives extra information unprompted, capture it and skip that question.
 - When all required fields are filled, read back a one-line confirmation and stop talking.
@@ -281,9 +302,9 @@ Rules:
 |---------|-------|--------|
 | Greeting | Very short ("Go ahead.") | Driver initiated; don't waste their time |
 | Barge-in / interruption | **Enabled** | Drivers self-correct mid-sentence constantly |
-| Silence threshold | Tuned longer than default | Road noise + thinking pauses; avoid cutting them off |
+| Silence threshold | Tuned longer than default | Street noise and thinking pauses; avoid cutting them off |
 | Keyterm biasing | Loaded from the active region pack | Single highest-impact tuning knob |
-| Voice | Clear, moderate pace | Heard through road noise and a helmet |
+| Voice | Clear, moderate pace | Heard through street noise, often on a phone speaker |
 
 ---
 
