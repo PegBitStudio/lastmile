@@ -7,10 +7,45 @@ Built on the AssemblyAI Voice Agent API. Target: lablab.ai AssemblyAI Voice Agen
 
 ## 1. One-line definition
 
-A driver speaks what happened at a drop; the agent asks only for the details still missing,
-confirms out loud, and writes a structured delivery record that stays linked to the audio.
+**After a stop, while stationary**, a driver speaks what happened; the agent asks only for the
+details still missing, confirms out loud, and writes a structured delivery record with the
+driver's own words attached.
+
+Two things this is *not*, stated up front because both are easy to overclaim:
+
+- **This is not outcome capture.** Drivers already tap "attempted" or "left with neighbour",
+  because the scanner blocks the next stop until they do. What gets skipped is the *narrative* —
+  which lobby, the gateman's name, who signed, why. **Lastmile captures the narrative.**
+- **This is not proof of delivery.** A driver's recording is a statement by an interested party.
+  It is an **auditable exception narrative**, and it becomes evidence only alongside
+  machine-observed facts (§3.2). Real proof of delivery is scans, photos and signatures, and the
+  incumbents already do that well.
 
 Region-agnostic by design: address conventions are loaded as data, not baked into the product.
+
+---
+
+## 1.1 The safety gate — a hard rule
+
+**The agent will not start a conversation unless the vehicle is stationary.**
+
+A multi-turn dialogue with a moving driver is a liability, not a feature. It is cognitively
+demanding even when it is hands-free, and no fleet safety officer will approve it. Commercial
+driving rules in most markets restrict handheld phone use and require hands-free operation, and a
+back-and-forth conversation is a distraction whether or not hands are involved.
+
+So the product is **park, speak, go** — capture right after the stop, while the memory is fresh
+and the vehicle is still.
+
+Implementation: check the Geolocation API `speed` reading before opening the session. Above a low
+threshold the driver screen shows *"Waiting until you've stopped"* and the microphone stays shut.
+
+This also removes a technical problem. A dash-mounted phone holding a live microphone socket in a
+moving car is the worst case for a mobile browser — backgrounding, wake lock, Bluetooth routing.
+A stationary driver holding the phone for twenty seconds is the easy case. The safety rule and the
+engineering reality point the same way.
+
+It is a demo beat too. It is the kind of guardrail judges notice, and no other team will have one.
 
 ---
 
@@ -53,11 +88,7 @@ Used directly as the JSON Schema for the `log_delivery_event` tool.
       "properties": {
         "place":    { "type": "string", "description": "Estate, complex, building or landmark" },
         "entrance": { "type": "string", "description": "Gate, lobby, buzzer, unit or door" },
-        "notes":    { "type": "string" },
-        "gps_delta_m": {
-          "type": "number",
-          "description": "Metres between the driver's position and the manifest drop address at log time. Advisory only — never blocks a record."
-        }
+        "notes":    { "type": "string" }
       }
     },
 
@@ -96,15 +127,42 @@ Used directly as the JSON Schema for the `log_delivery_event` tool.
       "enum": ["reattempt_today", "reattempt_tomorrow", "return_to_hub", "contact_dispatcher"]
     },
 
-    "occurred_at": { "type": "string", "format": "date-time" },
+    "observed": {
+      "type": "object",
+      "description": "Machine-observed facts. Never spoken, never asked for, not the driver's to edit.",
+      "properties": {
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "coords":      { "type": "object", "properties": { "lat": {"type":"number"}, "lng": {"type":"number"} } },
+        "gps_delta_m": { "type": "number", "description": "Metres from the manifest drop address" },
+        "stationary":  { "type": "boolean", "description": "Safety gate satisfied at capture time" },
+        "scan_ref":    { "type": "string", "description": "Barcode, where the order was scanned" }
+      }
+    },
+
+    "proof": {
+      "type": "object",
+      "description": "Recipient-supplied evidence. Declared for completeness; out of scope for this build.",
+      "properties": {
+        "signature_ref": { "type": "string" },
+        "photo_ref":     { "type": "string" },
+        "otp_verified":  { "type": "boolean" }
+      }
+    },
+
+    "confidence": {
+      "type": "object",
+      "description": "Per-field recognition confidence, used to route weak records to review (§3.3)",
+      "additionalProperties": { "type": "number" }
+    },
 
     "audio_ref": {
       "type": "object",
-      "description": "Citation link back into the recording",
+      "description": "Turn-level citation: the driver turn that set the field",
       "properties": {
         "session_id": { "type": "string" },
-        "start_ms":   { "type": "integer" },
-        "end_ms":     { "type": "integer" }
+        "turn_index": { "type": "integer" },
+        "start_ms":   { "type": "integer", "description": "Start of that turn, not of the word" },
+        "end_ms":     { "type": "integer", "description": "End of that turn" }
       }
     }
   },
@@ -112,8 +170,64 @@ Used directly as the JSON Schema for the `log_delivery_event` tool.
 }
 ```
 
+### 3.2 Three kinds of evidence — keep them apart
+
+The record has three columns, and conflating them is how a product like this loses an argument:
+
+| Column | What it is | Where it comes from | Driver can change it? |
+|---|---|---|---|
+| **Stated** | `outcome`, `location`, `recipient`, `failure_reason`, `payment`, `next_action` | The driver's own words | Yes — it is their account |
+| **Observed** | `observed.*` — time, coordinates, distance from the drop, stationary flag, scan | The device | No |
+| **Proof** | `proof.*` — signature, photo, one-time code | The recipient | No |
+
+**Only the stated column is ever asked for.** The follow-up table below never asks about
+`observed` or `proof`, because those are not the driver's to supply.
+
+This is what makes the GPS distance honest. A record showing *"driver said main lobby"* next to
+*"300m from the drop address"* is not an accusation. It is two independent columns, and the
+dispatcher decides what to make of them. That is a much stronger position than claiming the audio
+proves anything by itself.
+
+### 3.3 Confidence and review
+
+Recognition on street names and personal names will sometimes be poor, and a wrong name written
+silently into a record is worse than no record at all.
+
+Any field below a confidence threshold marks the record **needs review** rather than accepted. It
+still reaches the board immediately - it is simply flagged, with the audio turn attached, so a
+dispatcher can listen and confirm in a couple of seconds.
+
+Demo this. A system that knows when it is unsure reads as engineered. One that is always confident
+reads as a toy.
+
+### 3.4 Audio: turn-level, not word-level
+
+`audio_ref` points at **the driver turn that caused the field to be written**, not at a word span
+inside it. Storing the causing turn is honest, cheap, and enough to settle a dispute.
+
+Word-level alignment is possible in principle, since streaming turn events carry word timings, but
+it is a project of its own and not what this build is about. **Do not show a waveform with five
+highlighted word ranges in the video.** Show the dispatcher clicking `recipient.name` and hearing
+the driver say "Marcus, he signed."
+
+**Retention:** keep the clipped turns a record cites, not the whole route's open microphone.
+Ambient conversation, other people's voices and unrelated speech are a liability with no upside.
+A recording indicator stays visible on the driver screen the whole time the session is live.
+
 `location.place` / `location.entrance` are deliberately generic. A region pack (§5) supplies the
 words the agent uses for them — "gate", "lobby", "buzzer", "unit" — without changing the schema.
+
+### 3.0 Which order — tap first, speak second
+
+**The order is chosen by tapping it on screen. Voice ordinals are a shortcut, not the mechanism.**
+
+"The third one" works in a scripted demo and fails in operations. Drivers reorder stops, go back to
+an earlier address, and carry several parcels at once. Attributing an exception to the wrong order
+destroys trust faster than a mis-transcribed street name ever will.
+
+So the driver screen opens on the manifest with the current stop already selected from the route.
+The driver taps if it is wrong. `lookup_manifest` stays as a convenience for "the Camden drop", and
+a resolved order is always read back before anything is written.
 
 ### 3.1 Conditional requirements — the follow-up table
 
@@ -212,45 +326,37 @@ in the video.
 
 ## 6. Tools — two tiers
 
-The agent both **records data** and **drives the interface**. Both go through client-side function
-tools, which keeps the demo self-contained on Vercel.
-
-### Tier 1 — data tools
+**There is one voice surface: the driver.** Every tool is a client-side function tool, which keeps
+the demo self-contained on Vercel with no server round-trip inside the voice loop.
 
 | Tool | Purpose |
 |------|---------|
-| `lookup_manifest` | Resolve "third one" / "the Camden drop" → `order_ref` |
-| `log_delivery_event` | Write/patch the event; **returns the still-missing field list** |
+| `lookup_manifest` | Convenience resolver for "the Camden drop" → `order_ref`. Not the primary path — see §3.0 |
+| `log_delivery_event` | Write or patch the event; **returns the still-missing field list** |
 | `close_session` | Confirm and end cleanly |
 
-### Tier 2 — view tools (dispatcher side)
+Three tools. That is the whole surface.
 
-| Tool | Purpose |
-|------|---------|
-| `set_filter` | Status, area, driver, time window, exception type |
-| `focus_order` | Open one order |
-| `set_layout` | Board / list / map |
-| `highlight` | Draw attention to a subset |
+### What used to be here, and why it is gone
 
-**Critical rule: the agent emits view *state*, it never generates UI.** Define a small closed
-vocabulary — a filter object, a layout mode, a focus target — and let the agent pick and
-parameterize from it. React renders from that state as normal.
+An earlier draft had a second tier of view tools letting a dispatcher say *"show me everything
+stuck at entrances since noon"* and watch the board rearrange.
 
-Fully generative UI (model produces markup) is a trap on a four-week build: nondeterministic,
-unstyleable, untestable, and it will break live. A closed vocabulary delivers the same felt
-experience — *"I spoke and the interface rearranged"* — with none of the fragility.
+**Cut.** It is a filtering problem wearing a microphone, it shares no logic with the driver loop,
+and it needs the auth, tenancy and real event store this build explicitly refuses. In four weeks
+with two people it would have become a search box with speech bolted on, and it would have made
+the project read as "voice on everything" instead of one sharp idea.
 
-### Two behavioural rules
+The board stays. It just updates by itself instead of listening.
 
-**Free actions vs confirmed actions.** View changes are cheap to get wrong — apply instantly, no
-confirmation; the user just says the next thing. State changes are expensive to get wrong — read
-back and confirm. A mis-heard filter costs nothing; a mis-heard "delivered to Marcus" costs a dispute.
+### Two behavioural rules that remain
 
-**Latency budget.** Apply view tool calls optimistically the moment they arrive; let the spoken
-acknowledgement land afterwards. If the screen waits on the voice, the whole thing feels sluggish.
+**Read back before writing.** A mis-heard "delivered to Marcus" costs a dispute, so every record
+is confirmed out loud before `close_session`.
 
-**Discoverability.** Nobody knows what they may say. Surface two or three contextual hints on
-screen that change with state, so the interface teaches its own vocabulary.
+**Never block the screen on speech.** Apply each tool call to the receipt the moment it arrives and
+let the spoken acknowledgement land afterwards. If the screen waits for the voice, the whole thing
+feels slow.
 
 ---
 
@@ -287,23 +393,34 @@ on the dispatcher board.
 
 ## 8. The two surfaces
 
-**Driver** — the screen is a *receipt*, not an interface. Fields fill in as they speak, missing
-ones highlight, confirmation appears. Glanceable at a red light, never required. No voice
-navigation at all, because there is nothing to navigate.
+**Driver** — the screen is a *receipt*, not an interface. It opens on the manifest with the current
+stop selected. Fields fill in as they speak, missing ones highlight, the confirmation appears.
+Glanceable, never required. No voice navigation at all, because there is nothing to navigate.
 
-**Dispatcher** — a live board that also takes voice. *"Show me everything stuck at entrances since
-noon"* → board reorganizes; *"just the cash ones"* → filters again. Voice earns its place here
-because expressing a filter beats constructing it through five menus.
+**Dispatcher** — a live board, read-only and updating by itself. Three columns per record: what the
+driver said, what the device observed, and whether it needs review. Click any stated field to hear
+the driver's own turn. **No voice on this surface** — see §6.
 
 ---
 
 ## 9. Deliberately out of scope
 
 Authentication · native mobile app · route optimisation · multi-tenancy · admin panels ·
-real TMS integration · offline sync · generative UI.
+real TMS integration · offline sync · generative UI · **voice control of the dispatcher board** ·
+**recipient proof capture** (signature, photo, one-time code) · **word-level audio alignment**.
 
 The manifest is a fixture file. Nobody expects a real backend, and every hour here is an hour not
 spent on the video.
+
+Two of those deserve a sentence, because they are things a real product would need:
+
+- **Offline.** A browser voice socket needs connectivity, and estates and basements do not always
+  have it. For a real product, queue the audio locally and transcribe on reconnect. For this
+  build, say plainly that it is an online prototype. Incumbents treat offline as table stakes, and
+  pretending otherwise in front of an operator would cost more credibility than admitting it.
+- **Recipient proof.** Signature and photo are what actually prove a delivery. We are not building
+  them, we are declaring where they would sit (§3.2), and we are not claiming our audio replaces
+  them.
 
 ---
 
@@ -311,23 +428,35 @@ spent on the video.
 
 | Risk | Mitigation |
 |------|-----------|
+| **Driver safety and fleet liability** | The safety gate (§1.1). No session above a low speed threshold, and the record stores whether the gate was satisfied |
+| **Privacy of recorded third parties** — concierge names, ambient speech | Keep only the cited turns, not the route audio. Visible recording indicator. Say the retention rule out loud in the video |
+| **Wrong order attributed to an exception** | Tap-to-select is the primary path (§3.0); resolved orders are read back before writing |
+| **A wrong name written silently into a record** | Confidence thresholds route the record to review rather than accepting it (§3.3) |
+| **No connectivity in a basement or a gated estate** | Out of scope, and stated as such. This is an online prototype |
 | **WebSocket billing** — sessions bill on connection time, not audio | Close in a `finally`; hard client-side session cap; verify no orphaned sockets before every dev session |
 | Free tier: 5 new streams/min | Fine for a demo; state it as a known limit rather than hiding it |
 | Road noise degrades recognition | Test against real noise clips in week 3; report findings in the writeup |
 | Local place names mis-transcribed | Region-pack keyterms; measure before/after per pack |
-| Voice-driven UI feels sluggish | Optimistic view updates; never block the screen on speech |
 | Live demo fails on the day | Record a backup run of the full flow in week 3, before you need it |
 
 ---
 
 ## 11. What makes this score
 
-- **Application of Technology** — JSON-Schema tool calling is the core loop, not decoration;
-  client-side tools drive both data and interface; keyterm biasing, barge-in and turn tuning are
-  each used for a stated reason.
-- **Business value** — unlogged exceptions cause failed drops and disputes; the audio-linked
-  record is the thing a carrier actually buys. Region packs make the market global, not niche.
-- **Originality** — driver-facing voice capture is genuine whitespace; funded voice-AI logistics
-  companies are aimed at freight brokerage, not the last mile.
-- **Presentation** — the demo is 90 seconds: speak, watch the record appear, click to hear it
-  back, then swap the region pack and watch it work somewhere else.
+- **Application of Technology** — JSON-Schema tool calling is the core loop, not decoration.
+  Keyterm biasing, barge-in and turn tuning are each used for a stated reason, and the keyterm
+  numbers are measured rather than asserted.
+- **Business value** — the missing thing is not the outcome code, which the scanner already
+  forces. It is the narrative: which entrance, who took it, whether they signed. That is the field
+  a dispute turns on and the one nobody types. Region packs widen the market beyond one country.
+- **Originality** — schema-driven follow-ups are the idea. The agent is told what is missing by
+  code on every turn, so it cannot drift. Most voice entries this month will be a prompt and a
+  transcript.
+- **Presentation** — the demo is 90 seconds: the gate holds until the van stops, one messy
+  sentence fills three fields, the agent asks only for the holes, the record lands with its audio,
+  then the same code runs against another country.
+
+**The comparison to run on camera.** Same clip, two agents side by side: a plain prompted one and
+ours. The plain one asks for the outcome the driver already gave. Ours does not. Eight seconds,
+and it makes the architecture visible — otherwise the judges only see a nice voice demo and never
+see the part that took the work.

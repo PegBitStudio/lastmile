@@ -2,9 +2,10 @@
 
 **Voice-first delivery exception reporting for last-mile drivers.**
 
-A driver finishes a drop and says what happened, out loud, in normal words. The agent asks only
-for the details they left out, reads the record back to confirm, and files it. The audio stays
-linked to the record, so a dispatcher can click any field and hear the driver say it.
+A driver finishes a drop and, **while stopped**, says what happened out loud in normal words. The
+agent asks only for the details they left out, reads the record back to confirm, and files it. Each
+field keeps a link to the driver turn that set it, so a dispatcher can click it and hear the driver
+say it.
 
 Built on the [AssemblyAI Voice Agent API](https://www.assemblyai.com/) for the lablab.ai
 AssemblyAI Voice Agent Hackathon, September 2026.
@@ -17,10 +18,19 @@ AssemblyAI Voice Agent Hackathon, September 2026.
 ## The idea in one paragraph
 
 Delivery drivers hit problems all day: the customer is out, the gate is locked, a neighbour takes
-the parcel. Today they either type it into a form while standing in the road, or they do not
-record it at all. Both are bad, and unrecorded exceptions become failed deliveries and disputes.
+the parcel.
 
-Lastmile lets the driver just talk.
+**The outcome usually does get recorded** — the scanner blocks the next stop until the driver taps
+something. What does not get recorded is the *narrative*: which lobby, the gateman's name, whether
+he signed, why it failed. That is the part a dispute turns on three weeks later, and it is the part
+nobody types with a parcel under one arm.
+
+Lastmile captures the narrative. The driver just talks.
+
+**What this is not:** it is not proof of delivery. A driver's recording is a statement by an
+interested party. Real proof is scans, photos and signatures, and the existing tools already do
+that well. What Lastmile produces is an **auditable exception narrative** that sits next to those
+machine-observed facts.
 
 ## What makes it an agent, not a voice-driven form
 
@@ -34,6 +44,33 @@ it asks nothing and goes straight to confirming.
 
 Nothing in the prompt changes to make that work. See [`docs/architecture.md`](docs/architecture.md)
 §5 for the control loop and a full worked example.
+
+## Safety first, and it is not a slogan
+
+**The agent will not open a session unless the vehicle is stationary.**
+
+A multi-turn conversation with a moving driver is a liability no fleet safety officer will sign
+off, hands-free or not. So the product is **park, speak, go**. Above a low speed threshold the
+screen says "Waiting until you've stopped" and the microphone stays shut.
+
+This also happens to be the engineering answer. A dash-mounted phone holding a live microphone
+socket in a moving car is the worst case for a mobile browser. A stopped driver holding a phone
+for twenty seconds is the easy case.
+
+## Three kinds of evidence, kept apart
+
+| Column | Comes from | Example |
+|---|---|---|
+| **Stated** | the driver's words | "left it with the concierge, main lobby" |
+| **Observed** | the device | time, coordinates, 300m from the drop address, vehicle stationary |
+| **Proof** | the recipient | signature, photo, one-time code (declared, not built) |
+
+Only the stated column is ever asked for. This is what makes the GPS distance honest: "driver said
+main lobby" next to "300m away" is not an accusation, it is two independent columns and a
+dispatcher who can now decide.
+
+Any field the recogniser is unsure about marks the record **needs review** rather than being
+accepted silently.
 
 ## It works in more than one country
 
@@ -72,8 +109,9 @@ Three things worth knowing up front, because they are the decisions people ask a
 - **No RAG.** There is no corpus here — a 12-row manifest, a five-value enum and a word list.
   Keyterm biasing fixes local place names *at the recogniser, before it listens*, which retrieval
   cannot do. Full reasoning in `docs/architecture.md` §4.
-- **The agent emits view state, never UI.** A closed vocabulary of filters and layouts; React
-  renders from it as normal.
+- **One voice surface, not two.** The driver talks. The dispatcher board is read-only and updates
+  by itself. Voice control of the board was cut on purpose — it is a filtering problem wearing a
+  microphone and it shares no logic with the loop that matters.
 
 ---
 

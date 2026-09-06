@@ -15,7 +15,7 @@ Most of this document follows from them being wrong.
 
 **1. There is no multi-agent system. There is one agent.**
 No planner, no router, no supervisor, no specialist sub-agents talking to each other. One agent,
-one conversation, seven tools. A driver reporting a delivery is a single short exchange with a
+one conversation, three tools. A driver reporting a delivery is a single short exchange with a
 single participant — there is no second role for a second agent to play. A swarm here would add
 latency, failure modes and moving parts to a 90-second demo, and would score nothing.
 
@@ -79,7 +79,7 @@ Six pieces, all inside the one WebSocket. We build and host none of them:
 What **we** supply — this is the entire surface we control:
 
 1. **System prompt** (spec §4)
-2. **Tool definitions** — JSON Schemas for the seven tools (§6)
+2. **Tool definitions** — JSON Schemas for the three tools (§6)
 3. **Tool handlers** — our TypeScript functions, running in the browser
 4. **Settings** — greeting, voice, silence threshold, barge-in on
 5. **Keyterms** — loaded from the active region pack
@@ -141,6 +141,14 @@ This section is the heart of the project. Read it twice.
 
 **The rule: the LLM decides *how* to ask. Our code decides *what* is still missing.**
 
+**Before any of it runs**, two preconditions:
+
+- **The safety gate.** No session opens unless the device reports the vehicle is stationary
+  (spec §1.1). The record stores whether the gate was satisfied.
+- **The order is already chosen.** The screen opens on the manifest with the current stop
+  selected; the driver taps to change it (spec §3.0). `lookup_manifest` is a convenience, not the
+  mechanism.
+
 Each turn:
 
 1. Driver speaks. STT transcribes.
@@ -151,6 +159,13 @@ Each turn:
 5. The agent asks for the first missing item, in its own words, in one short sentence.
 6. Repeat from 1 until the list comes back empty.
 7. Empty list: the agent reads a one-line confirmation aloud, then calls `close_session`.
+8. Any field below the confidence threshold marks the record **needs review** (spec §3.3). It
+   still reaches the board — flagged, with its audio turn attached.
+
+Only **stated** fields are ever in that list. `observed` (time, coordinates, distance, stationary
+flag) and `proof` (signature, photo) are never asked for, because they are not the driver's to
+give. See spec §3.2 — keeping those three columns apart is what makes the GPS distance readable as
+information rather than as an accusation.
 
 Step 4 is the whole trick. The agent is never asked to remember or reason about what a complete
 record looks like. It is told, every single turn, by code.
@@ -185,35 +200,30 @@ Runs inside the same `log_delivery_event` handler, before the missing-field list
 
 ---
 
-## 6. The seven tools
+## 6. The three tools
 
 All client-side function tools, running in the browser. This keeps the demo self-contained on
 Vercel with no server round-trip inside the voice loop.
 
-**Data tier** (driver side)
-
 | Tool | In | Out |
 |---|---|---|
-| `lookup_manifest` | ordinal or description | `order_ref` |
+| `lookup_manifest` | a description like "the Camden drop" | `order_ref` — a convenience, not the primary path |
 | `log_delivery_event` | partial delivery event | **the missing-field list** |
 | `close_session` | — | — |
 
-**View tier** (dispatcher side)
+Three tools. That is the whole surface.
 
-| Tool | Purpose |
-|---|---|
-| `set_filter` | status, area, driver, time window, exception type |
-| `focus_order` | open one order |
-| `set_layout` | board / list / map |
-| `highlight` | draw attention to a subset |
+**There is no view tier any more.** An earlier draft let a dispatcher talk to the board:
+*"show me everything stuck at entrances since noon"*. It is cut. It is a filtering problem wearing
+a microphone, it shares no logic with the driver loop, and it needs the auth, tenancy and real
+event store this build refuses. In four weeks with two people it would have become a search box
+with speech bolted on, and it would have made the project read as "voice on everything" rather
+than one sharp idea.
 
-**Hard rule: the agent emits view *state*, never UI.** A closed vocabulary of filter objects and
-layout modes; React renders from that state as normal. Generative UI is out of scope — it is
-nondeterministic, unstyleable, and it will break live.
+The board stays. It updates by itself instead of listening.
 
-**Free versus confirmed.** View changes apply instantly with no confirmation, because a wrong
-filter costs nothing. State changes are read back and confirmed, because a wrong "delivered to
-Marcus" costs a dispute.
+**Read back before writing.** A wrong "delivered to Marcus" costs a dispute, so every record is
+confirmed aloud before `close_session`.
 
 ---
 
@@ -287,6 +297,7 @@ Western city, and it is the one pack a team member can record natively.
 1. Does the Lahore pack need Urdu-script keyterm variants, or is romanised text enough?
    (Yashfa's call.)
 2. GPS threshold: 200m or 300m? Needs one real test, not a guess.
+2b. Confidence threshold for "needs review". Start at 0.6 and tune it on the real clips.
 3. Do we score word error rate, or exact match on the address span only? Exact match is a blunter
    measure but a much clearer slide.
 4. Named prize recipient — must be able to receive a US wire and file a W-8BEN.
