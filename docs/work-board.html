@@ -1,0 +1,373 @@
+<title>Lastmile Work Board</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+
+<style id="sheet">
+:root{
+  --paper:#F4F5F2; --surface:#FFFFFF; --surface-2:#ECEEE9;
+  --ink:#14171A; --ink-soft:#3E4650; --mute:#7C7A73; --rule:#D4D6CF;
+  --amber:#C06E05; --amber-soft:#F5E3C6;
+  --moss:#2F6B4F;  --moss-soft:#D8E6DD;
+  --rust:#A33B22;  --rust-soft:#F6DDD6;
+  --dami:#2F5474;  --dami-soft:#DCE6EF;
+  --yashfa:#6B4478; --yashfa-soft:#EADFEE;
+  --display:"Archivo Narrow","Arial Narrow",Helvetica,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --gutter:clamp(1rem,3.5vw,2.5rem);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#101316; --surface:#171B1F; --surface-2:#1E242A;
+  --ink:#ECEEE9; --ink-soft:#B4BCC4; --mute:#878E94; --rule:#2C333A;
+  --amber:#E9A23B; --amber-soft:#3A2C13;
+  --moss:#6FBF95;  --moss-soft:#17301F;
+  --rust:#E38166;  --rust-soft:#3A1C14;
+  --dami:#8FB6D6;  --dami-soft:#1B2C3A;
+  --yashfa:#C39BD0; --yashfa-soft:#2C1E33;
+}}
+:root[data-theme="dark"]{
+  --paper:#101316; --surface:#171B1F; --surface-2:#1E242A;
+  --ink:#ECEEE9; --ink-soft:#B4BCC4; --mute:#878E94; --rule:#2C333A;
+  --amber:#E9A23B; --amber-soft:#3A2C13;
+  --moss:#6FBF95;  --moss-soft:#17301F;
+  --rust:#E38166;  --rust-soft:#3A1C14;
+  --dami:#8FB6D6;  --dami-soft:#1B2C3A;
+  --yashfa:#C39BD0; --yashfa-soft:#2C1E33;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);font-size:1rem;line-height:1.5;-webkit-font-smoothing:antialiased}
+.wrap{max-width:74rem;margin:0 auto;padding:0 var(--gutter) 5rem}
+
+/* header */
+.top{position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:2px solid var(--ink);padding:.9rem 0 .7rem;margin-bottom:1.5rem}
+.toprow{display:flex;flex-wrap:wrap;align-items:baseline;gap:.5rem 1.5rem}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(1.5rem,4vw,2rem);letter-spacing:-.015em;margin:0;line-height:1}
+.when{font-family:var(--mono);font-size:.6875rem;letter-spacing:.1em;text-transform:uppercase;color:var(--mute)}
+.counts{display:flex;gap:1.25rem;margin-left:auto;font-family:var(--mono);font-size:.6875rem;letter-spacing:.06em;text-transform:uppercase;color:var(--mute)}
+.counts b{font-family:var(--display);font-size:1rem;letter-spacing:0;text-transform:none;color:var(--ink);font-variant-numeric:tabular-nums}
+.counts .hot b{color:var(--rust)}
+.savebar{display:flex;align-items:center;gap:.75rem;margin-top:.6rem;font-family:var(--mono);font-size:.625rem;letter-spacing:.09em;text-transform:uppercase;color:var(--mute)}
+.dot{width:.5rem;height:.5rem;border-radius:50%;background:var(--mute);flex:none}
+.dot.ok{background:var(--moss)} .dot.busy{background:var(--amber)} .dot.local{background:var(--rust)}
+button.act{font-family:var(--mono);font-size:.625rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:none;color:var(--mute);border:1px solid var(--rule);border-radius:2px;padding:.35rem .6rem;cursor:pointer}
+button.act:hover{color:var(--ink);border-color:var(--ink)}
+button.act:focus-visible,[role="button"]:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+/* balance */
+.balance{display:grid;grid-template-columns:1fr;gap:.75rem;margin:0 0 2rem}
+@media(min-width:44rem){.balance{grid-template-columns:1fr 1fr}}
+.bcard{border:1px solid var(--rule);border-radius:3px;background:var(--surface);padding:.8rem .95rem}
+.bcard .who{font-family:var(--display);font-weight:700;font-size:1.05rem}
+.bcard.d .who{color:var(--dami)} .bcard.y .who{color:var(--yashfa)}
+.bnums{display:flex;gap:1.1rem;margin-top:.35rem;font-family:var(--mono);font-size:.6875rem;color:var(--mute);flex-wrap:wrap}
+.bnums b{font-family:var(--display);font-size:1rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.bar{display:flex;height:5px;border-radius:3px;overflow:hidden;margin-top:.6rem;background:var(--surface-2)}
+.bar i{display:block}
+.bar .s-done{background:var(--moss)} .bar .s-doing{background:var(--amber)} .bar .s-blocked{background:var(--rust)}
+
+/* sections */
+h2{font-family:var(--display);font-weight:700;font-size:1.35rem;margin:0 0 .2rem;letter-spacing:-.01em}
+.sub{font-size:.875rem;color:var(--mute);margin:0 0 .9rem}
+section{margin-bottom:2.5rem}
+.lanes{display:grid;grid-template-columns:1fr;gap:1rem}
+@media(min-width:52rem){.lanes{grid-template-columns:1fr 1fr;gap:1.5rem}}
+.lane h3{font-family:var(--mono);font-size:.625rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;margin:0 0 .4rem;padding-bottom:.3rem;border-bottom:2px solid}
+.lane.d h3{color:var(--dami);border-color:var(--dami)}
+.lane.y h3{color:var(--yashfa);border-color:var(--yashfa)}
+.empty{font-size:.875rem;color:var(--mute);padding:.6rem 0;font-style:italic}
+
+/* rows */
+.rows{display:flex;flex-direction:column}
+.row{display:grid;grid-template-columns:auto auto 1fr auto;gap:.55rem;align-items:start;padding:.5rem 0;border-bottom:1px solid var(--rule)}
+.row:last-child{border-bottom:0}
+.row.is-done .txt{color:var(--mute);text-decoration:line-through;text-decoration-thickness:1px}
+.txt{font-size:.9375rem;line-height:1.4}
+.txt .note{display:block;font-size:.78rem;color:var(--mute);margin-top:.1rem}
+.chip{font-family:var(--mono);font-size:.5625rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;border:1px solid;border-radius:2px;padding:.22rem .4rem;cursor:pointer;background:none;white-space:nowrap;line-height:1.1}
+.st-todo{color:var(--mute);border-color:var(--rule)}
+.st-doing{color:var(--amber);border-color:var(--amber);background:var(--amber-soft)}
+.st-blocked{color:var(--rust);border-color:var(--rust);background:var(--rust-soft)}
+.st-done{color:var(--moss);border-color:var(--moss);background:var(--moss-soft)}
+.ow-D{color:var(--dami);border-color:var(--dami);background:var(--dami-soft)}
+.ow-Y{color:var(--yashfa);border-color:var(--yashfa);background:var(--yashfa-soft)}
+.ow-B{color:var(--ink-soft);border-color:var(--ink-soft);background:var(--surface-2)}
+.star{background:none;border:0;cursor:pointer;color:var(--rule);font-size:1rem;line-height:1;padding:.1rem .2rem}
+.star.on{color:var(--amber)}
+.wk{font-family:var(--mono);font-size:.5625rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mute);white-space:nowrap;padding-top:.25rem}
+
+/* blockers */
+.blockers{display:grid;grid-template-columns:1fr;gap:1rem;margin-top:1rem}
+@media(min-width:52rem){.blockers{grid-template-columns:1fr 1fr;gap:1.5rem}}
+.blockers label{display:block;font-family:var(--mono);font-size:.5625rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);margin-bottom:.3rem}
+.blockers textarea{width:100%;min-height:3.4rem;resize:vertical;font-family:var(--body);font-size:.9rem;color:var(--ink);background:var(--surface);border:1px solid var(--rule);border-radius:3px;padding:.5rem .6rem;line-height:1.4}
+.blockers textarea:focus{outline:2px solid var(--amber);outline-offset:1px}
+
+/* week nav */
+.wknav{display:flex;flex-wrap:wrap;gap:.4rem;margin-bottom:1rem}
+.wknav button{font-family:var(--mono);font-size:.625rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;background:none;border:1px solid var(--rule);color:var(--mute);border-radius:2px;padding:.4rem .6rem;cursor:pointer}
+.wknav button.on{color:var(--paper);background:var(--ink);border-color:var(--ink)}
+
+.banner{border:1px solid var(--rust);border-left-width:3px;background:var(--rust-soft);border-radius:2px;padding:.7rem .9rem;margin-bottom:1.25rem;font-size:.875rem}
+.banner b{color:var(--rust)}
+footer{border-top:1px solid var(--rule);margin-top:2rem;padding-top:.9rem;font-family:var(--mono);font-size:.625rem;letter-spacing:.05em;color:var(--mute);display:flex;flex-wrap:wrap;gap:.4rem 1.5rem}
+@media print{.top{position:static}.savebar,.wknav,.star,button.act{display:none}}
+</style>
+
+<div class="wrap" id="app"></div>
+
+<script id="boot">
+const STATE = /*S*/{"v":1,"updated":"2026-09-06","blockers":{"D":"","Y":""},"tasks":[
+{"id":"n1","w":"now","o":"D","s":"todo","t":1,"x":"Send Yashfa the three Discord messages"},
+{"id":"n2","w":"now","o":"B","s":"todo","t":1,"x":"AssemblyAI account through the event's tracked signup link","n":"Log out of any old account first and accept cookies, or the $50 credit does not attach"},
+{"id":"n3","w":"now","o":"B","s":"todo","t":1,"x":"Run the voice agent quickstart locally and hear it reply"},
+{"id":"n4","w":"now","o":"Y","s":"todo","t":1,"x":"Accept the GitHub repo invite"},
+{"id":"n5","w":"now","o":"B","s":"todo","t":0,"x":"Agree the daily call time","n":"14:00 WAT / 18:00 PKT unless Yashfa says otherwise"},
+{"id":"n6","w":"now","o":"B","s":"todo","t":0,"x":"Decide the named prize recipient","n":"Whoever can receive a US wire and file a W-8BEN"},
+{"id":"a1","w":"w1","o":"D","s":"done","t":0,"x":"Repo created, MIT licence, Yashfa invited"},
+{"id":"a2","w":"w1","o":"D","s":"todo","t":1,"x":"Next.js app deployed to Vercel with a /drive page","n":"Deploy an empty page first. Never debug a build and a socket at the same time"},
+{"id":"a3","w":"w1","o":"D","s":"todo","t":1,"x":"Server route that mints a short-lived browser token","n":"The API key never reaches the browser"},
+{"id":"a4","w":"w1","o":"D","s":"todo","t":1,"x":"Browser microphone connects to the Voice Agent API"},
+{"id":"a5","w":"w1","o":"D","s":"todo","t":1,"x":"The agent speaks back"},
+{"id":"a6","w":"w1","o":"D","s":"todo","t":1,"x":"Check the socket closes properly","n":"Billing runs on socket-open time, not speaking time. Close the tab mid-session and check again"},
+{"id":"a7","w":"w1","o":"D","s":"todo","t":0,"x":"manifest.fixture.json: 12 drops, 2 regions, 3 cash-on-delivery, coords on every drop"},
+{"id":"a8","w":"w1","o":"D","s":"todo","t":0,"x":"Delivery event schema committed as v1"},
+{"id":"a9","w":"w1","o":"Y","s":"todo","t":1,"x":"Read the spec and the architecture doc","n":"Post questions as you go. Do not save them up"},
+{"id":"a10","w":"w1","o":"Y","s":"todo","t":1,"x":"Lahore pack first draft: 30 to 50 keyterms"},
+{"id":"a11","w":"w1","o":"Y","s":"todo","t":0,"x":"Decide: word error rate, or exact match on the address only"},
+{"id":"a12","w":"w1","o":"Y","s":"todo","t":0,"x":"Decide: Urdu script keyterms, or is romanised enough"},
+{"id":"b1","w":"w2","o":"D","s":"todo","t":0,"x":"The safety gate: no session unless the vehicle is stopped"},
+{"id":"b2","w":"w2","o":"D","s":"todo","t":0,"x":"Speed override for the demo","n":"coords.speed is null on most laptops. Without this the opening shot of the video cannot be filmed"},
+{"id":"b3","w":"w2","o":"D","s":"todo","t":0,"x":"Manifest on screen, current stop selected, tap to change it"},
+{"id":"b4","w":"w2","o":"D","s":"todo","t":0,"x":"lookup_manifest tool","n":"A convenience for 'the Camden drop'. Not the primary path"},
+{"id":"b5","w":"w2","o":"D","s":"todo","t":0,"x":"log_delivery_event writing to Postgres"},
+{"id":"b6","w":"w2","o":"D","s":"todo","t":0,"x":"The conditional-requirements table in code","n":"This is the product. It returns the missing-field list every turn"},
+{"id":"b7","w":"w2","o":"D","s":"todo","t":0,"x":"One missing field at a time, and skip anything already volunteered"},
+{"id":"b8","w":"w2","o":"D","s":"todo","t":0,"x":"Spoken confirmation read back, then close_session"},
+{"id":"b9","w":"w2","o":"D","s":"todo","t":0,"x":"/board with the three evidence columns, refreshing every 2 seconds"},
+{"id":"b10","w":"w2","o":"B","s":"todo","t":0,"x":"Talk to two people who have actually run last-mile","n":"Do you already capture neighbour and safe-place, and what do you wish you had?"},
+{"id":"b11","w":"w2","o":"Y","s":"todo","t":0,"x":"Lahore pack finished and committed as JSON"},
+{"id":"b12","w":"w2","o":"Y","s":"todo","t":0,"x":"UK / London pack written"},
+{"id":"b13","w":"w2","o":"Y","s":"todo","t":0,"x":"Recording setup working: quiet room, phone mic, consistent method"},
+{"id":"b14","w":"w2","o":"Y","s":"todo","t":0,"x":"First 20 Lahore addresses recorded, with the correct text written out"},
+{"id":"b15","w":"w2","o":"Y","s":"todo","t":0,"x":"Measurement script: audio in, transcript out, comparison as CSV"},
+{"id":"c1","w":"w3","o":"D","s":"todo","t":0,"x":"Lagos pack written"},
+{"id":"c2","w":"w3","o":"D","s":"todo","t":0,"x":"Region switcher in the interface","n":"A dropdown is fine. It only has to be visible in the video"},
+{"id":"c3","w":"w3","o":"D","s":"todo","t":0,"x":"Road-noise testing. Tune silence threshold and barge-in"},
+{"id":"c4","w":"w3","o":"D","s":"todo","t":0,"x":"Record the backup demo video of the full flow","n":"Before we need it"},
+{"id":"c5","w":"w3","o":"D","s":"todo","t":0,"x":"Record the mic audio, upload on session end, store audio_ref turns"},
+{"id":"c6","w":"w3","o":"D","s":"todo","t":0,"x":"Click any field on the board to hear the driver say it"},
+{"id":"c7","w":"w3","o":"D","s":"todo","t":0,"x":"Confidence thresholds: weak fields mark the record 'needs review'"},
+{"id":"c8","w":"w3","o":"D","s":"todo","t":0,"x":"GPS drop-distance check","n":"Advisory only. It never blocks a record"},
+{"id":"c9","w":"w3","o":"Y","s":"todo","t":0,"x":"Remaining recordings: 20 per pack, all three packs"},
+{"id":"c10","w":"w3","o":"Y","s":"todo","t":0,"x":"Run the measurement: keyterms on versus keyterms off","n":"The strongest slide in the deck comes from this"},
+{"id":"c11","w":"w3","o":"Y","s":"todo","t":0,"x":"Results table and a simple chart, readable as a slide"},
+{"id":"c12","w":"w3","o":"Y","s":"todo","t":0,"x":"Accent and code-switching pass"},
+{"id":"c13","w":"w3","o":"Y","s":"todo","t":0,"x":"Pack-authoring notes: how to add a fourth country"},
+{"id":"d1","w":"w4","o":"B","s":"todo","t":0,"x":"Sep 22 to 24: bug fixes only, then freeze"},
+{"id":"d2","w":"w4","o":"D","s":"todo","t":0,"x":"Record the demo screen and speak the driver parts"},
+{"id":"d3","w":"w4","o":"D","s":"todo","t":0,"x":"Architecture diagram and 30-second quickstart in the README"},
+{"id":"d4","w":"w4","o":"D","s":"done","t":0,"x":"MIT LICENSE committed"},
+{"id":"d5","w":"w4","o":"D","s":"todo","t":0,"x":"Cover image, PNG or JPG, 16:9"},
+{"id":"d6","w":"w4","o":"Y","s":"todo","t":0,"x":"Record the Lahore pack section of the video"},
+{"id":"d7","w":"w4","o":"Y","s":"todo","t":0,"x":"Build the results slides from the measurement numbers"},
+{"id":"d8","w":"w4","o":"Y","s":"todo","t":0,"x":"Write the 'what we learned' section from the log"},
+{"id":"d9","w":"w4","o":"Y","s":"todo","t":0,"x":"Slide deck as PDF, one idea per slide"},
+{"id":"d10","w":"w4","o":"B","s":"todo","t":0,"x":"Both review the whole video before it is final"},
+{"id":"e1","w":"sub","o":"D","s":"todo","t":0,"x":"MAKE THE REPO PUBLIC","n":"It is private during the build. Judges cannot open a private link. Do this first on submission day"},
+{"id":"e2","w":"sub","o":"B","s":"todo","t":0,"x":"Full test of the live URL on a phone, mobile data, cold start"},
+{"id":"e3","w":"sub","o":"B","s":"todo","t":0,"x":"Submit from the team dashboard, not the event page"},
+{"id":"e4","w":"sub","o":"B","s":"todo","t":0,"x":"Post the submission in Discord"}
+]}/*E*/;
+
+const WEEKS = [
+  {k:"now", label:"Now", full:"Catch-up — by Mon 7 Sep"},
+  {k:"w1",  label:"Week 1", full:"Week 1 — to Sep 7: prove the pipe"},
+  {k:"w2",  label:"Week 2", full:"Week 2 — Sep 8 to 14: the core loop"},
+  {k:"w3",  label:"Week 3", full:"Week 3 — Sep 15 to 21: make it real and global"},
+  {k:"w4",  label:"Week 4", full:"Week 4 — Sep 22 to 28: the deliverables"},
+  {k:"sub", label:"Submit", full:"Sep 29 — submit"}
+];
+const OWNERS = ["D","Y","B"];
+const OWNER_NAME = {D:"Dami", Y:"Yashfa", B:"Both"};
+const STATUSES = ["todo","doing","blocked","done"];
+const STATUS_NAME = {todo:"To do", doing:"Doing", blocked:"Blocked", done:"Done"};
+
+let state = null, mode = "local", view = "now", dirty = false, timer = null, art = null;
+
+function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function daysTo(iso){ return Math.ceil((new Date(iso+"T23:59:59+01:00") - new Date())/864e5); }
+
+function counts(who){
+  const mine = state.tasks.filter(t => t.o===who || t.o==="B");
+  const n = s => mine.filter(t => t.s===s).length;
+  return {all:mine.length, done:n("done"), doing:n("doing"), blocked:n("blocked"), open:mine.length-n("done")};
+}
+
+function rowHTML(t, showWeek){
+  const wk = WEEKS.find(w => w.k===t.w);
+  return '<div class="row' + (t.s==="done" ? " is-done" : "") + '" data-id="' + t.id + '">'
+    + '<button class="chip st-' + t.s + '" data-act="status" title="Click to change status">' + STATUS_NAME[t.s] + '</button>'
+    + '<button class="chip ow-' + t.o + '" data-act="owner" title="Click to reassign">' + OWNER_NAME[t.o] + '</button>'
+    + '<span class="txt">' + esc(t.x) + (t.n ? '<span class="note">' + esc(t.n) + '</span>' : '') + '</span>'
+    + (showWeek ? '<span class="wk">' + esc(wk ? wk.label : "") + '</span>'
+                : '<button class="star' + (t.t ? " on" : "") + '" data-act="star" title="Pin to today">' + (t.t ? "★" : "☆") + '</button>')
+    + '</div>';
+}
+
+function laneHTML(who, tasks){
+  const cls = who==="D" ? "d" : "y";
+  const mine = tasks.filter(t => t.o===who || t.o==="B");
+  return '<div class="lane ' + cls + '"><h3>' + OWNER_NAME[who] + '</h3>'
+    + (mine.length ? '<div class="rows">' + mine.map(t => rowHTML(t, true)).join("") + '</div>'
+                   : '<p class="empty">Nothing pinned. Star a task below to put it here.</p>')
+    + '</div>';
+}
+
+function renderBody(st){
+  state = st;
+  const today = state.tasks.filter(t => t.t && t.s!=="done");
+  const wk = WEEKS.find(w => w.k===view) || WEEKS[0];
+  const inWeek = state.tasks.filter(t => t.w===view);
+  const cd = counts("D"), cy = counts("Y");
+
+  const bar = c => {
+    const p = n => c.all ? (n/c.all*100).toFixed(1) + "%" : "0%";
+    return '<div class="bar"><i class="s-done" style="width:' + p(c.done) + '"></i>'
+      + '<i class="s-doing" style="width:' + p(c.doing) + '"></i>'
+      + '<i class="s-blocked" style="width:' + p(c.blocked) + '"></i></div>';
+  };
+  const bcard = (who, c) => '<div class="bcard ' + (who==="D"?"d":"y") + '"><span class="who">' + OWNER_NAME[who] + '</span>'
+    + '<div class="bnums"><span><b>' + c.open + '</b> open</span><span><b>' + c.doing + '</b> doing</span>'
+    + '<span><b>' + c.blocked + '</b> blocked</span><span><b>' + c.done + '</b> done</span></div>' + bar(c) + '</div>';
+
+  return '<div class="top"><div class="toprow">'
+    + '<h1>Work Board</h1>'
+    + '<span class="when">Lastmile · updated ' + esc(state.updated) + '</span>'
+    + '<span class="counts"><span>Freeze Sep 24 <b>' + daysTo("2026-09-24") + 'd</b></span>'
+    + '<span class="hot">Submit Sep 29 <b>' + daysTo("2026-09-29") + 'd</b></span></span>'
+    + '</div><div class="savebar"><span class="dot" id="dot"></span><span id="saymsg">Starting up</span>'
+    + '<button class="act" id="savebtn" type="button">Save now</button></div></div>'
+
+    + '<div id="bannerslot"></div>'
+
+    + '<div class="balance">' + bcard("D", cd) + bcard("Y", cy) + '</div>'
+
+    + '<section><h2>Today</h2><p class="sub">Starred tasks that are not finished. Star anything below to pin it here.</p>'
+    + '<div class="lanes">' + laneHTML("D", today) + laneHTML("Y", today) + '</div>'
+    + '<div class="blockers">'
+    + '<div><label for="bd">Dami — what is blocking me</label><textarea id="bd" data-who="D" placeholder="Nothing right now">' + esc(state.blockers.D) + '</textarea></div>'
+    + '<div><label for="by">Yashfa — what is blocking me</label><textarea id="by" data-who="Y" placeholder="Nothing right now">' + esc(state.blockers.Y) + '</textarea></div>'
+    + '</div></section>'
+
+    + '<section><h2>' + esc(wk.full) + '</h2>'
+    + '<p class="sub">Click the left chip to change status. Click the name to reassign. Click the star to pin it to Today.</p>'
+    + '<div class="wknav">' + WEEKS.map(w => '<button type="button" data-week="' + w.k + '"' + (w.k===view ? ' class="on"' : '') + '>' + esc(w.label) + '</button>').join("") + '</div>'
+    + (inWeek.length ? '<div class="rows">' + inWeek.map(t => rowHTML(t, false)).join("") + '</div>' : '<p class="empty">Nothing here.</p>')
+    + '</section>'
+
+    + '<footer><span>Lastmile Work Board</span><span>Plan and spec live in the repo</span></footer>';
+}
+
+function paint(){ document.getElementById("app").innerHTML = renderBody(state); wire(); say(); }
+
+function say(msg, kind){
+  const dot = document.getElementById("dot"), m = document.getElementById("saymsg");
+  if(!dot || !m) return;
+  dot.className = "dot" + (kind ? " " + kind : "");
+  m.textContent = msg || (mode==="shared"
+    ? (dirty ? "Unsaved changes" : "Shared — you and your teammate see the same board")
+    : "Saved on this device only");
+  if(!kind) dot.className = "dot " + (mode==="shared" ? (dirty ? "busy" : "ok") : "local");
+}
+
+function banner(html){
+  const el = document.getElementById("bannerslot");
+  if(el) el.innerHTML = html ? '<div class="banner">' + html + '</div>' : "";
+}
+
+function docSource(st){
+  const sheet = document.getElementById("sheet").textContent;
+  const boot = document.getElementById("boot").textContent
+    .replace(/\/\*S\*\/[\s\S]*?\/\*E\*\//, function(){ return "/*S*/" + JSON.stringify(st) + "/*E*/"; });
+  return '<!doctype html><html lang="en"><head><meta charset="utf-8">'
+    + '<meta name="viewport" content="width=device-width, initial-scale=1">'
+    + '<title>Lastmile Work Board</title>'
+    + '<link rel="preconnect" href="https://fonts.googleapis.com">'
+    + '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
+    + '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">'
+    + '<style id="sheet">' + sheet + '</style></head><body>'
+    + '<div class="wrap" id="app"></div>'
+    + '<scr' + 'ipt id="boot">' + boot + '</scr' + 'ipt></body></html>';
+}
+
+function stash(){ try{ localStorage.setItem("lastmile-board-v1", JSON.stringify(state)); }catch(e){} }
+
+function goLocal(why){
+  mode = "local";
+  banner('<b>This board is not shared.</b> ' + why + ' Your changes stay on this device, so tell each other on the daily call. '
+    + 'To make reassignment work for both of you, the artifact has to be shared with the other person directly with edit access — not as a public link.');
+  say();
+}
+
+async function save(){
+  state.updated = new Date().toISOString().slice(0,10);
+  stash();
+  if(mode !== "shared" || !art){ dirty = false; say(); return; }
+  say("Saving", "busy");
+  try{
+    await art.publish(docSource(state));
+    dirty = false; say("Saved", "ok"); setTimeout(say, 1200);
+  }catch(err){
+    const code = err && err.code;
+    if(code === "conflict"){ say("Someone else saved first — reloading", "busy"); return; }
+    if(code === "not_writer" || code === "not_granted" || code === "capability_disabled"){
+      goLocal(code === "not_writer" ? "You can view it but not edit it." : "Saving is not available on this view.");
+      return;
+    }
+    say("Could not save — kept on this device", "local");
+  }
+}
+
+function queue(){ dirty = true; say(); clearTimeout(timer); timer = setTimeout(save, 2500); }
+
+function wire(){
+  document.querySelectorAll(".wknav button").forEach(b => b.onclick = () => { view = b.dataset.week; paint(); });
+  document.querySelectorAll(".row [data-act]").forEach(el => {
+    el.onclick = () => {
+      const id = el.closest(".row").dataset.id;
+      const t = state.tasks.find(x => x.id === id);
+      if(!t) return;
+      const a = el.dataset.act;
+      if(a === "status") t.s = STATUSES[(STATUSES.indexOf(t.s) + 1) % STATUSES.length];
+      if(a === "owner")  t.o = OWNERS[(OWNERS.indexOf(t.o) + 1) % OWNERS.length];
+      if(a === "star")   t.t = t.t ? 0 : 1;
+      paint(); queue();
+    };
+  });
+  document.querySelectorAll(".blockers textarea").forEach(ta => {
+    ta.oninput = () => { state.blockers[ta.dataset.who] = ta.value; queue(); };
+  });
+  const btn = document.getElementById("savebtn");
+  if(btn) btn.onclick = () => { clearTimeout(timer); save(); };
+}
+
+(function start(){
+  let seed = STATE;
+  try{
+    const local = JSON.parse(localStorage.getItem("lastmile-board-v1") || "null");
+    if(local && local.updated >= STATE.updated) seed = local;
+  }catch(e){}
+  state = seed;
+  paint();
+  banner("");
+  if(window.claude && typeof window.claude.use === "function"){
+    window.claude.use("artifact").then(a => {
+      if(!a){ goLocal("Shared saving is not switched on for this view."); return; }
+      art = a; mode = "shared"; say();
+    }).catch(() => goLocal("Shared saving could not start."));
+  } else {
+    goLocal("This is a local copy of the file, not the published page.");
+  }
+})();
+</script>
