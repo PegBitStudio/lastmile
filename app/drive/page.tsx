@@ -3,6 +3,26 @@
 import { useEffect, useRef, useState } from "react";
 import { VoiceSession, type SessionEvent } from "@/lib/voice-session";
 
+/** Ignore case and punctuation when comparing two spoken lines. */
+function words(t: string) {
+  return t.toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(Boolean);
+}
+
+/**
+ * Is this the same utterance said twice? The server sends one built from deltas
+ * and again as a finished sentence, and the two differ by punctuation or a word
+ * like "a" against "the". Compare word by word and allow a little drift.
+ */
+function nearlySame(a: string, b: string) {
+  const x = words(a), y = words(b);
+  if (!x.length || !y.length) return false;
+  if (Math.abs(x.length - y.length) > 2) return false;
+  const n = Math.min(x.length, y.length);
+  let same = 0;
+  for (let i = 0; i < n; i++) if (x[i] === y[i]) same++;
+  return same / Math.max(x.length, y.length) >= 0.7;
+}
+
 type Line = { who: "driver" | "agent"; text: string; final: boolean };
 
 export default function Drive() {
@@ -40,6 +60,13 @@ export default function Drive() {
           const open = last && last.who === who && !last.final;
 
           if (!open) {
+            // The server sends the same utterance more than once: built up from
+            // deltas, then again as a finished sentence, sometimes with different
+            // punctuation. Same speaker saying nearly the same thing is one line.
+            if (last && last.who === who && nearlySame(last.text, e.text)) {
+              next[next.length - 1] = { who, text: e.text, final: e.final };
+              return next;
+            }
             next.push({ who, text: e.text, final: e.final });
             return next;
           }
