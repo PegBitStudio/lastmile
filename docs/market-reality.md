@@ -187,6 +187,82 @@ It is a five-minute test with a phone and a stopwatch.
 
 ---
 
+---
+
+## 5. Where audio still helps in the markets that looked dead
+
+Lockers, Japan and the US kill the *doorstep* story. They do not kill voice. In each one the
+exception just moves somewhere else, and it is still nobody's job to type it.
+
+Four plays, strongest first.
+
+### Play 1 — turn the microphone around: capture access knowledge
+
+DispatchTrack's Driver AI reads access notes *to* the driver before each stop: which gate, where to
+park, how the building works. Someone had to know that. Nobody in the industry captures it — it
+lives in one driver's head and leaves when they quit.
+
+We are the input side of a feature an incumbent already sells the output side of. A driver who has
+just worked out that the loading bay is on the north side and closed after 4pm says it once, in
+twenty seconds, while parked. The next driver hears it.
+
+This works in **every** market on earth, lockers and US suburbs included, because it is about the
+place, not the recipient. It needs no new schema — `location.place`, `location.entrance` and
+`location.notes` already hold it. It changes the outcome enum, not the product.
+
+### Play 2 — point it at the asset, not the recipient (locker Europe)
+
+A locker market has no recipient, but it has 20,000 machines that break, fill up and get vandalised.
+Parcels are already returned to sender because the locker was full, and customers report the
+availability display disagreeing with what the courier actually found. That gap is a driver
+standing in front of a machine with knowledge the network does not have.
+
+"Bank at the Biedronka, three compartments jammed shut, ice in the hinges, moved eight parcels to
+the Żabka bank 400m north." That is an estate-condition report, it is worth money to a network
+operator, and today it is a phone call that never gets made.
+
+Same product. The recipient fields go quiet and the location fields do the work.
+
+### Play 3 — Japan: the exception is "why nobody was in", and time is now rationed
+
+Japan's redelivery rate was 8.4% (9.3% in cities). The ministry target of 7.5% for FY2025 looks
+like it will be missed. And since April 2024 driver hours are legally capped, so every second of
+paperwork is a second of regulated, scarce capacity.
+
+The narrative that matters is not who took the parcel. It is what the driver learned at the door —
+the intercom is broken, the household is out until eight, there is a locker two streets away that
+this customer would accept. That feeds the redelivery decision, which is the exact number the
+government is measuring. Speaking it is faster than typing it, and in Japan faster is now
+regulatory, not just nice.
+
+### Play 4 — USA: change the parcel, not the country
+
+US parcel is a bad market for us: 97.2% first-attempt success and a device that already forces a
+reason code and a photo. But that is only one kind of last mile.
+
+Furniture and appliance final-mile runs damage rates of roughly **5–10%** — two to three times the
+whole US parcel failure rate, on goods worth hundreds of dollars, delivered by two-person crews
+whose hands are full and who are the only witnesses. Freight OS&D (over, short, damaged) reporting
+is the same shape. So is grocery cold chain and pharmacy.
+
+The exception pool is bigger, each event is worth far more, and the driver physically cannot type.
+
+**The US caveat stands:** Illinois BIPA does not care which vertical you are in. Driver-only
+recording, clear notice and a stated retention period are not optional there.
+
+### What this means for the build
+
+Nothing. None of these need new code. Each is a different **outcome enum and a different follow-up
+table** — which is the same "data, not code" claim we already make about region packs.
+
+That is worth saying out loud, because it upgrades the claim. The packs are not just a way to
+change country. They are a way to change *what kind of exception you are reporting*. Region is one
+axis; event type is the other, and it is the bigger one.
+
+For the hackathon this is a slide, not a build. Ship the three region packs. Say in one sentence
+that the same table swap points the product at locker networks, redelivery decisions and freight
+damage — and that we know which markets we are not for.
+
 ## Sources
 
 - [Parcel Perform — first-attempt success rates, Q1 2025](https://www.parcelperform.com/insights/top-routes-with-the-highest-first-time-delivery-success-rates-in-q1-2025)
@@ -208,3 +284,8 @@ It is a five-minute test with a phone and a stopwatch.
 - [American Bar Association — voiceprints, AI and BIPA](https://www.americanbar.org/groups/litigation/resources/newsletters/class-actions-derivative-suits/voiceprints-ai-bipa-new-trends-biometric-privacy-litigation/)
 - [Equidem — platform delivery riders in Saudi Arabia and the UAE](https://equidem.org/reports/free-to-be-exploited-the-abuse-of-platform-based-food-delivery-riders-in-saudi-arabia-and-the-uae/)
 - [Omnisend porch piracy figures, via Stacker](https://www.northcountrynow.com/premium/stacker/stories/porch-piracy-delivery-fraud-and-the-rising-cost-of-lost-packages,370870)
+- [Nippon.com — parcel redelivery rate in Japan](https://www.nippon.com/en/japan-data/h02461/)
+- [Statista — Japan door-to-door parcel redelivery rate, 2018-2024](https://statista.com/statistics/1220819/japan-door-to-door-parcel-redelivery-rate)
+- [InPost help — locker collection and courier visits](https://inpost.co.uk/help)
+- [uShip — reducing damage claims on furniture deliveries](https://www.uship.com/blog/business-shipping/reducing-damage-claims-furniture-deliveries/)
+- [NXTPoint Logistics — exception management in the final mile](https://nxtpointlogistics.com/blog/exception-management-in-the-final-mile/)

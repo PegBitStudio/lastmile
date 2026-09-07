@@ -11,6 +11,9 @@
  */
 
 const SAMPLE_RATE = 24000;
+/** Send about 50 ms at a time. A frame per 128 samples is ~187 messages a second,
+ *  which floods the socket and gives the turn detector nothing useful to chew on. */
+const FRAME_SAMPLES = 1200;
 const WS_URL = "wss://agents.assemblyai.com/v1/ws";
 
 export type SessionEvent =
@@ -36,7 +39,10 @@ export class VoiceSession {
   private stream: MediaStream | null = null;
   private node: AudioWorkletNode | ScriptProcessorNode | null = null;
   private playHead = 0;
+  private pending: number[] = [];
   private stopped = false;
+  private sent = 0;
+  private ready = false;
   private opts: StartOptions | null = null;
 
   get live() {
@@ -84,8 +90,20 @@ export class VoiceSession {
       };
 
       ws.onopen = () => {
+        if (!agentId) {
+          fail("No agent id. NEXT_PUBLIC_AGENT_ID is missing from this build.");
+          return;
+        }
+        this.opts?.onEvent({ type: "status", text: "Connected. Starting the session" });
         ws.send(JSON.stringify({ type: "session.update", session: { agent_id: agentId } }));
       };
+
+      // If the session never becomes ready we would hang here forever.
+      setTimeout(() => {
+        if (!this.stopped && this.ws === ws && !this.ready) {
+          fail("The session did not become ready within 10 seconds.");
+        }
+      }, 10000);
 
       ws.onmessage = (ev) => {
         let msg: any;
@@ -115,6 +133,7 @@ export class VoiceSession {
 
     switch (msg.type) {
       case "session.ready":
+        this.ready = true;
         send({ type: "ready", sessionId: msg.session_id ?? "" });
         ready?.();
         break;
@@ -145,8 +164,12 @@ export class VoiceSession {
         break;
 
       case "error":
-        send({ type: "error", text: msg.message ?? "unknown error" });
+        send({ type: "error", text: msg.message ?? JSON.stringify(msg) });
         break;
+
+      default:
+        // Anything unexpected is worth seeing while we are still wiring this up.
+        console.debug("[voice] unhandled", msg.type, msg);
     }
   }
 
@@ -196,12 +219,18 @@ export class VoiceSession {
 
   private sendAudio(chunk: Float32Array) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
-    const pcm = new Int16Array(chunk.length);
-    for (let i = 0; i < chunk.length; i++) {
-      const v = Math.max(-1, Math.min(1, chunk[i]));
+
+    for (let i = 0; i < chunk.length; i++) this.pending.push(chunk[i]);
+    if (this.pending.length < FRAME_SAMPLES) return;
+
+    const take = this.pending.splice(0, this.pending.length - (this.pending.length % FRAME_SAMPLES));
+    const pcm = new Int16Array(take.length);
+    for (let i = 0; i < take.length; i++) {
+      const v = Math.max(-1, Math.min(1, take[i]));
       pcm[i] = v < 0 ? v * 0x8000 : v * 0x7fff;
     }
     this.ws.send(JSON.stringify({ type: "input.audio", audio: b64(pcm.buffer) }));
+    this.sent += take.length;
   }
 
   /** Queue agent audio so consecutive chunks play without gaps. */
@@ -263,8 +292,11 @@ export class VoiceSession {
     this.ctxIn = null;
     this.ctxOut = null;
     this.playHead = 0;
+    this.pending = [];
 
-    this.opts?.onEvent({ type: "status", text: "Closed: " + reason });
+    const secs = (this.sent / SAMPLE_RATE).toFixed(1);
+    this.opts?.onEvent({ type: "status", text: `Closed: ${reason}. Sent ${secs}s of audio.` });
+    this.ready = false;
   }
 }
 
