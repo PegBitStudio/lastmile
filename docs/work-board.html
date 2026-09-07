@@ -119,11 +119,11 @@ footer{border-top:1px solid var(--rule);margin-top:2rem;padding-top:.9rem;font-f
 <script id="boot">
 const STATE = /*S*/{"v":1,"updated":"2026-09-07","blockers":{"D":"","Y":""},"tasks":[
 {"id":"n1","w":"now","o":"D","s":"done","t":1,"x":"Send Yashfa the three Discord messages"},
-{"id":"n2","w":"now","o":"Y","s":"todo","t":1,"x":"AssemblyAI account through the event's tracked signup link","n":"Log out of any old account first and accept cookies, or the $50 credit does not attach"},
+{"id":"n2","w":"now","o":"B","s":"done","t":1,"x":"AssemblyAI account through the event's tracked signup link","n":"Log out of any old account first and accept cookies, or the $50 credit does not attach","d":"2026-09-07"},
 {"id":"n3","w":"now","o":"B","s":"done","t":1,"x":"Run the voice agent quickstart locally and hear it reply"},
-{"id":"n4","w":"now","o":"Y","s":"todo","t":1,"x":"Accept the GitHub repo invite"},
-{"id":"n5","w":"now","o":"B","s":"todo","t":0,"x":"Agree the daily call time","n":"14:00 WAT / 18:00 PKT unless Yashfa says otherwise"},
-{"id":"n6","w":"now","o":"B","s":"todo","t":0,"x":"Decide the named prize recipient","n":"Whoever can receive a US wire and file a W-8BEN"},
+{"id":"n4","w":"now","o":"Y","s":"done","t":1,"x":"Accept the GitHub repo invite","d":"2026-09-07"},
+{"id":"n5","w":"now","o":"B","s":"done","t":0,"x":"Agree the daily call time","n":"14:00 WAT / 18:00 PKT unless Yashfa says otherwise","d":"2026-09-07"},
+{"id":"n6","w":"now","o":"B","s":"blocked","t":0,"x":"Decide the named prize recipient","n":"Whoever can receive a US wire and file a W-8BEN"},
 {"id":"a1","w":"w1","o":"D","s":"done","t":0,"x":"Repo created, MIT licence, Yashfa invited"},
 {"id":"a2","w":"w1","o":"D","s":"done","t":1,"x":"Next.js app deployed to Vercel with a /drive page","n":"Deploy an empty page first. Never debug a build and a socket at the same time"},
 {"id":"a3","w":"w1","o":"D","s":"todo","t":1,"x":"Server route that mints a short-lived browser token","n":"The API key never reaches the browser"},
@@ -308,11 +308,39 @@ function docSource(st){
 
 function stash(){ try{ localStorage.setItem("lastmile-board-v1", JSON.stringify(state)); }catch(e){} }
 
+var localReason = "";
+
 function goLocal(why){
   mode = "local";
-  banner('<b>This board is not shared.</b> ' + why + ' Your changes stay on this device, so tell each other on the daily call. '
-    + 'To make reassignment work for both of you, the artifact has to be shared with the other person directly with edit access — not as a public link.');
+  localReason = why || localReason;
+  drawBanner();
   say();
+}
+
+function drawBanner(){
+  var html = "";
+  if(mode === "local"){
+    html += '<b>Saving is off. Your clicks stay in this browser and your teammate will not see them.</b>'
+      + '<p style="margin:.5rem 0 0">' + localReason + '</p>'
+      + '<p style="margin:.5rem 0 0"><b>Most likely cause: this board is shared as a public link.</b> '
+      + 'A page can only save itself when it is <i>not</i> public.</p>'
+      + '<p style="margin:.5rem 0 0"><b>How to fix it:</b> click <b>Share</b> at the top right. '
+      + 'Turn off the public link. Share it with the other person directly and give them edit access. '
+      + 'Then reload this page. The dot should turn green and say Shared.</p>';
+  }
+  if(staleLocal){
+    html += (html ? '<p style="margin:.7rem 0 0;border-top:1px solid var(--rust);padding-top:.6rem">' : '<p style="margin:0">')
+      + '<b>You are looking at a copy saved in this browser, not the live board.</b> '
+      + 'It is different from the version on the server, so it may be missing your teammate\'s work. '
+      + '<button class="act" type="button" id="uselive" style="margin-left:.4rem">Use the live board</button>'
+      + '</p>';
+  }
+  banner(html);
+  var ul = document.getElementById("uselive");
+  if(ul) ul.onclick = function(){
+    try{ localStorage.removeItem("lastmile-board-v1"); }catch(e){}
+    location.reload();
+  };
 }
 
 async function save(){
@@ -327,7 +355,9 @@ async function save(){
     const code = err && err.code;
     if(code === "conflict"){ say("Someone else saved first — reloading", "busy"); return; }
     if(code === "not_writer" || code === "not_granted" || code === "capability_disabled"){
-      goLocal(code === "not_writer" ? "You can view it but not edit it." : "Saving is not available on this view.");
+      goLocal(code === "not_writer"
+        ? "You can open this board but you do not have edit access to it."
+        : "The server refused the save (" + code + ").");
       return;
     }
     say("Could not save — kept on this device", "local");
@@ -361,22 +391,27 @@ function wire(){
   if(btn) btn.onclick = () => { clearTimeout(timer); save(); };
 }
 
+var staleLocal = false;
+
 (function start(){
   let seed = STATE;
   try{
     const local = JSON.parse(localStorage.getItem("lastmile-board-v1") || "null");
-    if(local && local.updated >= STATE.updated) seed = local;
+    if(local && local.updated >= STATE.updated){
+      seed = local;
+      staleLocal = JSON.stringify(local.tasks) !== JSON.stringify(STATE.tasks);
+    }
   }catch(e){}
   state = seed;
   paint();
-  banner("");
+  drawBanner();
   if(window.claude && typeof window.claude.use === "function"){
     window.claude.use("artifact").then(a => {
-      if(!a){ goLocal("Shared saving is not switched on for this view."); return; }
+      if(!a){ goLocal("This page loaded, but it was not allowed to save."); return; }
       art = a; mode = "shared"; say();
-    }).catch(() => goLocal("Shared saving could not start."));
+    }).catch(function(){ goLocal("Saving could not start on this view."); });
   } else {
-    goLocal("This is a local copy of the file, not the published page.");
+    goLocal("This is a local copy of the file, not the published page. Open the artifact link instead.");
   }
 })();
 </script>
