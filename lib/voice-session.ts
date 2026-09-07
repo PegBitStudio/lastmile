@@ -19,8 +19,8 @@ const WS_URL = "wss://agents.assemblyai.com/v1/ws";
 export type SessionEvent =
   | { type: "status"; text: string }
   | { type: "ready"; sessionId: string }
-  | { type: "user"; text: string; final: boolean }
-  | { type: "agent"; text: string; final: boolean }
+  | { type: "user"; text: string; final: boolean; delta?: boolean }
+  | { type: "agent"; text: string; final: boolean; delta?: boolean }
   | { type: "tool"; callId: string; name: string; args: Record<string, unknown> }
   | { type: "ended"; reason: string }
   | { type: "error"; text: string };
@@ -59,6 +59,12 @@ export class VoiceSession {
       const res = await fetch("/api/token", { cache: "no-store" });
       if (!res.ok) throw new Error("token route said " + res.status);
       const { token } = (await res.json()) as { token: string };
+
+      // Must happen inside the click that started this. A mobile browser starts an
+       // AudioContext suspended unless it is created during a real user gesture, which
+       // is why the agent could be transcribed but never heard.
+      this.ctxOut = new AudioContext({ sampleRate: SAMPLE_RATE });
+      await this.ctxOut.resume().catch(() => {});
 
       say("Asking for the microphone");
       this.stream = await navigator.mediaDevices.getUserMedia({
@@ -139,13 +145,13 @@ export class VoiceSession {
         break;
 
       case "transcript.user.delta":
-        send({ type: "user", text: msg.text ?? msg.delta ?? "", final: false });
+        send({ type: "user", text: msg.text ?? msg.delta ?? "", final: false, delta: true });
         break;
       case "transcript.user":
         send({ type: "user", text: msg.text ?? "", final: true });
         break;
       case "transcript.agent.delta":
-        send({ type: "agent", text: msg.text ?? msg.delta ?? "", final: false });
+        send({ type: "agent", text: msg.text ?? msg.delta ?? "", final: false, delta: true });
         break;
       case "transcript.agent":
         send({ type: "agent", text: msg.text ?? "", final: true });
@@ -238,6 +244,7 @@ export class VoiceSession {
     if (!base64) return;
     if (!this.ctxOut) this.ctxOut = new AudioContext({ sampleRate: SAMPLE_RATE });
     const ctx = this.ctxOut;
+    if (ctx.state === "suspended") void ctx.resume();
 
     const bytes = unb64(base64);
     const pcm = new Int16Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 2);

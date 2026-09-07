@@ -37,9 +37,16 @@ export default function Drive() {
         setLines((prev) => {
           const next = [...prev];
           const last = next[next.length - 1];
-          // Replace the running partial rather than piling up half sentences.
-          if (last && last.who === who && !last.final) next[next.length - 1] = { who, ...e, text: e.text };
-          else next.push({ who, text: e.text, final: e.final });
+          const open = last && last.who === who && !last.final;
+
+          if (!open) {
+            next.push({ who, text: e.text, final: e.final });
+            return next;
+          }
+          // A delta is one more piece of the same sentence. A non-delta is the
+          // whole sentence, so it replaces what we built up.
+          const text = e.delta ? last.text + e.text : e.text;
+          next[next.length - 1] = { who, text, final: e.final };
           return next;
         });
         break;
