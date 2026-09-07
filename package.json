@@ -5,7 +5,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "agent:create": "node scripts/agent.mjs create",
+    "agent:update": "node scripts/agent.mjs update",
+    "agent:list": "node scripts/agent.mjs list"
   },
   "dependencies": {
     "next": "15.5.4",
