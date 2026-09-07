@@ -43,6 +43,8 @@ export class VoiceSession {
   private stopped = false;
   private sent = 0;
   private ready = false;
+  private inRate = SAMPLE_RATE;
+  private leftover = 0;
   private opts: StartOptions | null = null;
 
   get live() {
@@ -194,6 +196,17 @@ export class VoiceSession {
   private async pipeMicrophone() {
     if (!this.stream) return;
     this.ctxIn = new AudioContext({ sampleRate: SAMPLE_RATE });
+    // Asking for 24 kHz is a request, not a promise. Android in particular often
+    // hands back 48 kHz. Sending 48 kHz audio labelled as 24 kHz makes speech
+    // arrive at the wrong speed, which ruins recognition and confuses the turn
+    // detector into interrupting. So measure it and convert.
+    this.inRate = this.ctxIn.sampleRate;
+    if (this.inRate !== SAMPLE_RATE) {
+      this.opts?.onEvent({
+        type: "status",
+        text: `Listening. Converting ${this.inRate} Hz to ${SAMPLE_RATE} Hz.`,
+      });
+    }
     const source = this.ctxIn.createMediaStreamSource(this.stream);
 
     const worklet = `
@@ -223,9 +236,10 @@ export class VoiceSession {
     }
   }
 
-  private sendAudio(chunk: Float32Array) {
+  private sendAudio(raw: Float32Array) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
 
+    const chunk = this.inRate === SAMPLE_RATE ? raw : this.downsample(raw);
     for (let i = 0; i < chunk.length; i++) this.pending.push(chunk[i]);
     if (this.pending.length < FRAME_SAMPLES) return;
 
@@ -237,6 +251,25 @@ export class VoiceSession {
     }
     this.ws.send(JSON.stringify({ type: "input.audio", audio: b64(pcm.buffer) }));
     this.sent += take.length;
+  }
+
+  /**
+   * Linear resample to 24 kHz. `leftover` carries the fractional read position
+   * between chunks, so no sample is dropped or repeated at a chunk boundary.
+   */
+  private downsample(input: Float32Array): Float32Array {
+    const ratio = this.inRate / SAMPLE_RATE;
+    const out: number[] = [];
+    let pos = this.leftover;
+    while (pos < input.length - 1) {
+      const i = Math.floor(pos);
+      const frac = pos - i;
+      out.push(input[i] * (1 - frac) + input[i + 1] * frac);
+      pos += ratio;
+    }
+    this.leftover = pos - input.length;
+    if (this.leftover < 0) this.leftover = 0;
+    return Float32Array.from(out);
   }
 
   /** Queue agent audio so consecutive chunks play without gaps. */
@@ -300,9 +333,14 @@ export class VoiceSession {
     this.ctxOut = null;
     this.playHead = 0;
     this.pending = [];
+    this.leftover = 0;
 
     const secs = (this.sent / SAMPLE_RATE).toFixed(1);
-    this.opts?.onEvent({ type: "status", text: `Closed: ${reason}. Sent ${secs}s of audio.` });
+    const rate = this.inRate === SAMPLE_RATE ? "24k" : `${this.inRate}\u219224k`;
+    this.opts?.onEvent({
+      type: "status",
+      text: `Closed: ${reason}. Sent ${secs}s of audio at ${rate}.`,
+    });
     this.ready = false;
   }
 }
