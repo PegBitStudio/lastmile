@@ -20,11 +20,16 @@ export ASSEMBLYAI_API_KEY=your_key_here
 npm run agent:create
 ```
 
-**Update** after editing `driver.json` — needs the id:
+**Update** after editing `driver.json` or a region pack — needs the id:
 
 ```bash
 AGENT_ID=your_agent_id npm run agent:update
 ```
+
+Update is a `PUT`, and it replaces the whole config. `PATCH` is not allowed.
+
+A region pack is merged in at send time. The default is `ng-lagos`; pass another
+with `REGION=uk-london npm run agent:update`.
 
 **List** what exists on your account:
 
@@ -59,5 +64,8 @@ The id is safe in the browser. The API key is not, and never leaves the server.
 
 - `voice_id` is `anna`, and the API accepted it. We have not heard it yet, so it may
   still change once we listen to it through a phone speaker with street noise.
+- **Keyterms live on the agent, not on the session.** Up to 100 strings. This is how a
+  region pack reaches the recogniser, and it means switching region means updating the
+  agent, or running one agent per region. Worth deciding before week 3.
 - Tools are **not** declared here yet. The follow-up loop registers them from the
   client in week 2, and the missing-field list comes back as the tool result.

@@ -2,9 +2,12 @@
 /**
  * Create, update or list voice agents from the JSON in agents/.
  *
- *   node scripts/agent.mjs create [file]
- *   AGENT_ID=... node scripts/agent.mjs update [file]
+ *   node scripts/agent.mjs create [file] [region]
+ *   AGENT_ID=... node scripts/agent.mjs update [file] [region]
  *   node scripts/agent.mjs list
+ *
+ * The region is a file in regions/. Its keyterms are merged into
+ * input.keyterms, which is how a region pack reaches the recogniser.
  *
  * The config lives in a file so the prompt is version controlled. This script
  * only posts it.
@@ -20,7 +23,25 @@ if (!key) {
   process.exit(1);
 }
 
-const [, , cmd = "list", file = "agents/driver.json"] = process.argv;
+const [, , cmd = "list", file = "agents/driver.json", region = process.env.REGION ?? "ng-lagos"] =
+  process.argv;
+
+/** Load the agent config and fold the region pack's keyterms into it. */
+async function configWithRegion() {
+  const config = JSON.parse(await readFile(file, "utf8"));
+  try {
+    const pack = JSON.parse(await readFile(`regions/${region}.json`, "utf8"));
+    config.input = { ...(config.input ?? {}), keyterms: pack.keyterms ?? [] };
+    console.log(`region: ${pack.label} (${(pack.keyterms ?? []).length} keyterms)`);
+  } catch {
+    console.log(`region: none found at regions/${region}.json, sending without keyterms`);
+  }
+  if ((config.input?.keyterms?.length ?? 0) > 100) {
+    console.error("More than 100 keyterms. The API caps it at 100.");
+    process.exit(1);
+  }
+  return config;
+}
 
 const headers = { Authorization: key, "Content-Type": "application/json" };
 
@@ -42,7 +63,7 @@ async function show(res) {
 
 switch (cmd) {
   case "create": {
-    const config = JSON.parse(await readFile(file, "utf8"));
+    const config = await configWithRegion();
     const body = await show(await fetch(BASE, { method: "POST", headers, body: JSON.stringify(config) }));
     const id = body.agent_id ?? body.id;
     console.log(`\nCreated "${config.name}"`);
@@ -58,8 +79,8 @@ switch (cmd) {
       console.error("AGENT_ID is not set.\n  AGENT_ID=your_agent_id node scripts/agent.mjs update");
       process.exit(1);
     }
-    const config = JSON.parse(await readFile(file, "utf8"));
-    await show(await fetch(`${BASE}/${id}`, { method: "PATCH", headers, body: JSON.stringify(config) }));
+    const config = await configWithRegion();
+    await show(await fetch(`${BASE}/${id}`, { method: "PUT", headers, body: JSON.stringify(config) }));
     console.log(`\nUpdated ${id} from ${file}\n`);
     break;
   }
