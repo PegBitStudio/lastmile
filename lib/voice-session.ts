@@ -45,6 +45,8 @@ export class VoiceSession {
   private ready = false;
   private inRate = SAMPLE_RATE;
   private leftover = 0;
+  private heard = 0;   // reply.audio chunks received
+  private played = 0;  // seconds queued for the speaker
   private opts: StartOptions | null = null;
 
   get live() {
@@ -160,6 +162,7 @@ export class VoiceSession {
         break;
 
       case "reply.audio":
+        this.heard++;
         this.play(msg.audio as string);
         break;
 
@@ -283,7 +286,13 @@ export class VoiceSession {
     const pcm = new Int16Array(bytes.buffer, bytes.byteOffset, bytes.byteLength / 2);
     const buf = ctx.createBuffer(1, pcm.length, SAMPLE_RATE);
     const out = buf.getChannelData(0);
-    for (let i = 0; i < pcm.length; i++) out[i] = pcm[i] / 0x8000;
+    let peak = 0;
+    for (let i = 0; i < pcm.length; i++) {
+      const v = pcm[i] / 0x8000;
+      out[i] = v;
+      const a = v < 0 ? -v : v;
+      if (a > peak) peak = a;
+    }
 
     const src = ctx.createBufferSource();
     src.buffer = buf;
@@ -292,6 +301,21 @@ export class VoiceSession {
     if (this.playHead < now) this.playHead = now;
     src.start(this.playHead);
     this.playHead += buf.duration;
+    this.played += buf.duration;
+
+    if (this.heard === 1) {
+      // First chunk only. Everything needed to tell silence from a dead speaker.
+      console.info("[voice] first reply.audio", {
+        contextState: ctx.state,
+        contextRate: ctx.sampleRate,
+        samples: pcm.length,
+        peakLevel: peak.toFixed(3),
+      });
+      this.opts?.onEvent({
+        type: "status",
+        text: `Agent audio arriving. Speaker ${ctx.state}, peak ${peak.toFixed(2)}.`,
+      });
+    }
   }
 
   /**
@@ -334,12 +358,17 @@ export class VoiceSession {
     this.playHead = 0;
     this.pending = [];
     this.leftover = 0;
+    this.heard = 0;
+    this.played = 0;
 
     const secs = (this.sent / SAMPLE_RATE).toFixed(1);
     const rate = this.inRate === SAMPLE_RATE ? "24k" : `${this.inRate}\u219224k`;
+    const back = this.heard
+      ? `Heard back ${this.heard} chunks, ${this.played.toFixed(1)}s.`
+      : "The agent sent no audio at all.";
     this.opts?.onEvent({
       type: "status",
-      text: `Closed: ${reason}. Sent ${secs}s of audio at ${rate}.`,
+      text: `Closed: ${reason}. Sent ${secs}s at ${rate}. ${back}`,
     });
     this.ready = false;
   }
