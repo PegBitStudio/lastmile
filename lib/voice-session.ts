@@ -45,7 +45,8 @@ export class VoiceSession {
   private ready = false;
   private inRate = SAMPLE_RATE;
   private leftover = 0;
-  private heard = 0;   // reply.audio chunks received
+  private heard = 0;   // audio chunks received
+  private seen = new Set<string>(); // every message type the server sent
   private played = 0;  // seconds queued for the speaker
   private opts: StartOptions | null = null;
 
@@ -140,6 +141,15 @@ export class VoiceSession {
   private handle(msg: any, ready?: () => void) {
     const send = this.opts?.onEvent;
     if (!send) return;
+    if (msg.type) this.seen.add(msg.type);
+
+    // Catch any audio-carrying event whatever it is called. The docs name
+    // reply.audio, but the only thing that matters is base64 audio arriving.
+    if (typeof msg.audio === "string" && msg.audio.length > 0) {
+      this.heard++;
+      this.play(msg.audio);
+      if (this.heard === 1) console.info("[voice] audio arrived on type", msg.type);
+    }
 
     switch (msg.type) {
       case "session.ready":
@@ -162,9 +172,7 @@ export class VoiceSession {
         break;
 
       case "reply.audio":
-        this.heard++;
-        this.play(msg.audio as string);
-        break;
+        break; // handled above, whatever the type is called
 
       case "tool.call":
         void this.runTool(msg.call_id, msg.name, msg.arguments ?? {});
@@ -360,12 +368,14 @@ export class VoiceSession {
     this.leftover = 0;
     this.heard = 0;
     this.played = 0;
+    this.seen.clear();
 
     const secs = (this.sent / SAMPLE_RATE).toFixed(1);
     const rate = this.inRate === SAMPLE_RATE ? "24k" : `${this.inRate}\u219224k`;
+    const types = Array.from(this.seen).join(" ");
     const back = this.heard
       ? `Heard back ${this.heard} chunks, ${this.played.toFixed(1)}s.`
-      : "The agent sent no audio at all.";
+      : `No audio. Server sent: ${types || "nothing"}`;
     this.opts?.onEvent({
       type: "status",
       text: `Closed: ${reason}. Sent ${secs}s at ${rate}. ${back}`,
