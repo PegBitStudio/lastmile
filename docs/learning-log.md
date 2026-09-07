@@ -19,3 +19,7 @@ Format:
 
 - 2026-09-05 — Dami — Sessions bill on how long the WebSocket is open, not how long anyone is
   speaking. A forgotten browser tab costs real credit.
+- 2026-09-07 — Dami — Voice agents are created with a POST to /v1/agents, not in a dashboard.
+  So the system prompt is a file we can keep in git and diff, which beats a text box in a UI.
+- 2026-09-07 — Dami — Browser tokens are single use and last 60 seconds. Fetch a fresh one immediately
+  before opening each socket, not once at page load.
