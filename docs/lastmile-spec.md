@@ -278,23 +278,24 @@ does not — and this is precisely the reliability point to make in the writeup.
 
 ## 4. Agent configuration
 
-### System prompt (shape, not final copy)
+### System prompt
 
-```
-You are a dispatch assistant for a delivery driver who has just finished a stop.
-They have parked, they are standing on the street or sitting in a stopped van, and
-they want to be moving again. There is street noise around them.
+The live copy is `agents/driver.json`, and it is sent to the API unchanged. Edit it there, not
+here, and run `npm run agent:update`.
 
-Rules:
-- Ask about ONE missing field at a time. Never batch questions.
-- Keep every utterance under 12 words. The driver wants to get going.
-- NEVER invent or assume a field value. If you did not hear it, ask.
-- If the driver gives extra information unprompted, capture it and skip that question.
-- When all required fields are filled, read back a one-line confirmation and stop talking.
-- Use the local vocabulary supplied for this region when naming places and entrances.
-- Accept regional accents, dialects and code-switching naturally. Never ask the driver
-  to repeat themselves in "standard" English.
-```
+Two rules it must keep, because they are the product:
+
+- **Ask only for what is missing.** In week 2 the missing-field list arrives as a tool result and
+  the prompt defers to it. Until the tools exist, the prompt asks the model to work it out, which
+  is weaker but at least coherent.
+- **Never ask the driver to repeat themselves in standard English.** If a name is unclear, ask
+  them to spell it.
+
+**A lesson from the first live test.** The prompt said *"You will be told which fields are still
+missing after every tool call."* No tools were registered, so that list never arrived. The agent
+followed instructions about machinery that did not exist and invented questions instead — it
+asked for the address, which we already know. A prompt that refers to something absent does not
+degrade gracefully; it produces confident nonsense.
 
 ### Key settings
 
