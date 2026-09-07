@@ -119,7 +119,7 @@ footer{border-top:1px solid var(--rule);margin-top:2rem;padding-top:.9rem;font-f
 <script id="boot">
 const STATE = /*S*/{"v":1,"updated":"2026-09-07","blockers":{"D":"","Y":""},"tasks":[
 {"id":"n1","w":"now","o":"D","s":"done","t":1,"x":"Send Yashfa the three Discord messages"},
-{"id":"n2","w":"now","o":"Y","s":"blocked","t":1,"x":"AssemblyAI account through the event's tracked signup link","n":"Log out of any old account first and accept cookies, or the $50 credit does not attach"},
+{"id":"n2","w":"now","o":"Y","s":"todo","t":1,"x":"AssemblyAI account through the event's tracked signup link","n":"Log out of any old account first and accept cookies, or the $50 credit does not attach"},
 {"id":"n3","w":"now","o":"B","s":"done","t":1,"x":"Run the voice agent quickstart locally and hear it reply"},
 {"id":"n4","w":"now","o":"Y","s":"todo","t":1,"x":"Accept the GitHub repo invite"},
 {"id":"n5","w":"now","o":"B","s":"todo","t":0,"x":"Agree the daily call time","n":"14:00 WAT / 18:00 PKT unless Yashfa says otherwise"},
@@ -186,7 +186,8 @@ const WEEKS = [
   {k:"w2",  label:"Week 2", full:"Week 2 — Sep 8 to 14: the core loop"},
   {k:"w3",  label:"Week 3", full:"Week 3 — Sep 15 to 21: make it real and global"},
   {k:"w4",  label:"Week 4", full:"Week 4 — Sep 22 to 28: the deliverables"},
-  {k:"sub", label:"Submit", full:"Sep 29 — submit"}
+  {k:"sub", label:"Submit", full:"Sep 29 — submit"},
+  {k:"done", label:"Done", full:"Finished — click a status chip to bring something back"}
 ];
 const OWNERS = ["D","Y","B"];
 const OWNER_NAME = {D:"Dami", Y:"Yashfa", B:"Both"};
@@ -210,7 +211,7 @@ function rowHTML(t, showWeek){
     + '<button class="chip st-' + t.s + '" data-act="status" title="Click to change status">' + STATUS_NAME[t.s] + '</button>'
     + '<button class="chip ow-' + t.o + '" data-act="owner" title="Click to reassign">' + OWNER_NAME[t.o] + '</button>'
     + '<span class="txt">' + esc(t.x) + (t.n ? '<span class="note">' + esc(t.n) + '</span>' : '') + '</span>'
-    + (showWeek ? '<span class="wk">' + esc(wk ? wk.label : "") + '</span>'
+    + (showWeek ? '<span class="wk">' + esc(wk ? wk.label : "") + (t.d ? ' \u00b7 ' + esc(t.d.slice(5)) : "") + '</span>'
                 : '<button class="star' + (t.t ? " on" : "") + '" data-act="star" title="Pin to today">' + (t.t ? "★" : "☆") + '</button>')
     + '</div>';
 }
@@ -228,7 +229,9 @@ function renderBody(st){
   state = st;
   const today = state.tasks.filter(t => t.t && t.s!=="done");
   const wk = WEEKS.find(w => w.k===view) || WEEKS[0];
-  const inWeek = state.tasks.filter(t => t.w===view);
+  const inWeek = view === "done"
+    ? state.tasks.filter(t => t.s === "done").slice().sort((a,b) => (b.d||"").localeCompare(a.d||""))
+    : state.tasks.filter(t => t.w===view);
   const cd = counts("D"), cy = counts("Y");
 
   const bar = c => {
@@ -262,8 +265,10 @@ function renderBody(st){
 
     + '<section><h2>' + esc(wk.full) + '</h2>'
     + '<p class="sub">Click the left chip to change status. Click the name to reassign. Click the star to pin it to Today.</p>'
-    + '<div class="wknav">' + WEEKS.map(w => '<button type="button" data-week="' + w.k + '"' + (w.k===view ? ' class="on"' : '') + '>' + esc(w.label) + '</button>').join("") + '</div>'
-    + (inWeek.length ? '<div class="rows">' + inWeek.map(t => rowHTML(t, false)).join("") + '</div>' : '<p class="empty">Nothing here.</p>')
+    + '<div class="wknav">' + WEEKS.map(w => '<button type="button" data-week="' + w.k + '"' + (w.k===view ? ' class="on"' : '') + '>' + esc(w.label)
+        + (w.k === "done" ? ' (' + state.tasks.filter(t => t.s === "done").length + ')' : '') + '</button>').join("") + '</div>'
+    + (inWeek.length ? '<div class="rows">' + inWeek.map(t => rowHTML(t, view === "done")).join("") + '</div>'
+                     : '<p class="empty">' + (view === "done" ? 'Nothing finished yet.' : 'Nothing here.') + '</p>')
     + '</section>'
 
     + '<footer><span>Lastmile Work Board</span><span>Plan and spec live in the repo</span></footer>';
@@ -339,7 +344,11 @@ function wire(){
       const t = state.tasks.find(x => x.id === id);
       if(!t) return;
       const a = el.dataset.act;
-      if(a === "status") t.s = STATUSES[(STATUSES.indexOf(t.s) + 1) % STATUSES.length];
+      if(a === "status"){
+        t.s = STATUSES[(STATUSES.indexOf(t.s) + 1) % STATUSES.length];
+        if(t.s === "done") t.d = new Date().toISOString().slice(0,10);
+        else delete t.d;
+      }
       if(a === "owner")  t.o = OWNERS[(OWNERS.indexOf(t.o) + 1) % OWNERS.length];
       if(a === "star")   t.t = t.t ? 0 : 1;
       paint(); queue();
