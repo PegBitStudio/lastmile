@@ -15,6 +15,10 @@ const SAMPLE_RATE = 24000;
  *  which floods the socket and gives the turn detector nothing useful to chew on. */
 const FRAME_SAMPLES = 1200;
 const WS_URL = "wss://agents.assemblyai.com/v1/ws";
+/** Hard ceiling on one session. A real capture after a stop is under a minute.
+ *  Anything past this is a forgotten tab, and a forgotten tab bills the whole time
+ *  the socket stays open. Cut it ourselves rather than trust anyone to press Stop. */
+const MAX_SESSION_MS = 5 * 60 * 1000;
 
 export type SessionEvent =
   | { type: "status"; text: string }
@@ -49,6 +53,7 @@ export class VoiceSession {
   private seen = new Set<string>(); // every message type the server sent
   private played = 0;  // seconds queued for the speaker
   private opts: StartOptions | null = null;
+  private deadline: ReturnType<typeof setTimeout> | null = null;
 
   get live() {
     return this.ws?.readyState === WebSocket.OPEN;
@@ -58,6 +63,11 @@ export class VoiceSession {
     this.opts = opts;
     this.stopped = false;
     const say = (text: string) => opts.onEvent({ type: "status", text });
+
+    this.deadline = setTimeout(
+      () => void this.stop(`time limit: ${MAX_SESSION_MS / 60000} minutes`),
+      MAX_SESSION_MS,
+    );
 
     try {
       say("Getting a token");
@@ -333,6 +343,9 @@ export class VoiceSession {
   async stop(reason = "stopped") {
     if (this.stopped) return;
     this.stopped = true;
+
+    if (this.deadline) clearTimeout(this.deadline);
+    this.deadline = null;
 
     try {
       if (this.ws?.readyState === WebSocket.OPEN) {

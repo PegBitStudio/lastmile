@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "note": "Fixture route for development and the demo. Two regions so the pack switch can be filmed. Coords are approximate real positions, good enough for the GPS distance check.",
+  "drops": [
+    {
+      "order_ref": "LG-4412",
+      "region": "ng-lagos",
+      "seq": 1,
+      "recipient_name": "Chidi Okafor",
+      "address": "14 Adeniyi Jones Avenue, Ikeja",
+      "place": "Adeniyi Jones",
+      "coords": { "lat": 6.6018, "lng": 3.3495 },
+      "cash_on_delivery": false
+    },
+    {
+      "order_ref": "LG-4413",
+      "region": "ng-lagos",
+      "seq": 2,
+      "recipient_name": "Folake Adebayo",
+      "address": "Flat 3B, Parkview Estate, Ikoyi",
+      "place": "Parkview Estate",
+      "coords": { "lat": 6.4585, "lng": 3.4463 },
+      "cash_on_delivery": true,
+      "payment": { "expected_amount": 18500, "currency": "NGN" }
+    },
+    {
+      "order_ref": "LG-4414",
+      "region": "ng-lagos",
+      "seq": 3,
+      "recipient_name": "Emeka Nwosu",
+      "address": "7 Osapa London, Lekki",
+      "place": "Osapa London",
+      "coords": { "lat": 6.4402, "lng": 3.5271 },
+      "cash_on_delivery": false
+    },
+    {
+      "order_ref": "LG-4415",
+      "region": "ng-lagos",
+      "seq": 4,
+      "recipient_name": "Amaka Eze",
+      "address": "22 Opebi Road, Ikeja",
+      "place": "Opebi",
+      "coords": { "lat": 6.5931, "lng": 3.3564 },
+      "cash_on_delivery": false
+    },
+    {
+      "order_ref": "LG-4416",
+      "region": "ng-lagos",
+      "seq": 5,
+      "recipient_name": "Tunde Bakare",
+      "address": "Block 4, Dolphin Estate, Ebute Metta",
+      "place": "Dolphin Estate",
+      "coords": { "lat": 6.4834, "lng": 3.3903 },
+      "cash_on_delivery": true,
+      "payment": { "expected_amount": 7200, "currency": "NGN" }
+    },
+    {
+      "order_ref": "LG-4417",
+      "region": "ng-lagos",
+      "seq": 6,
+      "recipient_name": "Ngozi Balogun",
+      "address": "9 Ogudu Road, Ojota",
+      "place": "Ogudu",
+      "coords": { "lat": 6.5843, "lng": 3.3841 },
+      "cash_on_delivery": false
+    },
+    {
+      "order_ref": "LH-7701",
+      "region": "pk-lahore",
+      "seq": 7,
+      "recipient_name": "Bilal Ahmed",
+      "address": "House 118, Block J, DHA Phase 5",
+      "place": "DHA Phase 5",
+      "coords": { "lat": 31.4732, "lng": 74.4013 },
+      "cash_on_delivery": false
+    },
+    {
+      "order_ref": "LH-7702",
+      "region": "pk-lahore",
+      "seq": 8,
+      "recipient_name": "Ayesha Siddiqui",
+      "address": "42-C, Main Boulevard, Gulberg",
+      "place": "Gulberg",
+      "coords": { "lat": 31.5163, "lng": 74.3439 },
+      "cash_on_delivery": true,
+      "payment": { "expected_amount": 4300, "currency": "PKR" }
+    },
+    {
+      "order_ref": "LH-7703",
+      "region": "pk-lahore",
+      "seq": 9,
+      "recipient_name": "Usman Tariq",
+      "address": "Upper portion, Block G1, Johar Town",
+      "place": "Johar Town",
+      "coords": { "lat": 31.4697, "lng": 74.2728 },
+      "cash_on_delivery": false
+    },
+    {
+      "order_ref": "LH-7704",
+      "region": "pk-lahore",
+      "seq": 10,
+      "recipient_name": "Maryam Nawaz",
+      "address": "Shop 12, Liberty Market, Gulberg",
+      "place": "Liberty Market",
+      "coords": { "lat": 31.5122, "lng": 74.3459 },
+      "cash_on_delivery": false
+    },
+    {
+      "order_ref": "LH-7705",
+      "region": "pk-lahore",
+      "seq": 11,
+      "recipient_name": "Hassan Raza",
+      "address": "House 7, Sector C, Bahria Town",
+      "place": "Bahria Town",
+      "coords": { "lat": 31.3672, "lng": 74.1836 },
+      "cash_on_delivery": false
+    },
+    {
+      "order_ref": "LH-7706",
+      "region": "pk-lahore",
+      "seq": 12,
+      "recipient_name": "Sana Iqbal",
+      "address": "Flat 9, Askari 11, Ferozepur Road",
+      "place": "Askari 11",
+      "coords": { "lat": 31.4408, "lng": 74.3271 },
+      "cash_on_delivery": false
+    }
+  ]
+}

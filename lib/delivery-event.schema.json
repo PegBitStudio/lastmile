@@ -1,0 +1,131 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://lastmile.dev/schemas/delivery-event/v1",
+  "title": "Delivery event v1",
+  "description": "The record a driver's spoken account becomes. Used unchanged as the JSON Schema for the log_delivery_event tool. Three columns of evidence, kept apart: stated (the driver's words), observed (the device), proof (the recipient). Only the stated column is ever asked for. See docs/lastmile-spec.md section 3.2.",
+  "type": "object",
+  "properties": {
+    "order_ref": { "type": "string", "description": "Order ID resolved from the manifest" },
+
+    "outcome": {
+      "type": "string",
+      "description": "What happened at the stop",
+      "enum": [
+        "delivered_to_recipient",
+        "delivered_to_third_party",
+        "delivery_failed",
+        "refused_by_customer",
+        "rescheduled"
+      ]
+    },
+
+    "location": {
+      "type": "object",
+      "description": "Stated. Where at the address it happened. The region pack supplies the words used to ask.",
+      "properties": {
+        "place": { "type": "string", "description": "Estate, complex, building, block or landmark" },
+        "entrance": { "type": "string", "description": "Gate, lobby, buzzer, unit or door" },
+        "notes": { "type": "string", "description": "Anything else the driver volunteered about the location" }
+      },
+      "additionalProperties": false
+    },
+
+    "recipient": {
+      "type": "object",
+      "description": "Stated. Who took the parcel, when it was not the customer.",
+      "properties": {
+        "name": { "type": "string" },
+        "relationship": {
+          "type": "string",
+          "enum": ["security", "concierge", "neighbour", "family", "colleague", "reception", "other"]
+        },
+        "signed": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+
+    "failure_reason": {
+      "type": "string",
+      "description": "Stated. Required when the outcome is a failure or a refusal.",
+      "enum": [
+        "customer_absent",
+        "address_incorrect",
+        "access_denied",
+        "customer_refused",
+        "payment_shortfall",
+        "unsafe_conditions"
+      ]
+    },
+
+    "payment": {
+      "type": "object",
+      "description": "Stated. Required when the manifest marks the order cash-on-delivery.",
+      "properties": {
+        "expected_amount": { "type": "number", "description": "From the manifest, not from the driver" },
+        "collected_amount": { "type": "number" },
+        "currency": { "type": "string" },
+        "method": { "type": "string", "enum": ["cash", "card", "transfer", "none"] }
+      },
+      "additionalProperties": false
+    },
+
+    "next_action": {
+      "type": "string",
+      "description": "Stated. Required whenever the parcel did not reach the customer.",
+      "enum": ["reattempt_today", "reattempt_tomorrow", "return_to_hub", "contact_dispatcher"]
+    },
+
+    "observed": {
+      "type": "object",
+      "description": "Machine-observed facts. Never spoken, never asked for, not the driver's to edit.",
+      "properties": {
+        "occurred_at": { "type": "string", "format": "date-time" },
+        "coords": {
+          "type": "object",
+          "properties": { "lat": { "type": "number" }, "lng": { "type": "number" } },
+          "required": ["lat", "lng"],
+          "additionalProperties": false
+        },
+        "gps_delta_m": { "type": "number", "description": "Metres from the manifest drop address. Advisory. It never blocks a record." },
+        "stationary": {
+          "type": "string",
+          "enum": ["yes", "no", "unknown"],
+          "description": "Safety gate state at capture. Unknown when the device cannot report speed, see spec section 1.1."
+        },
+        "scan_ref": { "type": "string", "description": "Barcode, where the order was scanned" }
+      },
+      "additionalProperties": false
+    },
+
+    "proof": {
+      "type": "object",
+      "description": "Recipient-supplied evidence. Declared so the model is complete; out of scope for this build.",
+      "properties": {
+        "signature_ref": { "type": "string" },
+        "photo_ref": { "type": "string" },
+        "otp_verified": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+
+    "confidence": {
+      "type": "object",
+      "description": "Per-field recognition confidence, keyed by dotted field path, used to route weak records to review. See spec section 3.3.",
+      "additionalProperties": { "type": "number" }
+    },
+
+    "audio_ref": {
+      "type": "object",
+      "description": "Turn-level citation: the driver turn that set the field. Not a word span. See spec section 3.4.",
+      "properties": {
+        "session_id": { "type": "string" },
+        "turn_index": { "type": "integer" },
+        "start_ms": { "type": "integer", "description": "Start of that turn, not of the word" },
+        "end_ms": { "type": "integer", "description": "End of that turn" }
+      },
+      "additionalProperties": false
+    }
+  },
+  "required": ["order_ref", "outcome"],
+  "additionalProperties": false
+}

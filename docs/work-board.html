@@ -117,7 +117,7 @@ footer{border-top:1px solid var(--rule);margin-top:2rem;padding-top:.9rem;font-f
 <div class="wrap" id="app"></div>
 
 <script id="boot">
-const STATE = /*S*/{"v":1,"updated":"2026-09-07","blockers":{"D":"","Y":""},"tasks":[
+const STATE = /*S*/{"v":1,"updated":"2026-09-10","blockers":{"D":"","Y":""},"tasks":[
 {"id":"n1","w":"now","o":"D","s":"done","t":1,"x":"Send Yashfa the three Discord messages"},
 {"id":"n2","w":"now","o":"B","s":"done","t":1,"x":"AssemblyAI account through the event's tracked signup link","n":"Log out of any old account first and accept cookies, or the $50 credit does not attach","d":"2026-09-07"},
 {"id":"n3","w":"now","o":"B","s":"done","t":1,"x":"Run the voice agent quickstart locally and hear it reply"},
@@ -126,14 +126,14 @@ const STATE = /*S*/{"v":1,"updated":"2026-09-07","blockers":{"D":"","Y":""},"tas
 {"id":"n6","w":"now","o":"B","s":"blocked","t":0,"x":"Decide the named prize recipient","n":"Whoever can receive a US wire and file a W-8BEN"},
 {"id":"a1","w":"w1","o":"D","s":"done","t":0,"x":"Repo created, MIT licence, Yashfa invited"},
 {"id":"a2","w":"w1","o":"D","s":"done","t":1,"x":"Next.js app deployed to Vercel with a /drive page","n":"Deploy an empty page first. Never debug a build and a socket at the same time"},
-{"id":"a3","w":"w1","o":"D","s":"todo","t":1,"x":"Server route that mints a short-lived browser token","n":"The API key never reaches the browser"},
-{"id":"a4","w":"w1","o":"D","s":"todo","t":1,"x":"Browser microphone connects to the Voice Agent API"},
-{"id":"a5","w":"w1","o":"D","s":"todo","t":1,"x":"The agent speaks back"},
-{"id":"a6","w":"w1","o":"D","s":"todo","t":1,"x":"Check the socket closes properly","n":"Billing runs on socket-open time, not speaking time. Close the tab mid-session and check again"},
-{"id":"a7","w":"w1","o":"D","s":"todo","t":0,"x":"manifest.fixture.json: 12 drops, 2 regions, 3 cash-on-delivery, coords on every drop"},
-{"id":"a8","w":"w1","o":"D","s":"todo","t":0,"x":"Delivery event schema committed as v1"},
+{"id":"a3","w":"w1","o":"D","s":"done","t":1,"d":"2026-09-10","x":"Server route that mints a short-lived browser token","n":"The API key never reaches the browser"},
+{"id":"a4","w":"w1","o":"D","s":"done","t":1,"d":"2026-09-10","x":"Browser microphone connects to the Voice Agent API"},
+{"id":"a5","w":"w1","o":"D","s":"done","t":1,"d":"2026-09-10","x":"The agent speaks back"},
+{"id":"a6","w":"w1","o":"D","s":"done","t":1,"d":"2026-09-10","x":"Check the socket closes properly","n":"Every path out ends in stop(), and a 5 minute hard cap now closes a forgotten tab. Still worth closing the tab mid-session once and checking"},
+{"id":"a7","w":"w1","o":"D","s":"done","t":0,"d":"2026-09-10","x":"manifest.fixture.json: 12 drops, 2 regions, 3 cash-on-delivery, coords on every drop"},
+{"id":"a8","w":"w1","o":"D","s":"done","t":0,"d":"2026-09-10","x":"Delivery event schema committed as v1"},
 {"id":"a9","w":"w1","o":"Y","s":"todo","t":1,"x":"Read the spec and the architecture doc","n":"Post questions as you go. Do not save them up"},
-{"id":"a10","w":"w1","o":"Y","s":"todo","t":1,"x":"Lahore pack first draft: 30 to 50 keyterms"},
+{"id":"a10","w":"w1","o":"Y","s":"done","t":1,"d":"2026-09-10","x":"Lahore pack first draft: 30 to 50 keyterms","n":"39 Lahore keyterms from Yashfa, committed as regions/pk-lahore.json with vocabulary and aliases"},
 {"id":"a11","w":"w1","o":"Y","s":"todo","t":0,"x":"Decide: word error rate, or exact match on the address only"},
 {"id":"a12","w":"w1","o":"Y","s":"todo","t":0,"x":"Decide: Urdu script keyterms, or is romanised enough"},
 {"id":"b1","w":"w2","o":"D","s":"todo","t":0,"x":"The safety gate: no session unless the vehicle is stopped"},

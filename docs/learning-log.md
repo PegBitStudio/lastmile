@@ -23,3 +23,6 @@ Format:
   So the system prompt is a file we can keep in git and diff, which beats a text box in a UI.
 - 2026-09-07 — Dami — Browser tokens are single use and last 60 seconds. Fetch a fresh one immediately
   before opening each socket, not once at page load.
+- 2026-09-10 — Dami — The keyterm list is capped at 100 by the API, so a region pack has to
+  choose. Place names first, then the words for gates and doors, then first names — a name we
+  never bias is one wrong record, a street we never bias is wrong every single day.
