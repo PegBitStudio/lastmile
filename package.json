@@ -6,6 +6,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test lib/*.test.ts",
     "agent:create": "node scripts/agent.mjs create",
     "agent:update": "node scripts/agent.mjs update",
     "agent:list": "node scripts/agent.mjs list"

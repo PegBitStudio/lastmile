@@ -26,3 +26,6 @@ Format:
 - 2026-09-10 — Dami — The keyterm list is capped at 100 by the API, so a region pack has to
   choose. Place names first, then the words for gates and doors, then first names — a name we
   never bias is one wrong record, a street we never bias is wrong every single day.
+- 2026-09-10 — Dami — Writing the follow-up table as tests first showed a hole the spec table
+  does not cover: a driver who collected nothing. Zero is a real answer, so it must not read as
+  a missing field, or the agent asks the same question until the driver gives up.
