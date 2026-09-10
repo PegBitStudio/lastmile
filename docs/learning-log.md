@@ -29,3 +29,11 @@ Format:
 - 2026-09-10 — Dami — Writing the follow-up table as tests first showed a hole the spec table
   does not cover: a driver who collected nothing. Zero is a real answer, so it must not read as
   a missing field, or the agent asks the same question until the driver gives up.
+- 2026-09-10 — Dami — Three things about tool calls that the code had wrong, all from the API
+  spec: the `result` goes on the wire as a JSON string and not an object, it must be sent inside
+  the `reply.done` handler and not the moment `tool.call` arrives, and `reply.audio` carries its
+  base64 in `data`. A result sent early is simply dropped, and the agent then waits for an answer
+  that already went past.
+- 2026-09-10 — Dami — `node --experimental-strip-types` removes types without rewriting anything,
+  so a TypeScript constructor parameter property is a syntax error there. Fine in Next, broken in
+  a script. Worth knowing before writing more shared code.

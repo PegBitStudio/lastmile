@@ -54,6 +54,10 @@ export class VoiceSession {
   private played = 0;  // seconds queued for the speaker
   private opts: StartOptions | null = null;
   private deadline: ReturnType<typeof setTimeout> | null = null;
+  /** Tool results wait here until reply.done. See flushTools(). */
+  private toolQueue: { call_id: string; result: string }[] = [];
+  /** True between reply.started and reply.done: a flush is coming on its own. */
+  private speaking = false;
 
   get live() {
     return this.ws?.readyState === WebSocket.OPEN;
@@ -153,11 +157,12 @@ export class VoiceSession {
     if (!send) return;
     if (msg.type) this.seen.add(msg.type);
 
-    // Catch any audio-carrying event whatever it is called. The docs name
-    // reply.audio, but the only thing that matters is base64 audio arriving.
-    if (typeof msg.audio === "string" && msg.audio.length > 0) {
+    // reply.audio carries base64 in `data`. Older notes here guessed `audio`, so
+    // accept either and stop caring which event it rode in on.
+    const audio = typeof msg.data === "string" ? msg.data : msg.audio;
+    if (typeof audio === "string" && audio.length > 0) {
       this.heard++;
-      this.play(msg.audio);
+      this.play(audio);
       if (this.heard === 1) console.info("[voice] audio arrived on type", msg.type);
     }
 
@@ -188,6 +193,18 @@ export class VoiceSession {
         void this.runTool(msg.call_id, msg.name, msg.arguments ?? {});
         break;
 
+      case "reply.started":
+        this.speaking = true;
+        break;
+
+      case "reply.done":
+        this.speaking = false;
+        // The API is explicit about this: a tool result goes out in the reply.done
+        // handler, never the moment the tool.call lands. Sending it early gets it
+        // dropped, and the agent then waits for an answer that already went past.
+        this.flushTools();
+        break;
+
       case "session.ended":
         send({ type: "ended", reason: msg.reason ?? "the agent ended the session" });
         break;
@@ -210,7 +227,20 @@ export class VoiceSession {
     } catch (err) {
       result = { error: String(err instanceof Error ? err.message : err) };
     }
-    this.ws?.send(JSON.stringify({ type: "tool.result", call_id: callId, result }));
+    // `result` is a JSON-encoded string on the wire, not a nested object.
+    this.toolQueue.push({ call_id: callId, result: JSON.stringify(result) });
+
+    // A tool.call can also arrive after reply.done for that turn. If nothing is
+    // being spoken, there is no later flush coming, so answer now.
+    if (!this.speaking) this.flushTools();
+  }
+
+  /** Send every queued tool result. Safe to call with an empty queue. */
+  private flushTools() {
+    if (this.ws?.readyState !== WebSocket.OPEN) return;
+    for (const t of this.toolQueue.splice(0)) {
+      this.ws.send(JSON.stringify({ type: "tool.result", ...t }));
+    }
   }
 
   /** Microphone -> Float32 -> Int16 -> base64 -> socket. */
@@ -346,6 +376,8 @@ export class VoiceSession {
 
     if (this.deadline) clearTimeout(this.deadline);
     this.deadline = null;
+    this.toolQueue = [];
+    this.speaking = false;
 
     try {
       if (this.ws?.readyState === WebSocket.OPEN) {

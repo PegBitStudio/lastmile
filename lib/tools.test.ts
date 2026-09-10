@@ -1,0 +1,109 @@
+/**
+ * Tests for the tool handler.
+ *
+ * The table itself is tested in requirements.test.ts. What is tested here is the
+ * part that stands between a language model and the record: what it is allowed to
+ * write, and what happens when it sends something it should not.
+ */
+
+import { test } from "node:test";
+import assert from "node:assert/strict";
+
+import { DeliveryDraft, handleTool, TOOLS } from "./tools.ts";
+import type { ManifestDrop } from "./requirements.ts";
+
+const plain: ManifestDrop = { order_ref: "LG-4412" };
+const cod: ManifestDrop = {
+  order_ref: "LG-4413",
+  cash_on_delivery: true,
+  payment: { expected_amount: 18500, currency: "NGN" },
+};
+
+test("a draft starts with the order taken from the selected stop", () => {
+  const d = new DeliveryDraft(plain);
+  assert.equal(d.event.order_ref, "LG-4412");
+});
+
+test("the agent cannot change which order this is", () => {
+  const d = new DeliveryDraft(plain);
+  d.apply({ order_ref: "LG-9999", outcome: "rescheduled" });
+  assert.equal(d.event.order_ref, "LG-4412");
+});
+
+test("the agent cannot write the observed or proof columns", () => {
+  const d = new DeliveryDraft(plain);
+  d.apply({
+    outcome: "delivered_to_recipient",
+    observed: { stationary: "yes", gps_delta_m: 0 },
+    proof: { otp_verified: true },
+  });
+  assert.equal("observed" in d.event, false);
+  assert.equal("proof" in d.event, false);
+});
+
+test("facts add up across calls instead of replacing each other", () => {
+  const d = new DeliveryDraft(plain);
+  d.apply({ outcome: "delivered_to_third_party", recipient: { relationship: "concierge" } });
+  d.apply({ location: { entrance: "side door" } });
+  const r = d.apply({ recipient: { name: "Marcus" } });
+
+  assert.equal(d.event.recipient?.relationship, "concierge");
+  assert.equal(d.event.recipient?.name, "Marcus");
+  assert.equal(d.event.location?.entrance, "side door");
+  assert.equal(r.complete, true);
+});
+
+test("a driver correcting themselves overwrites the old value", () => {
+  const d = new DeliveryDraft(plain);
+  d.apply({ recipient: { name: "Marcus" } });
+  d.apply({ recipient: { name: "Marco" } });
+  assert.equal(d.event.recipient?.name, "Marco");
+});
+
+test("the expected amount comes from the manifest, not from the driver", () => {
+  const d = new DeliveryDraft(cod);
+  assert.equal(d.event.payment?.expected_amount, 18500);
+  d.apply({ payment: { collected_amount: 10000, method: "cash" } });
+  assert.equal(d.event.payment?.expected_amount, 18500);
+  assert.equal(d.event.payment?.collected_amount, 10000);
+});
+
+test("the demo sentence leaves exactly one question", () => {
+  // "Customer wasn't in, left it with the concierge at the side entrance."
+  const d = new DeliveryDraft(plain);
+  const r = d.apply({
+    outcome: "delivered_to_third_party",
+    recipient: { relationship: "concierge" },
+    location: { entrance: "side entrance" },
+  });
+  assert.equal(r.missing.length, 1);
+  assert.equal(r.next?.path, "recipient.name");
+});
+
+test("an unknown tool is answered rather than left hanging", () => {
+  const d = new DeliveryDraft(plain);
+  const r = handleTool(d, "delete_everything", {}) as { error?: string };
+  assert.match(r.error ?? "", /no tool called/);
+});
+
+test("the declared tool never offers the model a field it must not write", () => {
+  const tool = TOOLS.find((t) => t.name === "log_delivery_event");
+  assert.ok(tool);
+  const props = Object.keys(
+    (tool.parameters as { properties: Record<string, unknown> }).properties,
+  );
+  for (const banned of ["order_ref", "observed", "proof", "confidence", "audio_ref"]) {
+    assert.equal(props.includes(banned), false, banned + " must not be declared");
+  }
+});
+
+test("the committed agent config matches the tools in this file", async () => {
+  const { default: config } = await import("../agents/driver.json", {
+    with: { type: "json" },
+  });
+  assert.deepEqual(
+    config.tools,
+    JSON.parse(JSON.stringify(TOOLS)),
+    "agents/driver.json is stale. Run: npm run tools:sync",
+  );
+});
