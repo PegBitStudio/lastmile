@@ -31,6 +31,8 @@ async function configWithRegion() {
   const config = JSON.parse(await readFile(file, "utf8"));
   try {
     const pack = JSON.parse(await readFile(`regions/${region}.json`, "utf8"));
+    // Merge, do not replace: turn_detection lives in the same object and the
+    // region pack has nothing to say about it.
     config.input = { ...(config.input ?? {}), keyterms: pack.keyterms ?? [] };
     console.log(`region: ${pack.label} (${(pack.keyterms ?? []).length} keyterms)`);
   } catch {

@@ -48,3 +48,11 @@ Format:
   route handler cannot be imported by a plain Node test. Moving the decisions into a normal file
   and leaving the route as a wrapper made them testable, and made the route shorter. Worth doing
   from the start on the next route.
+- 2026-09-10 — Dami — `input.turn_detection` had been left null the whole time, so the agent has
+  been running on adaptive defaults tuned for a quiet room. The knobs are vad_threshold,
+  min_silence, max_silence and interrupt_response. Raising the threshold is what makes a noisy
+  street usable; a low one hears a passing engine as the start of a sentence.
+- 2026-09-10 — Dami — A session needs an ending for the case where nobody says anything. The
+  designed ending is close_session, but the table refuses to close an incomplete record, so a
+  driver who walks off mid-report leaves the agent asking a question forever on a socket we pay
+  for by the second.

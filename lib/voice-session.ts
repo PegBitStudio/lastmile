@@ -19,6 +19,15 @@ const WS_URL = "wss://agents.assemblyai.com/v1/ws";
  *  Anything past this is a forgotten tab, and a forgotten tab bills the whole time
  *  the socket stays open. Cut it ourselves rather than trust anyone to press Stop. */
 const MAX_SESSION_MS = 5 * 60 * 1000;
+/** Close after this much silence from both sides.
+ *
+ *  The designed ending is close_session, which the agent calls after the read-back
+ *  — the driver never presses anything. But a driver who walks off mid-report leaves
+ *  a record the table will not let the agent close, so the agent keeps asking a
+ *  question nobody is answering and we pay for every second of it. This is that
+ *  case, and it is the common one: someone got called away, or the phone went in a
+ *  pocket. Long enough to think, short enough not to hurt. */
+const IDLE_MS = 45 * 1000;
 
 export type SessionEvent =
   | { type: "status"; text: string }
@@ -60,6 +69,7 @@ export class VoiceSession {
   private speaking = false;
   /** True once close_session has been honoured: the microphone is done. */
   private closing = false;
+  private idle: ReturnType<typeof setTimeout> | null = null;
 
   get live() {
     return this.ws?.readyState === WebSocket.OPEN;
@@ -154,10 +164,32 @@ export class VoiceSession {
     });
   }
 
+  /** Anybody said anything: start the idle clock again. */
+  private stirred() {
+    if (this.stopped || this.closing) return;
+    if (this.idle) clearTimeout(this.idle);
+    this.idle = setTimeout(() => {
+      this.opts?.onEvent({
+        type: "status",
+        text: "No one has spoken for a while. Closing.",
+      });
+      void this.finish("nobody was speaking");
+    }, IDLE_MS);
+  }
+
   private handle(msg: any, ready?: () => void) {
     const send = this.opts?.onEvent;
     if (!send) return;
     if (msg.type) this.seen.add(msg.type);
+
+    // Any sign of life on the socket resets the idle clock.
+    if (
+      msg.type === "input.speech.started" ||
+      msg.type === "transcript.user" ||
+      msg.type === "reply.started"
+    ) {
+      this.stirred();
+    }
 
     // reply.audio carries base64 in `data`. Older notes here guessed `audio`, so
     // accept either and stop caring which event it rode in on.
@@ -171,6 +203,7 @@ export class VoiceSession {
     switch (msg.type) {
       case "session.ready":
         this.ready = true;
+        this.stirred();
         send({ type: "ready", sessionId: msg.session_id ?? "" });
         ready?.();
         break;
@@ -385,6 +418,8 @@ export class VoiceSession {
   async finish(reason = "the agent closed the session", maxWaitMs = 15000) {
     if (this.stopped || this.closing) return;
     this.closing = true;
+    if (this.idle) clearTimeout(this.idle);
+    this.idle = null;
     this.flushTools();
 
     const ctx = this.ctxOut;
@@ -405,6 +440,8 @@ export class VoiceSession {
 
     if (this.deadline) clearTimeout(this.deadline);
     this.deadline = null;
+    if (this.idle) clearTimeout(this.idle);
+    this.idle = null;
     this.toolQueue = [];
     this.speaking = false;
     this.closing = false;
