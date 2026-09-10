@@ -15,6 +15,7 @@ import {
   type DeliveryEvent,
   type ManifestDrop,
   type RegionPack,
+  type Observed,
   type ToolResult,
 } from "./requirements.ts";
 
@@ -182,6 +183,18 @@ export class DeliveryDraft {
         ? { payment: { expected_amount: drop.payment.expected_amount } }
         : {}),
     };
+  }
+
+  /**
+   * Write the observed column.
+   *
+   * Called by the app, never by the agent, and it is deliberately not reachable
+   * from any tool. These are facts the device supplies: when, where, and whether
+   * the vehicle was stopped. The driver cannot edit them and neither can the
+   * model. See spec §3.2.
+   */
+  observe(patch: Observed) {
+    this.event = { ...this.event, observed: { ...this.event.observed, ...patch } };
   }
 
   /** Apply a log_delivery_event call and produce the reply the agent gets back. */

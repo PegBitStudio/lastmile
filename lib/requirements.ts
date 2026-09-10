@@ -44,6 +44,16 @@ export type NextAction =
 
 export type PaymentMethod = "cash" | "card" | "transfer" | "none";
 
+/** The machine-observed column. Written by the app from the device, never by the
+ *  agent and never by the driver. The follow-up table never asks about any of it. */
+export interface Observed {
+  occurred_at?: string;
+  coords?: { lat: number; lng: number };
+  gps_delta_m?: number;
+  stationary?: "yes" | "no" | "unknown";
+  scan_ref?: string;
+}
+
 /** A partial delivery event. Every field is optional: the whole point is that we are
  *  working out what is not here yet. Shape matches lib/delivery-event.schema.json. */
 export interface DeliveryEvent {
@@ -59,6 +69,7 @@ export interface DeliveryEvent {
     method?: PaymentMethod;
   };
   next_action?: NextAction;
+  observed?: Observed;
 }
 
 /** One drop from data/manifest.fixture.json. Only the parts this table reads. */

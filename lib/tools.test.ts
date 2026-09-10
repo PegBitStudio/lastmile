@@ -166,3 +166,29 @@ test("close_session is routed like any other tool", () => {
   const r = handleTool(d, "close_session", {}) as { closed: boolean };
   assert.equal(r.closed, true);
 });
+
+test("the observed column is written by the app and left alone by the table", () => {
+  const d = new DeliveryDraft(plain);
+  d.observe({ stationary: "unknown", gps_delta_m: 240 });
+  const r = d.apply({ outcome: "rescheduled", next_action: "return_to_hub" });
+
+  assert.equal(d.event.observed?.stationary, "unknown");
+  assert.equal(d.event.observed?.gps_delta_m, 240);
+  // Nothing in observed is ever asked for. Spec 3.2.
+  assert.equal(r.complete, true);
+});
+
+test("a later observation adds to the column instead of replacing it", () => {
+  const d = new DeliveryDraft(plain);
+  d.observe({ stationary: "yes" });
+  d.observe({ coords: { lat: 6.44, lng: 3.52 } });
+  assert.equal(d.event.observed?.stationary, "yes");
+  assert.equal(d.event.observed?.coords?.lat, 6.44);
+});
+
+test("the agent still cannot reach observed through a tool call", () => {
+  const d = new DeliveryDraft(plain);
+  d.observe({ stationary: "no" });
+  d.apply({ outcome: "rescheduled", observed: { stationary: "yes" } });
+  assert.equal(d.event.observed?.stationary, "no");
+});

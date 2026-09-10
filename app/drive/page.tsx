@@ -4,12 +4,28 @@ import { useEffect, useRef, useState } from "react";
 import { VoiceSession, type SessionEvent } from "@/lib/voice-session";
 import { DeliveryDraft, handleTool } from "@/lib/tools";
 import type { DeliveryEvent, ManifestDrop, MissingField } from "@/lib/requirements";
+import {
+  currentSpeed,
+  gateMessage,
+  gateState,
+  mayOpen,
+  metresBetween,
+  overrideSpeed,
+  stationaryFlag,
+  type Fix,
+  type GateState,
+} from "@/lib/speed";
 import manifest from "@/data/manifest.fixture.json";
 import lagos from "@/regions/ng-lagos.json";
 import lahore from "@/regions/pk-lahore.json";
 
 /** A fixture drop is a manifest drop plus the parts only the screen needs. */
-type Drop = ManifestDrop & { address: string; recipient_name: string; seq: number };
+type Drop = ManifestDrop & {
+  address: string;
+  recipient_name: string;
+  seq: number;
+  coords: { lat: number; lng: number };
+};
 
 const DROPS = manifest.drops as Drop[];
 const PACKS: Record<string, { vocabulary?: { place?: string; entrance?: string } }> = {
@@ -39,7 +55,22 @@ function nearlySame(a: string, b: string) {
 
 type Line = { who: "driver" | "agent"; text: string; final: boolean };
 
-/** Flatten the record into the rows the receipt shows. Empty branches are skipped. */
+/** The observed column, for the receipt. Kept apart from the stated rows on purpose:
+ *  conflating what the driver said with what the device saw is how a record like
+ *  this loses an argument. Spec §3.2. */
+function observedRows(event: DeliveryEvent): [string, string][] {
+  const o = event.observed;
+  if (!o) return [];
+  const out: [string, string][] = [];
+  if (o.stationary) out.push(["stationary", o.stationary]);
+  if (o.coords) out.push(["position", o.coords.lat.toFixed(5) + ", " + o.coords.lng.toFixed(5)]);
+  if (typeof o.gps_delta_m === "number") out.push(["from the drop", o.gps_delta_m + " m"]);
+  if (o.occurred_at) out.push(["at", new Date(o.occurred_at).toLocaleTimeString()]);
+  return out;
+}
+
+/** Flatten the stated column into the rows the receipt shows. The driver's own
+ *  account: the only column they can change, and the only one ever asked for. */
 function rows(event: DeliveryEvent): [string, string][] {
   const out: [string, string][] = [];
   const push = (k: string, v: unknown) => {
@@ -60,6 +91,64 @@ function rows(event: DeliveryEvent): [string, string][] {
   return out;
 }
 
+/**
+ * Watch the vehicle's speed, and say whether a session may open.
+ *
+ * Three states, not two. A device that will not report speed answers "unknown",
+ * and unknown allows — see lib/speed.ts for why blocking there would be worse.
+ */
+function useSafetyGate() {
+  const [state, setState] = useState<GateState>("unknown");
+  const [speed, setSpeed] = useState<number | null>(null);
+  const [fix, setFix] = useState<Fix | null>(null);
+  const [simulated, setSimulated] = useState<number | null>(null);
+  const previous = useRef<Fix | null>(null);
+
+  useEffect(() => {
+    const forced = overrideSpeed(window.location.search);
+    setSimulated(forced);
+    if (forced !== null) {
+      setSpeed(forced);
+      setState(gateState(forced));
+    }
+
+    if (!navigator.geolocation) return;
+
+    const id = navigator.geolocation.watchPosition(
+      (pos) => {
+        const next: Fix = {
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+          speed: pos.coords.speed,
+          accuracy: pos.coords.accuracy,
+          at: pos.timestamp,
+        };
+        setFix(next);
+        // A forced speed still lets the position through, so the distance check
+        // and the coordinates on the record stay real while filming.
+        if (forced === null) {
+          const v = currentSpeed(next, previous.current ?? undefined);
+          setSpeed(v);
+          setState(gateState(v));
+        }
+        previous.current = next;
+      },
+      () => {
+        // Refused, or no fix. We cannot tell, so we say so and allow.
+        if (forced === null) {
+          setSpeed(null);
+          setState("unknown");
+        }
+      },
+      { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 },
+    );
+
+    return () => navigator.geolocation.clearWatch(id);
+  }, []);
+
+  return { state, speed, fix, simulated };
+}
+
 export default function Drive() {
   const session = useRef<VoiceSession | null>(null);
   const [live, setLive] = useState(false);
@@ -76,6 +165,8 @@ export default function Drive() {
   const draft = useRef<DeliveryDraft | null>(null);
 
   const drop = DROPS[dropIndex];
+  const gate = useSafetyGate();
+  const blocked = !mayOpen(gate.state);
 
   // The socket must never outlive the page. This is the billing safety net.
   useEffect(() => {
@@ -165,12 +256,34 @@ export default function Drive() {
   }
 
   async function start() {
+    // The gate. Checked here as well as on the button, because a session that
+    // opens while the van is rolling is the one failure this product cannot have.
+    if (!mayOpen(gate.state)) {
+      setError("The vehicle is still moving. The microphone stays shut until you stop.");
+      return;
+    }
+
     setError(null);
     setLines([]);
     setMissing([]);
     setComplete(false);
     setClosed(false);
     draft.current = new DeliveryDraft(drop, PACKS[drop.region ?? ""]);
+
+    // The observed column, stamped once at the moment of capture. The agent cannot
+    // reach any of this and neither can the driver.
+    draft.current.observe({
+      occurred_at: new Date().toISOString(),
+      stationary: stationaryFlag(gate.state),
+      ...(gate.fix
+        ? {
+            coords: { lat: gate.fix.lat, lng: gate.fix.lng },
+            gps_delta_m: drop.coords
+              ? Math.round(metresBetween(gate.fix, drop.coords))
+              : undefined,
+          }
+        : {}),
+    });
     setEvent({ ...draft.current.event });
     session.current = new VoiceSession();
     // The agent id comes from the AssemblyAI dashboard once the agent is configured.
@@ -217,10 +330,19 @@ export default function Drive() {
         </select>
       </label>
 
+      <p style={blocked ? S.gateBlocked : S.gateOk}>
+        {gateMessage(gate.state, gate.speed)}
+        {gate.simulated !== null && <span style={S.sim}>simulated speed</span>}
+      </p>
+
       {/* A real user gesture is required to open a microphone. */}
       {!live ? (
-        <button style={S.go} onClick={start}>
-          Report a drop
+        <button
+          style={{ ...S.go, ...(blocked ? S.blockedBtn : {}) }}
+          onClick={start}
+          disabled={blocked}
+        >
+          {blocked ? "Waiting until you've stopped" : "Report a drop"}
         </button>
       ) : (
         <button style={{ ...S.go, ...S.stopBtn }} onClick={stop}>
@@ -243,6 +365,18 @@ export default function Drive() {
               </p>
             ))
           )}
+          {observedRows(event).length > 0 && (
+            <div style={S.observed}>
+              <p style={S.who}>OBSERVED — NOT SPOKEN, NOT EDITABLE</p>
+              {observedRows(event).map(([k, v]) => (
+                <p key={k} style={S.row}>
+                  <span style={S.key}>{k}</span>
+                  <span>{v}</span>
+                </p>
+              ))}
+            </div>
+          )}
+
           {missing.length > 0 && (
             <p style={S.missing}>
               still needed: {missing.map((m) => m.path).join(", ")}
@@ -291,6 +425,22 @@ const S: Record<string, React.CSSProperties> = {
     color: "#fff", background: "#14171A", border: 0, borderRadius: 4, cursor: "pointer",
   },
   stopBtn: { background: "#A33B22" },
+  gateOk: {
+    display: "flex", alignItems: "center", gap: ".5rem", margin: "1rem 0",
+    padding: ".55rem .75rem", borderRadius: 3, fontSize: ".8rem",
+    background: "#E8F0E9", border: "1px solid #2F6B4F", color: "#2F6B4F",
+  },
+  gateBlocked: {
+    display: "flex", alignItems: "center", gap: ".5rem", margin: "1rem 0",
+    padding: ".55rem .75rem", borderRadius: 3, fontSize: ".8rem", fontWeight: 600,
+    background: "#F6DDD6", border: "1px solid #A33B22", color: "#A33B22",
+  },
+  sim: {
+    marginLeft: "auto", fontSize: ".6rem", letterSpacing: ".1em",
+    textTransform: "uppercase", padding: ".1rem .35rem", borderRadius: 2,
+    background: "#14171A", color: "#fff",
+  },
+  blockedBtn: { background: "#7C7A73", cursor: "not-allowed" },
   pickWrap: { display: "block", margin: "1rem 0" },
   pick: {
     width: "100%", padding: ".6rem", fontSize: ".9rem", borderRadius: 3,
@@ -302,6 +452,10 @@ const S: Record<string, React.CSSProperties> = {
   },
   row: { display: "flex", gap: ".75rem", margin: ".2rem 0", fontSize: ".9rem" },
   key: { minWidth: "7rem", color: "#7C7A73", fontSize: ".75rem", textTransform: "uppercase", letterSpacing: ".08em", paddingTop: ".15rem" },
+  observed: {
+    marginTop: ".7rem", paddingTop: ".55rem", borderTop: "1px solid #C9C6BC",
+    color: "#3E4650",
+  },
   missing: { marginTop: ".6rem", paddingTop: ".5rem", borderTop: "1px dashed #C9C6BC", fontSize: ".75rem", color: "#7C7A73" },
   log: { marginTop: "1.5rem", display: "flex", flexDirection: "column", gap: ".6rem" },
   empty: { color: "#7C7A73", fontStyle: "italic", fontSize: ".9rem" },

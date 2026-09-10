@@ -40,3 +40,7 @@ Format:
 - 2026-09-10 — Dami — Ending a voice session is not the same as closing a socket. close_session
   arrives while the agent is still reading the record back, so closing on the spot cuts it off
   mid-sentence and reads as a crash. Stop listening first, let the queued audio drain, then close.
+- 2026-09-10 — Dami — A phone sitting still on a dashboard wanders by tens of metres. Divide that
+  drift by half a second and you have invented a speeding van that blocks a parked driver from
+  ever opening the microphone. The fix is to compare movement against the accuracy the device
+  itself reports, and to refuse to divide by anything under a second.
