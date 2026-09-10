@@ -342,22 +342,42 @@ export default function Drive() {
 
       {error && <p style={S.error}>{error}</p>}
 
-      <label style={S.pickWrap}>
-        <span style={S.who}>THIS STOP</span>
-        <select
-          style={S.pick}
-          value={dropIndex}
-          disabled={live}
-          onChange={(e) => setDropIndex(Number(e.target.value))}
-        >
-          {DROPS.map((d, i) => (
-            <option key={d.order_ref} value={i}>
-              {d.order_ref} — {d.address}
-              {d.cash_on_delivery ? "  (cash on delivery)" : ""}
-            </option>
-          ))}
-        </select>
-      </label>
+      {/* The manifest. Tapping is how an order is chosen — voice ordinals are a
+          shortcut, not the mechanism. Drivers reorder stops, go back to an earlier
+          address and carry several parcels at once, and attributing an exception to
+          the wrong order destroys trust faster than a mis-heard street name ever
+          will. Spec §3.0. */}
+      <section style={S.manifest}>
+        <p style={S.who}>TODAY&apos;S ROUTE — TAP THE STOP YOU ARE REPORTING</p>
+        <div style={S.stops}>
+          {DROPS.map((d, i) => {
+            const on = i === dropIndex;
+            return (
+              <button
+                key={d.order_ref}
+                type="button"
+                style={{ ...S.stop, ...(on ? S.stopOn : {}), ...(live ? S.stopLocked : {}) }}
+                onClick={() => !live && setDropIndex(i)}
+                disabled={live}
+                aria-current={on}
+              >
+                <span style={S.seq}>{d.seq}</span>
+                <span style={S.stopText}>
+                  <span style={S.stopRef}>{d.order_ref}</span>
+                  <span style={S.stopAddr}>{d.address}</span>
+                  <span style={S.stopWho}>{d.recipient_name}</span>
+                </span>
+                {d.cash_on_delivery && (
+                  <span style={S.cod}>
+                    collect {d.payment?.expected_amount?.toLocaleString()}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        {live && <p style={S.locked}>Locked while a report is open.</p>}
+      </section>
 
       <p style={blocked ? S.gateBlocked : S.gateOk}>
         {gateMessage(gate.state, gate.speed)}
@@ -478,11 +498,34 @@ const S: Record<string, React.CSSProperties> = {
     background: "#14171A", color: "#fff",
   },
   blockedBtn: { background: "#7C7A73", cursor: "not-allowed" },
-  pickWrap: { display: "block", margin: "1rem 0" },
-  pick: {
-    width: "100%", padding: ".6rem", fontSize: ".9rem", borderRadius: 3,
-    border: "1px solid #C9C6BC", background: "#fff", color: "#14171A",
+  manifest: { margin: "1rem 0" },
+  stops: {
+    display: "flex", flexDirection: "column", gap: ".3rem", marginTop: ".4rem",
+    maxHeight: "13rem", overflowY: "auto", paddingRight: ".2rem",
   },
+  stop: {
+    display: "flex", alignItems: "center", gap: ".6rem", width: "100%",
+    padding: ".5rem .6rem", textAlign: "left", cursor: "pointer",
+    border: "1px solid #C9C6BC", borderRadius: 3, background: "#fff",
+    color: "#14171A", font: "inherit",
+  },
+  stopOn: { borderColor: "#14171A", borderWidth: 2, background: "#FBFAF7" },
+  stopLocked: { cursor: "default", opacity: 0.55 },
+  seq: {
+    minWidth: "1.4rem", height: "1.4rem", flexShrink: 0, borderRadius: "50%",
+    background: "#14171A", color: "#fff", fontSize: ".7rem", fontWeight: 700,
+    display: "inline-flex", alignItems: "center", justifyContent: "center",
+  },
+  stopText: { display: "flex", flexDirection: "column", lineHeight: 1.3, minWidth: 0 },
+  stopRef: { fontSize: ".72rem", color: "#7C7A73", letterSpacing: ".04em" },
+  stopAddr: { fontSize: ".85rem" },
+  stopWho: { fontSize: ".72rem", color: "#7C7A73" },
+  cod: {
+    marginLeft: "auto", flexShrink: 0, fontSize: ".62rem", letterSpacing: ".08em",
+    textTransform: "uppercase", padding: ".15rem .35rem", borderRadius: 2,
+    background: "#FBEFD8", color: "#C06E05", fontWeight: 600,
+  },
+  locked: { margin: ".4rem 0 0", fontSize: ".7rem", color: "#7C7A73", fontStyle: "italic" },
   receipt: {
     marginTop: "1.25rem", padding: ".85rem 1rem", borderRadius: 4,
     border: "1px solid #C9C6BC", background: "#FBFAF7",

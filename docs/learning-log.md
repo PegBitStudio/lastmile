@@ -56,3 +56,6 @@ Format:
   designed ending is close_session, but the table refuses to close an incomplete record, so a
   driver who walks off mid-report leaves the agent asking a question forever on a socket we pay
   for by the second.
+- 2026-09-10 — Dami — Running `npm run build` while `npm run dev` is up corrupts `.next`, because
+  they share it. The symptom is misleading: pages return 200, chunks 404, nothing hydrates, and
+  the app looks like a React bug. `rm -rf .next` and restart. Never run both at once.
