@@ -115,7 +115,28 @@ export const LOG_DELIVERY_EVENT: ToolDefinition = {
   },
 };
 
-export const TOOLS: ToolDefinition[] = [LOG_DELIVERY_EVENT];
+export const CLOSE_SESSION: ToolDefinition = {
+  name: "close_session",
+  description:
+    "End the conversation. Call this only after you have read the record back to the driver, " +
+    "and only when log_delivery_event has told you nothing is missing. If anything is still " +
+    "missing this call is refused and you must ask for it instead.",
+  execution_mode: "hold",
+  timeout_seconds: 10,
+  parameters: {
+    type: "object",
+    properties: {
+      note: {
+        type: "string",
+        description:
+          "Anything the driver said that does not belong in a field. Leave it out otherwise.",
+      },
+    },
+    required: [],
+  },
+};
+
+export const TOOLS: ToolDefinition[] = [LOG_DELIVERY_EVENT, CLOSE_SESSION];
 
 /** Deep-merge one tool call into the record so far. Objects merge; everything else
  *  replaces, because a driver correcting themselves is the normal case. */
@@ -144,6 +165,8 @@ function merge(into: DeliveryEvent, patch: Record<string, unknown>): DeliveryEve
  */
 export class DeliveryDraft {
   event: DeliveryEvent;
+  /** Set once close_session has been accepted. The record is final after this. */
+  closed = false;
   // Written out longhand rather than as constructor parameter properties, because
   // node --experimental-strip-types removes types without rewriting anything, and
   // a parameter property is a type annotation that has to become an assignment.
@@ -168,6 +191,42 @@ export class DeliveryDraft {
     this.event = merge(this.event, stated);
     return toolResult(this.event, this.drop, this.pack);
   }
+
+  /**
+   * Answer close_session.
+   *
+   * Refused while anything is still missing. An agent that closes early leaves a
+   * half-written record and a driver who thinks they are finished, and there is no
+   * second chance to ask — they have already driven off. The same table that
+   * decides the questions decides when there are none left.
+   */
+  close(args: Record<string, unknown>): CloseResult {
+    const state = toolResult(this.event, this.drop, this.pack);
+    if (!state.complete) {
+      return {
+        closed: false,
+        missing: state.missing,
+        instruction:
+          "Not yet. " + state.instruction + " Do not call close_session again until it is answered.",
+      };
+    }
+
+    const note = typeof args.note === "string" ? args.note.trim() : "";
+    if (note) this.event = merge(this.event, { location: { notes: note } });
+    this.closed = true;
+
+    return {
+      closed: true,
+      missing: [],
+      instruction: "Recorded. Say nothing further.",
+    };
+  }
+}
+
+export interface CloseResult {
+  closed: boolean;
+  missing: ToolResult["missing"];
+  instruction: string;
 }
 
 /**
@@ -184,6 +243,8 @@ export function handleTool(
   switch (name) {
     case "log_delivery_event":
       return draft.apply(args);
+    case "close_session":
+      return draft.close(args);
     default:
       return { error: "There is no tool called " + name + "." };
   }

@@ -37,3 +37,6 @@ Format:
 - 2026-09-10 — Dami — `node --experimental-strip-types` removes types without rewriting anything,
   so a TypeScript constructor parameter property is a syntax error there. Fine in Next, broken in
   a script. Worth knowing before writing more shared code.
+- 2026-09-10 — Dami — Ending a voice session is not the same as closing a socket. close_session
+  arrives while the agent is still reading the record back, so closing on the spot cuts it off
+  mid-sentence and reads as a crash. Stop listening first, let the queued audio drain, then close.

@@ -107,3 +107,62 @@ test("the committed agent config matches the tools in this file", async () => {
     "agents/driver.json is stale. Run: npm run tools:sync",
   );
 });
+
+test("close_session is refused while anything is still missing", () => {
+  const d = new DeliveryDraft(plain);
+  d.apply({ outcome: "delivered_to_third_party", recipient: { relationship: "concierge" } });
+  const r = d.close({});
+  assert.equal(r.closed, false);
+  assert.equal(d.closed, false);
+  assert.ok(r.missing.length > 0);
+  assert.match(r.instruction, /Not yet/);
+});
+
+test("a refused close names the field to ask for", () => {
+  const d = new DeliveryDraft(plain);
+  d.apply({ outcome: "delivery_failed", failure_reason: "customer_absent" });
+  const r = d.close({});
+  assert.equal(r.closed, false);
+  assert.deepEqual(
+    r.missing.map((m) => m.path),
+    ["next_action"],
+  );
+});
+
+test("close_session is accepted once the record is complete", () => {
+  const d = new DeliveryDraft(plain);
+  d.apply({ outcome: "rescheduled", next_action: "reattempt_tomorrow" });
+  const r = d.close({});
+  assert.equal(r.closed, true);
+  assert.equal(d.closed, true);
+});
+
+test("a note given at close is kept, and an empty one is not", () => {
+  const complete = { outcome: "rescheduled", next_action: "reattempt_tomorrow" } as const;
+
+  const withNote = new DeliveryDraft(plain);
+  withNote.apply(complete);
+  withNote.close({ note: "buzzer broken" });
+  assert.equal(withNote.event.location?.notes, "buzzer broken");
+
+  const blank = new DeliveryDraft(plain);
+  blank.apply(complete);
+  blank.close({ note: "   " });
+  assert.equal(blank.event.location?.notes, undefined);
+});
+
+test("a cash order cannot be closed without the money", () => {
+  const d = new DeliveryDraft(cod);
+  d.apply({ outcome: "delivered_to_recipient", recipient: { name: "Folake" } });
+  assert.equal(d.close({}).closed, false);
+
+  d.apply({ payment: { collected_amount: 18500, method: "cash" } });
+  assert.equal(d.close({}).closed, true);
+});
+
+test("close_session is routed like any other tool", () => {
+  const d = new DeliveryDraft(plain);
+  d.apply({ outcome: "rescheduled", next_action: "return_to_hub" });
+  const r = handleTool(d, "close_session", {}) as { closed: boolean };
+  assert.equal(r.closed, true);
+});

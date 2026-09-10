@@ -58,6 +58,8 @@ export class VoiceSession {
   private toolQueue: { call_id: string; result: string }[] = [];
   /** True between reply.started and reply.done: a flush is coming on its own. */
   private speaking = false;
+  /** True once close_session has been honoured: the microphone is done. */
+  private closing = false;
 
   get live() {
     return this.ws?.readyState === WebSocket.OPEN;
@@ -289,6 +291,10 @@ export class VoiceSession {
 
   private sendAudio(raw: Float32Array) {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) return;
+    // Once we are closing, the read-back is still playing and the driver is very
+    // likely to say "thanks". Sending that would open another turn on a session we
+    // have already decided to end, and we would pay for the answer.
+    if (this.closing) return;
 
     const chunk = this.inRate === SAMPLE_RATE ? raw : this.downsample(raw);
     for (let i = 0; i < chunk.length; i++) this.pending.push(chunk[i]);
@@ -367,6 +373,29 @@ export class VoiceSession {
   }
 
   /**
+   * End the session the way a conversation ends, rather than the way a cable does.
+   *
+   * close_session arrives while the agent is still reading the record back. Calling
+   * stop() there would cut it off mid-sentence, which reads as a crash. So: send
+   * the tool result, stop listening, let the queued audio finish, then close.
+   *
+   * The wait is capped. A drain that never finishes is a socket we are paying for,
+   * and finishing the sentence is not worth that.
+   */
+  async finish(reason = "the agent closed the session", maxWaitMs = 15000) {
+    if (this.stopped || this.closing) return;
+    this.closing = true;
+    this.flushTools();
+
+    const ctx = this.ctxOut;
+    const deadline = Date.now() + maxWaitMs;
+    while (ctx && ctx.currentTime < this.playHead && Date.now() < deadline && !this.stopped) {
+      await new Promise((r) => setTimeout(r, 100));
+    }
+    await this.stop(reason);
+  }
+
+  /**
    * Close everything. Safe to call twice, and called from every failure path.
    * This is the method that decides the bill.
    */
@@ -378,6 +407,7 @@ export class VoiceSession {
     this.deadline = null;
     this.toolQueue = [];
     this.speaking = false;
+    this.closing = false;
 
     try {
       if (this.ws?.readyState === WebSocket.OPEN) {

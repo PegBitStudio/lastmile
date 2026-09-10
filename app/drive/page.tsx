@@ -72,6 +72,7 @@ export default function Drive() {
   const [event, setEvent] = useState<DeliveryEvent | null>(null);
   const [missing, setMissing] = useState<MissingField[]>([]);
   const [complete, setComplete] = useState(false);
+  const [closed, setClosed] = useState(false);
   const draft = useRef<DeliveryDraft | null>(null);
 
   const drop = DROPS[dropIndex];
@@ -144,10 +145,21 @@ export default function Drive() {
     if (!draft.current) return { error: "No stop is selected." };
     const result = handleTool(draft.current, name, args);
     setEvent({ ...draft.current.event });
+
     if (result && typeof result === "object" && "missing" in result) {
-      const r = result as { missing: MissingField[]; complete: boolean };
+      const r = result as { missing: MissingField[]; complete?: boolean; closed?: boolean };
       setMissing(r.missing);
-      setComplete(r.complete);
+      if (typeof r.complete === "boolean") setComplete(r.complete);
+
+      // An accepted close ends the session, but not this instant. The read-back is
+      // still coming out of the speaker. finish() sends this result, stops
+      // listening, lets the sentence land, and only then closes the socket.
+      if (r.closed === true) {
+        setClosed(true);
+        setComplete(true);
+        setStatus("Recorded. Closing.");
+        void session.current?.finish("the agent closed the session");
+      }
     }
     return result;
   }
@@ -157,6 +169,7 @@ export default function Drive() {
     setLines([]);
     setMissing([]);
     setComplete(false);
+    setClosed(false);
     draft.current = new DeliveryDraft(drop, PACKS[drop.region ?? ""]);
     setEvent({ ...draft.current.event });
     session.current = new VoiceSession();
@@ -217,7 +230,9 @@ export default function Drive() {
 
       {event && (
         <section style={S.receipt}>
-          <p style={S.who}>{complete ? "RECORD — COMPLETE" : "RECORD — BUILDING"}</p>
+          <p style={S.who}>
+            {closed ? "RECORD — CLOSED" : complete ? "RECORD — COMPLETE" : "RECORD — BUILDING"}
+          </p>
           {rows(event).length === 0 ? (
             <p style={S.empty}>Nothing recorded yet.</p>
           ) : (
