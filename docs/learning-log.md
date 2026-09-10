@@ -44,3 +44,7 @@ Format:
   drift by half a second and you have invented a speeding van that blocks a parked driver from
   ever opening the microphone. The fix is to compare movement against the accuracy the device
   itself reports, and to refuse to divide by anything under a second.
+- 2026-09-10 — Dami — `next/server` will not resolve outside Next's own module resolver, so a
+  route handler cannot be imported by a plain Node test. Moving the decisions into a normal file
+  and leaving the route as a wrapper made them testable, and made the route shorter. Worth doing
+  from the start on the next route.

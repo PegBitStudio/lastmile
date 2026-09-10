@@ -163,6 +163,9 @@ export default function Drive() {
   const [complete, setComplete] = useState(false);
   const [closed, setClosed] = useState(false);
   const draft = useRef<DeliveryDraft | null>(null);
+  /** One id per capture, so every write for this stop lands on one row. */
+  const captureId = useRef<string | null>(null);
+  const [saved, setSaved] = useState<"off" | "saving" | "ok" | "failed">("off");
 
   const drop = DROPS[dropIndex];
   const gate = useSafetyGate();
@@ -236,6 +239,7 @@ export default function Drive() {
     if (!draft.current) return { error: "No stop is selected." };
     const result = handleTool(draft.current, name, args);
     setEvent({ ...draft.current.event });
+    persist(draft.current.event, draft.current.closed);
 
     if (result && typeof result === "object" && "missing" in result) {
       const r = result as { missing: MissingField[]; complete?: boolean; closed?: boolean };
@@ -255,6 +259,27 @@ export default function Drive() {
     return result;
   }
 
+  /**
+   * Push the record to the store.
+   *
+   * Never awaited by anything the driver is looking at. The screen updates from
+   * the tool call itself; this is a background write. If the network is slow at a
+   * kerb in Lagos, the conversation carries on regardless.
+   */
+  function persist(event: DeliveryEvent, closed: boolean) {
+    const id = captureId.current;
+    if (!id) return;
+    setSaved("saving");
+    void fetch("/api/events", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id, event, closed }),
+    })
+      .then((r) => r.json())
+      .then((r) => setSaved(r?.saved ? "ok" : "off"))
+      .catch(() => setSaved("failed"));
+  }
+
   async function start() {
     // The gate. Checked here as well as on the button, because a session that
     // opens while the van is rolling is the one failure this product cannot have.
@@ -268,6 +293,7 @@ export default function Drive() {
     setMissing([]);
     setComplete(false);
     setClosed(false);
+    captureId.current = crypto.randomUUID();
     draft.current = new DeliveryDraft(drop, PACKS[drop.region ?? ""]);
 
     // The observed column, stamped once at the moment of capture. The agent cannot
@@ -285,6 +311,9 @@ export default function Drive() {
         : {}),
     });
     setEvent({ ...draft.current.event });
+    // Write the row before a word is spoken. A capture that opened and produced
+    // nothing is itself worth seeing on the board.
+    persist(draft.current.event, false);
     session.current = new VoiceSession();
     // The agent id comes from the AssemblyAI dashboard once the agent is configured.
     await session.current.start({
@@ -377,6 +406,14 @@ export default function Drive() {
             </div>
           )}
 
+          {saved !== "off" && (
+            <p style={S.saveState}>
+              {saved === "saving" && "saving…"}
+              {saved === "ok" && "saved"}
+              {saved === "failed" && "not saved — the record is still on this screen"}
+            </p>
+          )}
+
           {missing.length > 0 && (
             <p style={S.missing}>
               still needed: {missing.map((m) => m.path).join(", ")}
@@ -456,6 +493,7 @@ const S: Record<string, React.CSSProperties> = {
     marginTop: ".7rem", paddingTop: ".55rem", borderTop: "1px solid #C9C6BC",
     color: "#3E4650",
   },
+  saveState: { marginTop: ".5rem", fontSize: ".7rem", color: "#7C7A73", letterSpacing: ".04em" },
   missing: { marginTop: ".6rem", paddingTop: ".5rem", borderTop: "1px dashed #C9C6BC", fontSize: ".75rem", color: "#7C7A73" },
   log: { marginTop: "1.5rem", display: "flex", flexDirection: "column", gap: ".6rem" },
   empty: { color: "#7C7A73", fontStyle: "italic", fontSize: ".9rem" },
