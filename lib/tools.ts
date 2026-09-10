@@ -18,6 +18,10 @@ import {
   type Observed,
   type ToolResult,
 } from "./requirements.ts";
+import { lookupStop, type Stop } from "./manifest.ts";
+import manifestFixture from "../data/manifest.fixture.json" with { type: "json" };
+
+const STOPS = manifestFixture.drops as Stop[];
 
 /** A tool as the create-agent endpoint wants it. No `http` block means we run it
  *  in the browser and answer over the socket. */
@@ -137,7 +141,28 @@ export const CLOSE_SESSION: ToolDefinition = {
   },
 };
 
-export const TOOLS: ToolDefinition[] = [LOG_DELIVERY_EVENT, CLOSE_SESSION];
+export const LOOKUP_MANIFEST: ToolDefinition = {
+  name: "lookup_manifest",
+  description:
+    "Find which stop the driver means when they name it out loud — a street, a customer, an " +
+    "order number, or a position on the route. Only call this if they name a DIFFERENT stop " +
+    "from the one already selected on screen. The stop on screen is already correct by default. " +
+    "If the result is not found, ask which one; never pick for them.",
+  execution_mode: "hold",
+  timeout_seconds: 10,
+  parameters: {
+    type: "object",
+    properties: {
+      query: {
+        type: "string",
+        description: "What the driver called the stop, in their own words.",
+      },
+    },
+    required: ["query"],
+  },
+};
+
+export const TOOLS: ToolDefinition[] = [LOOKUP_MANIFEST, LOG_DELIVERY_EVENT, CLOSE_SESSION];
 
 /** Deep-merge one tool call into the record so far. Objects merge; everything else
  *  replaces, because a driver correcting themselves is the normal case. */
@@ -197,6 +222,19 @@ export class DeliveryDraft {
     this.event = { ...this.event, observed: { ...this.event.observed, ...patch } };
   }
 
+  /** Has the driver said anything about this stop yet? Once they have, the order
+   *  this record belongs to stops being negotiable. */
+  get started(): boolean {
+    return Boolean(
+      this.event.outcome ||
+        this.event.location ||
+        this.event.recipient ||
+        this.event.failure_reason ||
+        this.event.next_action ||
+        this.event.payment?.collected_amount !== undefined,
+    );
+  }
+
   /** Apply a log_delivery_event call and produce the reply the agent gets back. */
   apply(args: Record<string, unknown>): ToolResult {
     // order_ref is ours. If the model sends one, drop it on the floor.
@@ -252,8 +290,37 @@ export function handleTool(
   draft: DeliveryDraft,
   name: string,
   args: Record<string, unknown>,
+  onStopChange?: (stop: Stop) => void,
 ): unknown {
   switch (name) {
+    case "lookup_manifest": {
+      // Refuse to move once the driver has said anything about this stop. Rewriting
+      // which parcel a half-finished account belongs to is the worst outcome here,
+      // and it is far more likely to be a mis-heard word than a real correction.
+      if (draft.started) {
+        return {
+          found: false,
+          instruction:
+            "This report has already begun for " +
+            draft.event.order_ref +
+            ". Ask the driver to finish it, then tap the other stop on screen.",
+        };
+      }
+      const result = lookupStop(String(args.query ?? ""), STOPS);
+      if (result.found) {
+        onStopChange?.(result.stop);
+        return {
+          found: true,
+          order_ref: result.stop.order_ref,
+          instruction: "Say this back before anything else: " + result.confirm,
+        };
+      }
+      return {
+        found: false,
+        candidates: result.candidates.map((c) => c.address),
+        instruction: result.instruction,
+      };
+    }
     case "log_delivery_event":
       return draft.apply(args);
     case "close_session":

@@ -59,3 +59,7 @@ Format:
 - 2026-09-10 — Dami — Running `npm run build` while `npm run dev` is up corrupts `.next`, because
   they share it. The symptom is misleading: pages return 200, chunks 404, nothing hydrates, and
   the app looks like a React bug. `rm -rf .next` and restart. Never run both at once.
+- 2026-09-10 — Dami — "One" is a pronoun far more often than a number. Treating it as a route
+  position sent "that one" and "the one for Ayesha" both to the first stop on the list — a
+  confident wrong answer, on the exact field that must never be wrong. Found by a test, not by a
+  demo, which is the only reason it is not still there.

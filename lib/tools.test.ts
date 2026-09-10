@@ -192,3 +192,49 @@ test("the agent still cannot reach observed through a tool call", () => {
   d.apply({ outcome: "rescheduled", observed: { stationary: "yes" } });
   assert.equal(d.event.observed?.stationary, "no");
 });
+
+test("a lookup moves the report and asks for it to be read back", () => {
+  const d = new DeliveryDraft(plain);
+  let moved: string | null = null;
+  const r = handleTool(d, "lookup_manifest", { query: "the Johar Town drop" }, (s) => {
+    moved = s.order_ref;
+  }) as { found: boolean; order_ref?: string; instruction: string };
+
+  assert.equal(r.found, true);
+  assert.equal(r.order_ref, "LH-7703");
+  assert.equal(moved, "LH-7703");
+  assert.match(r.instruction, /Say this back/);
+});
+
+test("an unclear lookup does not move anything", () => {
+  const d = new DeliveryDraft(plain);
+  let moved = false;
+  const r = handleTool(d, "lookup_manifest", { query: "the Gulberg one" }, () => {
+    moved = true;
+  }) as { found: boolean; candidates?: string[] };
+
+  assert.equal(r.found, false);
+  assert.equal(moved, false);
+  assert.equal(r.candidates?.length, 2);
+});
+
+test("the order stops being negotiable once the driver has said something", () => {
+  const d = new DeliveryDraft(plain);
+  d.apply({ outcome: "delivery_failed" });
+
+  let moved = false;
+  const r = handleTool(d, "lookup_manifest", { query: "LH-7703" }, () => {
+    moved = true;
+  }) as { found: boolean; instruction: string };
+
+  // A half-finished account must not be reattached to a different parcel. Far more
+  // likely to be a mis-heard word than a real correction.
+  assert.equal(r.found, false);
+  assert.equal(moved, false);
+  assert.match(r.instruction, /already begun/);
+});
+
+test("a fresh draft is not yet started", () => {
+  assert.equal(new DeliveryDraft(plain).started, false);
+  assert.equal(new DeliveryDraft(cod).started, false, "an expected amount is not the driver talking");
+});

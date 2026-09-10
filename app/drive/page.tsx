@@ -237,7 +237,16 @@ export default function Drive() {
    */
   function onTool(name: string, args: Record<string, unknown>) {
     if (!draft.current) return { error: "No stop is selected." };
-    const result = handleTool(draft.current, name, args);
+    // A lookup can move the report to a different stop. The screen follows, so the
+    // driver can see which parcel they are talking about before it is written to.
+    const result = handleTool(draft.current, name, args, (stop) => {
+      const i = DROPS.findIndex((d) => d.order_ref === stop.order_ref);
+      if (i >= 0) {
+        setDropIndex(i);
+        draft.current = new DeliveryDraft(DROPS[i], PACKS[DROPS[i].region ?? ""]);
+        captureId.current = crypto.randomUUID();
+      }
+    });
     setEvent({ ...draft.current.event });
     persist(draft.current.event, draft.current.closed);
 
