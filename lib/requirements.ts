@@ -54,6 +54,15 @@ export interface Observed {
   scan_ref?: string;
 }
 
+/** Recipient-supplied evidence. Declared so the model is complete; nothing in this
+ *  build writes it. Saying so is better than quietly implying the audio proves
+ *  something it does not. Spec §1. */
+export interface Proof {
+  signature_ref?: string;
+  photo_ref?: string;
+  otp_verified?: boolean;
+}
+
 /** A partial delivery event. Every field is optional: the whole point is that we are
  *  working out what is not here yet. Shape matches lib/delivery-event.schema.json. */
 export interface DeliveryEvent {
@@ -70,6 +79,7 @@ export interface DeliveryEvent {
   };
   next_action?: NextAction;
   observed?: Observed;
+  proof?: Proof;
 }
 
 /** One drop from data/manifest.fixture.json. Only the parts this table reads. */

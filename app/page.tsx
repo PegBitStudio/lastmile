@@ -16,9 +16,12 @@ export default function Home() {
         Voice-first delivery exception reporting. A driver finishes a drop, says what happened,
         and the agent asks only for the details they left out.
       </p>
-      <p>
+      <p style={{ display: "flex", gap: "1.5rem" }}>
         <Link href="/drive" style={{ color: "#C06E05", fontWeight: 600 }}>
           Open the driver screen
+        </Link>
+        <Link href="/board" style={{ color: "#C06E05", fontWeight: 600 }}>
+          Open the dispatcher board
         </Link>
       </p>
     </main>
