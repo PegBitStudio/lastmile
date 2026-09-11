@@ -10,6 +10,8 @@
  *    user gesture to open a microphone.
  */
 
+import { TurnRecorder } from "./turn-audio";
+
 const SAMPLE_RATE = 24000;
 /** Send about 50 ms at a time. A frame per 128 samples is ~187 messages a second,
  *  which floods the socket and gives the turn detector nothing useful to chew on. */
@@ -33,6 +35,8 @@ export type SessionEvent =
   | { type: "status"; text: string }
   | { type: "ready"; sessionId: string }
   | { type: "user"; text: string; final: boolean; delta?: boolean }
+  /** A driver turn has ended, and its audio can be cut. */
+  | { type: "turn"; index: number; text: string }
   | { type: "agent"; text: string; final: boolean; delta?: boolean }
   | { type: "tool"; callId: string; name: string; args: Record<string, unknown> }
   | { type: "ended"; reason: string }
@@ -60,6 +64,8 @@ export class VoiceSession {
   private leftover = 0;
   private heard = 0;   // audio chunks received
   private seen = new Set<string>(); // every message type the server sent
+  /** A copy of exactly what we sent, cut into turns. Spec §3.4. */
+  readonly recorder = new TurnRecorder();
   private played = 0;  // seconds queued for the speaker
   private opts: StartOptions | null = null;
   private deadline: ReturnType<typeof setTimeout> | null = null;
@@ -211,7 +217,15 @@ export class VoiceSession {
       case "transcript.user.delta":
         send({ type: "user", text: msg.text ?? msg.delta ?? "", final: false, delta: true });
         break;
+      case "input.speech.started":
+        this.recorder.startTurn();
+        break;
+
       case "transcript.user":
+        if ((msg.text ?? "").trim()) {
+          const turn = this.recorder.endTurn(msg.text ?? "");
+          send({ type: "turn", index: turn.index, text: turn.text });
+        }
         send({ type: "user", text: msg.text ?? "", final: true });
         break;
       case "transcript.agent.delta":
@@ -341,6 +355,7 @@ export class VoiceSession {
     }
     this.ws.send(JSON.stringify({ type: "input.audio", audio: b64(pcm.buffer) }));
     this.sent += take.length;
+    this.recorder.push(pcm);
   }
 
   /**

@@ -177,13 +177,8 @@ Used directly as the JSON Schema for the `log_delivery_event` tool.
 
     "audio_ref": {
       "type": "object",
-      "description": "Turn-level citation: the driver turn that set the field",
-      "properties": {
-        "session_id": { "type": "string" },
-        "turn_index": { "type": "integer" },
-        "start_ms":   { "type": "integer", "description": "Start of that turn, not of the word" },
-        "end_ms":     { "type": "integer", "description": "End of that turn" }
-      }
+      "description": "Per field: which driver turn is its evidence, e.g. {\"recipient.name\": 3}",
+      "additionalProperties": { "type": "integer", "minimum": 1 }
     }
   },
   "required": ["order_ref", "outcome"]
@@ -405,9 +400,20 @@ Driver phone browser  ──mic──▶  Voice Agent API (WebSocket, token auth
 **Auth:** never ship the AssemblyAI API key to the browser. A server route mints a short-lived
 token for the browser client — the Voice Agent API supports token auth for exactly this.
 
-**Audio retention:** record the mic locally with `MediaRecorder`, upload the blob on session end,
-store the URL. `audio_ref` offsets point into it. This powers "play what the driver actually said"
-on the dispatcher board.
+**Audio retention:** one clip per driver turn, and only the turns a field cites.
+
+We do not use `MediaRecorder`. Its WebM output has no duration or index, and seeking into it is
+unreliable in Chrome. Instead the page keeps a copy of the 24 kHz PCM it already sends to the
+agent (`lib/turn-audio.ts`), cuts it where `input.speech.started` and the final
+`transcript.user` fall, and wraps each turn as a WAV. When a tool call changes a field, that field
+is cited to the turn just finished, and that turn is uploaded to `/api/audio` — the first time,
+and only if something cites it. A turn nothing cites never leaves the phone.
+
+The clips live in Postgres (`turn_audio`), so there is no second storage service and no second key.
+The board shows a "hear" button beside every cited field.
+
+Turn-level, not word-level: if one tool call follows two turns, both fields are credited to the
+later one. That is honest about what we can know, and it is enough to settle a dispute.
 
 **Dispatcher board:** poll every 2 seconds. SSE is nicer and one more thing to break on demo day.
 

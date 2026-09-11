@@ -128,3 +128,46 @@ export async function listEvents(limit = 50): Promise<StoredEvent[]> {
     limit ${Math.min(Math.max(limit, 1), 200)}
   `;
 }
+
+/**
+ * Keep one turn of the driver's voice.
+ *
+ * Idempotent on (capture, turn): a retry after a slow network does not store the
+ * same turn twice, and the second write simply wins.
+ */
+export async function saveTurnAudio(row: {
+  capture_id: string;
+  turn_index: number;
+  wav: Uint8Array;
+  heard: string;
+  seconds: number;
+}): Promise<boolean> {
+  const db = client();
+  if (!db) return false;
+  await migrate();
+
+  await db`
+    insert into turn_audio (capture_id, turn_index, wav, heard, seconds)
+    values (${row.capture_id}, ${row.turn_index}, ${Buffer.from(row.wav)}, ${row.heard}, ${row.seconds})
+    on conflict (capture_id, turn_index) do update set
+      wav = excluded.wav, heard = excluded.heard, seconds = excluded.seconds
+  `;
+  return true;
+}
+
+/** One turn, for playback on the board. */
+export async function getTurnAudio(
+  capture_id: string,
+  turn_index: number,
+): Promise<{ wav: Uint8Array; heard: string; seconds: number } | null> {
+  const db = client();
+  if (!db) return null;
+  await migrate();
+
+  const [row] = await db<{ wav: Buffer; heard: string; seconds: number }[]>`
+    select wav, heard, seconds from turn_audio
+    where capture_id = ${capture_id} and turn_index = ${turn_index}
+  `;
+  if (!row) return null;
+  return { wav: new Uint8Array(row.wav), heard: row.heard, seconds: row.seconds };
+}

@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { VoiceSession, type SessionEvent } from "@/lib/voice-session";
 import { DeliveryDraft, handleTool } from "@/lib/tools";
+import { changedFields, encodeWav } from "@/lib/turn-audio";
 import type { DeliveryEvent, ManifestDrop, MissingField } from "@/lib/requirements";
 import {
   currentSpeed,
@@ -166,6 +167,10 @@ export default function Drive() {
   /** One id per capture, so every write for this stop lands on one row. */
   const captureId = useRef<string | null>(null);
   const [saved, setSaved] = useState<"off" | "saving" | "ok" | "failed">("off");
+  /** The driver turn that just ended. A tool call that follows it is citing it. */
+  const lastTurn = useRef<{ index: number; text: string } | null>(null);
+  /** Turns already uploaded for this capture, so a turn is sent once. */
+  const uploaded = useRef<Set<number>>(new Set());
 
   const drop = DROPS[dropIndex];
   const gate = useSafetyGate();
@@ -189,6 +194,9 @@ export default function Drive() {
       case "ready":
         setStatus("Listening. Go ahead.");
         setLive(true);
+        break;
+      case "turn":
+        lastTurn.current = { index: e.index, text: e.text };
         break;
       case "user":
       case "agent": {
@@ -239,14 +247,27 @@ export default function Drive() {
     if (!draft.current) return { error: "No stop is selected." };
     // A lookup can move the report to a different stop. The screen follows, so the
     // driver can see which parcel they are talking about before it is written to.
+    const before = JSON.parse(JSON.stringify(draft.current.event));
     const result = handleTool(draft.current, name, args, (stop) => {
       const i = DROPS.findIndex((d) => d.order_ref === stop.order_ref);
       if (i >= 0) {
         setDropIndex(i);
         draft.current = new DeliveryDraft(DROPS[i], PACKS[DROPS[i].region ?? ""]);
         captureId.current = crypto.randomUUID();
+        uploaded.current = new Set();
       }
     });
+
+    // The fields this call set or changed came from the turn the driver just
+    // finished. That turn is their evidence, and it is the only audio we keep.
+    // A turn nothing cites is never uploaded. Spec §3.4.
+    if (name === "log_delivery_event" && lastTurn.current) {
+      const fields = changedFields(before, draft.current.event);
+      if (fields.length) {
+        draft.current.cite(fields, lastTurn.current.index);
+        uploadTurn(lastTurn.current.index, lastTurn.current.text);
+      }
+    }
     setEvent({ ...draft.current.event });
     persist(draft.current.event, draft.current.closed);
 
@@ -289,6 +310,32 @@ export default function Drive() {
       .catch(() => setSaved("failed"));
   }
 
+  /**
+   * Send one cited turn of the driver's voice to the store.
+   *
+   * Background, like persist(). A slow network at a kerb must not hold up the
+   * conversation, and if it fails the record is still right; it just has no audio
+   * behind that field.
+   */
+  function uploadTurn(index: number, heard: string) {
+    const id = captureId.current;
+    const rec = session.current?.recorder;
+    if (!id || !rec || uploaded.current.has(index)) return;
+    const turn = rec.turn(index);
+    const clip = turn ? rec.clip(turn) : null;
+    if (!clip || clip.length === 0) return;
+
+    uploaded.current.add(index);
+    const wav = encodeWav(clip, rec.rate);
+    const url =
+      "/api/audio?capture=" + id + "&turn=" + index + "&heard=" + encodeURIComponent(heard);
+    void fetch(url, {
+      method: "POST",
+      headers: { "content-type": "audio/wav" },
+      body: new Blob([wav.buffer as ArrayBuffer], { type: "audio/wav" }),
+    }).catch(() => uploaded.current.delete(index)); // let a later citation retry it
+  }
+
   async function start() {
     // The gate. Checked here as well as on the button, because a session that
     // opens while the van is rolling is the one failure this product cannot have.
@@ -303,6 +350,8 @@ export default function Drive() {
     setComplete(false);
     setClosed(false);
     captureId.current = crypto.randomUUID();
+    uploaded.current = new Set();
+    lastTurn.current = null;
     draft.current = new DeliveryDraft(drop, PACKS[drop.region ?? ""]);
 
     // The observed column, stamped once at the moment of capture. The agent cannot

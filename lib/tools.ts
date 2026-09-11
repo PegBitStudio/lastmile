@@ -222,6 +222,20 @@ export class DeliveryDraft {
     this.event = { ...this.event, observed: { ...this.event.observed, ...patch } };
   }
 
+  /**
+   * Record which driver turn is the evidence for these fields.
+   *
+   * Called by the app after a tool call changes them, never reachable from a tool.
+   * A later turn that corrects a field replaces its citation, because the
+   * correction is what the dispatcher needs to hear. Spec §3.4.
+   */
+  cite(fields: readonly string[], turn: number) {
+    if (!fields.length) return;
+    const refs = { ...(this.event.audio_ref ?? {}) };
+    for (const f of fields) refs[f] = turn;
+    this.event = { ...this.event, audio_ref: refs };
+  }
+
   /** Has the driver said anything about this stop yet? Once they have, the order
    *  this record belongs to stops being negotiable. */
   get started(): boolean {
@@ -238,7 +252,13 @@ export class DeliveryDraft {
   /** Apply a log_delivery_event call and produce the reply the agent gets back. */
   apply(args: Record<string, unknown>): ToolResult {
     // order_ref is ours. If the model sends one, drop it on the floor.
-    const { order_ref: _ignored, observed: _obs, proof: _proof, ...stated } = args;
+    const {
+      order_ref: _ignored,
+      observed: _obs,
+      proof: _proof,
+      audio_ref: _audio,
+      ...stated
+    } = args;
     this.event = merge(this.event, stated);
     return toolResult(this.event, this.drop, this.pack);
   }

@@ -63,3 +63,11 @@ Format:
   position sent "that one" and "the one for Ayesha" both to the first stop on the list — a
   confident wrong answer, on the exact field that must never be wrong. Found by a test, not by a
   demo, which is the only reason it is not still there.
+- 2026-09-11 — Dami — The browser's own recorder makes WebM with no duration or index, so seeking
+  into it is unreliable in Chrome. We already had clean PCM, because that is what we send the agent,
+  so each driver turn is cut from that and kept as a WAV. No seeking needed, and nothing new to load.
+- 2026-09-11 — Dami — Testing the audio found that production has never had a database. The live
+  site answers `configured: false`, so the Postgres layer has not saved a single record and the
+  dispatcher board has been empty. It degrades so politely that nothing looked broken. A feature
+  that fails silently needs a test that looks for it, not a demo.
+

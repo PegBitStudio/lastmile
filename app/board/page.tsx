@@ -45,36 +45,75 @@ function timeOf(iso: string) {
   return new Date(iso).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
 }
 
+/**
+ * Play one turn of the driver's own voice.
+ *
+ * This is the part a carrier pays for: not a text field someone typed, but the
+ * driver saying who took it, at the stop. Turn-level, so the clip is the whole
+ * thing they said in that breath, not a highlighted word. Spec §3.4.
+ */
+function Hear({ capture, turn }: { capture: string; turn: number }) {
+  const [state, setState] = useState<"idle" | "playing" | "missing">("idle");
+
+  function play() {
+    const audio = new Audio("/api/audio?capture=" + capture + "&turn=" + turn);
+    setState("playing");
+    audio.onended = () => setState("idle");
+    audio.onerror = () => setState("missing");
+    audio.play().catch(() => setState("missing"));
+  }
+
+  if (state === "missing") return <span style={S.nohear}>no audio</span>;
+  return (
+    <button
+      type="button"
+      onClick={play}
+      style={state === "playing" ? { ...S.hear, ...S.hearOn } : S.hear}
+      aria-label={"Hear the driver say this, turn " + turn}
+      title="Hear the driver say this"
+    >
+      {state === "playing" ? "playing" : "\u25B6 hear"}
+    </button>
+  );
+}
+
 /** What the driver said. The only column they can change, and the only one asked for. */
-function Stated({ event }: { event: DeliveryEvent }) {
-  const bits: [string, string][] = [];
-  if (event.outcome) bits.push(["outcome", plain(event.outcome)]);
-  if (event.recipient?.name) bits.push(["took it", event.recipient.name]);
-  if (event.recipient?.relationship) bits.push(["who", plain(event.recipient.relationship)]);
-  if (event.location?.place) bits.push(["place", event.location.place]);
-  if (event.location?.entrance) bits.push(["entrance", event.location.entrance]);
-  if (event.location?.notes) bits.push(["note", event.location.notes]);
-  if (event.failure_reason) bits.push(["why", plain(event.failure_reason)]);
-  if (event.next_action) bits.push(["next", plain(event.next_action)]);
+function Stated({ event, capture }: { event: DeliveryEvent; capture: string }) {
+  const bits: [string, string, string][] = [];
+  if (event.outcome) bits.push(["outcome", plain(event.outcome), "outcome"]);
+  if (event.recipient?.name) bits.push(["took it", event.recipient.name, "recipient.name"]);
+  if (event.recipient?.relationship)
+    bits.push(["who", plain(event.recipient.relationship), "recipient.relationship"]);
+  if (event.location?.place) bits.push(["place", event.location.place, "location.place"]);
+  if (event.location?.entrance)
+    bits.push(["entrance", event.location.entrance, "location.entrance"]);
+  if (event.location?.notes) bits.push(["note", event.location.notes, "location.notes"]);
+  if (event.failure_reason) bits.push(["why", plain(event.failure_reason), "failure_reason"]);
+  if (event.next_action) bits.push(["next", plain(event.next_action), "next_action"]);
   if (typeof event.payment?.collected_amount === "number") {
     const p = event.payment;
     const short =
       typeof p.expected_amount === "number" && (p.collected_amount ?? 0) < p.expected_amount;
     bits.push([
       "collected",
-      p.collected_amount + (short ? " of " + p.expected_amount + " — short" : ""),
+      p.collected_amount + (short ? " of " + p.expected_amount + " \u2014 short" : ""),
+      "payment.collected_amount",
     ]);
   }
 
   if (bits.length === 0) return <p style={S.nothing}>nothing said yet</p>;
   return (
     <>
-      {bits.map(([k, v]) => (
-        <p key={k} style={S.pair}>
-          <span style={S.k}>{k}</span>
-          <span>{v}</span>
-        </p>
-      ))}
+      {bits.map(([k, v, path]) => {
+        const turn = event.audio_ref?.[path];
+        return (
+          <p key={k} style={S.pair}>
+            <span style={S.k}>{k}</span>
+            <span>{v}</span>
+            {turn ? <Hear capture={capture} turn={turn} /> : null}
+          </p>
+        );
+      })}
     </>
   );
 }
@@ -194,7 +233,7 @@ export default function Board() {
                 <div style={S.cols}>
                   <section style={S.col}>
                     <p style={S.colHead}>Stated — the driver&apos;s words</p>
-                    <Stated event={r.event} />
+                    <Stated event={r.event} capture={r.id} />
                   </section>
                   <section style={S.col}>
                     <p style={S.colHead}>Observed — the device</p>
@@ -280,6 +319,14 @@ const S: Record<string, React.CSSProperties> = {
   pair: { display: "flex", gap: ".6rem", margin: ".15rem 0", fontSize: ".85rem" },
   k: { minWidth: "5.5rem", color: "#7C7A73", fontSize: ".72rem", paddingTop: ".12rem" },
   nothing: { margin: 0, fontSize: ".82rem", color: "#A9A69C", fontStyle: "italic" },
+  hear: {
+    marginLeft: "auto", fontSize: ".66rem", letterSpacing: ".06em", textTransform: "uppercase",
+    color: "#C06E05", background: "none", borderRadius: 3,
+    borderWidth: 1, borderStyle: "solid", borderColor: "#E4C89B",
+    padding: ".05rem .4rem", cursor: "pointer", whiteSpace: "nowrap",
+  },
+  hearOn: { color: "#fff", background: "#C06E05", borderColor: "#C06E05" },
+  nohear: { marginLeft: "auto", fontSize: ".66rem", color: "#A9A69C", whiteSpace: "nowrap" },
   soft: { color: "#7C7A73" },
   flag: { color: "#C06E05", fontWeight: 600 },
   waiting: {

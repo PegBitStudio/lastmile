@@ -80,6 +80,13 @@ export interface DeliveryEvent {
   next_action?: NextAction;
   observed?: Observed;
   proof?: Proof;
+  /**
+   * Which driver turn is the evidence for each stated field, as
+   * { "recipient.name": 3 }. The audio itself is kept per turn in turn_audio.
+   * Written by the app when a tool call changes a field, never by the agent.
+   * Spec §3.4.
+   */
+  audio_ref?: Record<string, number>;
 }
 
 /** One drop from data/manifest.fixture.json. Only the parts this table reads. */

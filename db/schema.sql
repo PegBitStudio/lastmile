@@ -33,3 +33,22 @@ create table if not exists delivery_events (
 -- The board reads newest first and polls every two seconds.
 create index if not exists delivery_events_updated_at_idx
   on delivery_events (updated_at desc);
+
+-- The driver's own voice, one turn per row. Spec §3.4.
+--
+-- Only turns that a field in the record cites are ever uploaded. A turn nothing
+-- cites never leaves the phone, so ambient speech at the kerb is not kept here.
+--
+-- Stored in Postgres rather than a blob store on purpose: one turn is a few hundred
+-- kilobytes, and one more service with one more key is one more thing to break the
+-- night before the demo.
+create table if not exists turn_audio (
+  capture_id  uuid        not null,
+  turn_index  integer     not null,
+  wav         bytea       not null,
+  -- What the recogniser heard, so a dispatcher can read it before pressing play.
+  heard       text        not null default '',
+  seconds     real        not null,
+  created_at  timestamptz not null default now(),
+  primary key (capture_id, turn_index)
+);

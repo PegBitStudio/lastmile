@@ -116,14 +116,8 @@
 
     "audio_ref": {
       "type": "object",
-      "description": "Turn-level citation: the driver turn that set the field. Not a word span. See spec section 3.4.",
-      "properties": {
-        "session_id": { "type": "string" },
-        "turn_index": { "type": "integer" },
-        "start_ms": { "type": "integer", "description": "Start of that turn, not of the word" },
-        "end_ms": { "type": "integer", "description": "End of that turn" }
-      },
-      "additionalProperties": false
+      "description": "Turn-level citation, per field: which driver turn is the evidence for each stated field, keyed by field path, e.g. {\"recipient.name\": 3}. Written by the app, never by the agent. The audio is kept per turn in the turn_audio table, and only cited turns are ever uploaded. Not a word span. See spec section 3.4.",
+      "additionalProperties": { "type": "integer", "minimum": 1 }
     }
   },
   "required": ["order_ref", "outcome"],
