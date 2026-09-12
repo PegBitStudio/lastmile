@@ -52,3 +52,15 @@ create table if not exists turn_audio (
   created_at  timestamptz not null default now(),
   primary key (capture_id, turn_index)
 );
+
+-- Lock both tables away from Supabase's public API.
+--
+-- Supabase publishes every table in `public` through its REST API, reachable with
+-- the project's anon key — and that key is public by design. Row level security
+-- with no policies means the API returns nothing from these tables, to anyone.
+--
+-- The app is unaffected: it connects with DATABASE_URL as the role that created
+-- these tables, and a table's owner is not subject to its row level security.
+-- Harmless on any other Postgres; there it simply has no API to close.
+alter table delivery_events enable row level security;
+alter table turn_audio      enable row level security;

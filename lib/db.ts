@@ -41,6 +41,10 @@ function client() {
     sql = postgres(process.env.DATABASE_URL, {
       // One connection per serverless instance. The pooler does the pooling.
       max: 1,
+      // Supabase's transaction pooler (port 6543) cannot hold prepared statements
+      // between transactions, and postgres.js prepares by default. Left on, it
+      // fails at random with "prepared statement does not exist".
+      prepare: false,
       idle_timeout: 20,
       connect_timeout: 10,
     });
