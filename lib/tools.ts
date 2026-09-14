@@ -311,6 +311,7 @@ export function handleTool(
   name: string,
   args: Record<string, unknown>,
   onStopChange?: (stop: Stop) => void,
+  regionId?: string,
 ): unknown {
   switch (name) {
     case "lookup_manifest": {
@@ -326,7 +327,11 @@ export function handleTool(
             ". Ask the driver to finish it, then tap the other stop on screen.",
         };
       }
-      const result = lookupStop(String(args.query ?? ""), STOPS);
+      // Only this region's stops. The socket is open to this region's agent, with
+      // this region's keyterms, so a stop in another country is not reachable from
+      // here — the driver switches region on screen, not by voice.
+      const pool = regionId ? STOPS.filter((s) => s.region === regionId) : STOPS;
+      const result = lookupStop(String(args.query ?? ""), pool);
       if (result.found) {
         onStopChange?.(result.stop);
         return {

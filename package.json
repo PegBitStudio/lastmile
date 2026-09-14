@@ -8,8 +8,8 @@
     "typecheck": "tsc --noEmit",
     "test": "node --experimental-strip-types --test lib/*.test.ts",
     "tools:sync": "node --experimental-strip-types scripts/sync-tools.mjs",
-    "agent:create": "node scripts/agent.mjs create",
-    "agent:update": "node scripts/agent.mjs update",
+    "agent:create": "node --experimental-strip-types scripts/agent.mjs create",
+    "agent:update": "node --experimental-strip-types scripts/agent.mjs update",
     "agent:list": "node scripts/agent.mjs list"
   },
   "dependencies": {

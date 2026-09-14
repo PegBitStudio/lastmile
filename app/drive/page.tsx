@@ -17,8 +17,7 @@ import {
   type GateState,
 } from "@/lib/speed";
 import manifest from "@/data/manifest.fixture.json";
-import lagos from "@/regions/ng-lagos.json";
-import lahore from "@/regions/pk-lahore.json";
+import { agentFor, packFor, PACKS as REGION_PACKS } from "@/lib/regions";
 
 /** A fixture drop is a manifest drop plus the parts only the screen needs. */
 type Drop = ManifestDrop & {
@@ -29,9 +28,15 @@ type Drop = ManifestDrop & {
 };
 
 const DROPS = manifest.drops as Drop[];
-const PACKS: Record<string, { vocabulary?: { place?: string; entrance?: string } }> = {
-  "ng-lagos": lagos,
-  "pk-lahore": lahore,
+const PACKS = Object.fromEntries(REGION_PACKS.map((p) => [p.id, p]));
+
+/** Written out in full: Next only inlines NEXT_PUBLIC_ variables it can see by name. */
+const AGENT_IDS = {
+  shared: process.env.NEXT_PUBLIC_AGENT_ID,
+  byRegion: {
+    "ng-lagos": process.env.NEXT_PUBLIC_AGENT_ID_NG_LAGOS,
+    "pk-lahore": process.env.NEXT_PUBLIC_AGENT_ID_PK_LAHORE,
+  },
 };
 
 /** Ignore case and punctuation when comparing two spoken lines. */
@@ -159,6 +164,7 @@ export default function Drive() {
   // Which stop this report is about. Tapping is the mechanism, not voice. Spec 3.0.
   // The proper manifest screen is still to come; this is the same choice, plainer.
   const [dropIndex, setDropIndex] = useState(0);
+  const [regionId, setRegionId] = useState(DROPS[0].region ?? REGION_PACKS[0].id);
   const [event, setEvent] = useState<DeliveryEvent | null>(null);
   const [missing, setMissing] = useState<MissingField[]>([]);
   const [complete, setComplete] = useState(false);
@@ -173,6 +179,16 @@ export default function Drive() {
   const uploaded = useRef<Set<number>>(new Set());
 
   const drop = DROPS[dropIndex];
+  const pack = packFor(regionId);
+  const agent = agentFor(regionId, AGENT_IDS);
+
+  /** Switch country. The route and the agent both follow. */
+  function chooseRegion(id: string) {
+    if (live) return;
+    setRegionId(id);
+    const first = DROPS.findIndex((d) => d.region === id);
+    if (first >= 0) setDropIndex(first);
+  }
   const gate = useSafetyGate();
   const blocked = !mayOpen(gate.state);
 
@@ -256,7 +272,7 @@ export default function Drive() {
         captureId.current = crypto.randomUUID();
         uploaded.current = new Set();
       }
-    });
+    }, regionId);
 
     // The fields this call set or changed came from the turn the driver just
     // finished. That turn is their evidence, and it is the only audio we keep.
@@ -373,9 +389,9 @@ export default function Drive() {
     // nothing is itself worth seeing on the board.
     persist(draft.current.event, false);
     session.current = new VoiceSession();
-    // The agent id comes from the AssemblyAI dashboard once the agent is configured.
+    // The agent for this region, which already has its keyterms loaded.
     await session.current.start({
-      agentId: process.env.NEXT_PUBLIC_AGENT_ID ?? "",
+      agentId: agent.agentId,
       onEvent,
       onTool,
     });
@@ -405,10 +421,46 @@ export default function Drive() {
           address and carry several parcels at once, and attributing an exception to
           the wrong order destroys trust faster than a mis-heard street name ever
           will. Spec §3.0. */}
+      {/* The region switch. Same code, different country: the words the recogniser
+          listens for and the words the agent uses both change. It only has to be
+          visible in the video — spec week 3. */}
+      <section style={S.regions}>
+        <p style={S.who}>REGION PACK</p>
+        <div style={S.regionRow}>
+          {REGION_PACKS.map((p) => (
+            <button
+              key={p.id}
+              type="button"
+              disabled={live}
+              onClick={() => chooseRegion(p.id)}
+              aria-pressed={p.id === regionId}
+              style={{
+                ...S.regionBtn,
+                ...(p.id === regionId ? S.regionOn : {}),
+                ...(live ? S.stopLocked : {}),
+              }}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <p style={S.regionInfo}>
+          {pack?.keyterms?.length ?? 0} local words loaded
+          {pack?.vocabulary?.entrance ? " · asks for the " + pack.vocabulary.entrance : ""}
+        </p>
+        {!agent.dedicated && (
+          <p style={S.regionWarn}>
+            No agent of its own for this region yet, so it uses the shared one. Its local
+            words may not be loaded. Set NEXT_PUBLIC_AGENT_ID_{regionId.toUpperCase().replace("-", "_")}.
+          </p>
+        )}
+      </section>
+
       <section style={S.manifest}>
         <p style={S.who}>TODAY&apos;S ROUTE — TAP THE STOP YOU ARE REPORTING</p>
         <div style={S.stops}>
           {DROPS.map((d, i) => {
+            if (d.region !== regionId) return null;
             const on = i === dropIndex;
             return (
               <button
@@ -557,6 +609,19 @@ const S: Record<string, React.CSSProperties> = {
   },
   blockedBtn: { background: "#7C7A73", cursor: "not-allowed" },
   manifest: { margin: "1rem 0" },
+  regions: { margin: "1rem 0 0" },
+  regionRow: { display: "flex", gap: ".4rem", marginTop: ".4rem" },
+  regionBtn: {
+    flex: 1, padding: ".55rem .5rem", font: "inherit", fontSize: ".85rem",
+    border: "1px solid #C9C6BC", borderRadius: 3, background: "#fff",
+    color: "#14171A", cursor: "pointer",
+  },
+  regionOn: { borderColor: "#14171A", borderWidth: 2, fontWeight: 600, background: "#FBFAF7" },
+  regionInfo: { margin: ".35rem 0 0", fontSize: ".72rem", color: "#7C7A73" },
+  regionWarn: {
+    margin: ".4rem 0 0", padding: ".4rem .6rem", fontSize: ".72rem", borderRadius: 3,
+    background: "#FBEFD8", color: "#8A4E03", border: "1px solid #E4B865",
+  },
   stops: {
     display: "flex", flexDirection: "column", gap: ".3rem", marginTop: ".4rem",
     maxHeight: "13rem", overflowY: "auto", paddingRight: ".2rem",

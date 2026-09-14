@@ -238,3 +238,15 @@ test("a fresh draft is not yet started", () => {
   assert.equal(new DeliveryDraft(plain).started, false);
   assert.equal(new DeliveryDraft(cod).started, false, "an expected amount is not the driver talking");
 });
+
+test("a lookup only searches the region the agent is serving", () => {
+  const d = new DeliveryDraft(plain);
+  const r = handleTool(d, "lookup_manifest", { query: "Johar Town" }, undefined, "ng-lagos") as {
+    found: boolean;
+  };
+  assert.equal(r.found, false, "a Lahore stop must not be reachable from the Lagos agent");
+  const ok = handleTool(d, "lookup_manifest", { query: "Johar Town" }, undefined, "pk-lahore") as {
+    found: boolean;
+  };
+  assert.equal(ok.found, true);
+});

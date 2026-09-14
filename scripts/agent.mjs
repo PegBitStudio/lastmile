@@ -34,6 +34,11 @@ async function configWithRegion() {
     // Merge, do not replace: turn_detection lives in the same object and the
     // region pack has nothing to say about it.
     config.input = { ...(config.input ?? {}), keyterms: pack.keyterms ?? [] };
+    // Keyterms help the recogniser hear a local word. This tells the model what
+    // that word means in the record. Same text as lib/regions.ts localWordsPrompt.
+    const { localWordsPrompt } = await import("../lib/regions.ts");
+    config.system_prompt = (config.system_prompt ?? "") + localWordsPrompt(pack);
+    config.name = `${config.name} (${pack.label})`;
     console.log(`region: ${pack.label} (${(pack.keyterms ?? []).length} keyterms)`);
   } catch {
     console.log(`region: none found at regions/${region}.json, sending without keyterms`);

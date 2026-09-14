@@ -28,8 +28,27 @@ AGENT_ID=your_agent_id npm run agent:update
 
 Update is a `PUT`, and it replaces the whole config. `PATCH` is not allowed.
 
-A region pack is merged in at send time. The default is `ng-lagos`; pass another
-with `REGION=uk-london npm run agent:update`.
+## One agent per region
+
+Keyterms live on the agent, not on the session. So each region gets its own agent,
+and the driver screen picks the right one when you switch country.
+
+A region pack is merged in at send time: its keyterms, plus a short "local words"
+section added to the prompt so the model knows a chowkidar is security.
+
+```bash
+REGION=ng-lagos  npm run agent:create   # put the id in NEXT_PUBLIC_AGENT_ID_NG_LAGOS
+REGION=pk-lahore npm run agent:create   # put the id in NEXT_PUBLIC_AGENT_ID_PK_LAHORE
+```
+
+Update each one the same way, with its own id:
+
+```bash
+REGION=pk-lahore AGENT_ID=the_lahore_id npm run agent:update
+```
+
+Set both ids in `.env.local` and in Vercel. A region without its own id falls back
+to `NEXT_PUBLIC_AGENT_ID`, and the driver screen shows a warning.
 
 **List** what exists on your account:
 
