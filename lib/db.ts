@@ -175,3 +175,66 @@ export async function getTurnAudio(
   if (!row) return null;
   return { wav: new Uint8Array(row.wav), heard: row.heard, seconds: row.seconds };
 }
+
+export interface StoredReview {
+  capture_id: string;
+  path: string;
+  turn_index: number;
+  value: string;
+  confidence: number | null;
+  found: boolean;
+  flagged: boolean;
+  reason: string;
+  heard: string;
+  reviewed_at: string;
+}
+
+/**
+ * Keep the second opinion on one turn's fields.
+ *
+ * Keyed on (capture, field), so a driver who corrects a name gets the corrected
+ * value reviewed and the old verdict replaced rather than kept beside it.
+ */
+export async function saveReviews(
+  rows: Omit<StoredReview, "reviewed_at">[],
+): Promise<boolean> {
+  const db = client();
+  if (!db || rows.length === 0) return false;
+  await migrate();
+
+  await db`
+    insert into field_review ${db(
+      rows,
+      "capture_id",
+      "path",
+      "turn_index",
+      "value",
+      "confidence",
+      "found",
+      "flagged",
+      "reason",
+      "heard",
+    )}
+    on conflict (capture_id, path) do update set
+      turn_index  = excluded.turn_index,
+      value       = excluded.value,
+      confidence  = excluded.confidence,
+      found       = excluded.found,
+      flagged     = excluded.flagged,
+      reason      = excluded.reason,
+      heard       = excluded.heard,
+      reviewed_at = now()
+  `;
+  return true;
+}
+
+/** Every review for these captures, for the board. */
+export async function listReviews(captureIds: string[]): Promise<StoredReview[]> {
+  const db = client();
+  if (!db || captureIds.length === 0) return [];
+  await migrate();
+
+  return db<StoredReview[]>`
+    select * from field_review where capture_id in ${db(captureIds)}
+  `;
+}

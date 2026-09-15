@@ -24,6 +24,15 @@ type Drop = ManifestDrop & { address: string; recipient_name: string };
 const DROPS = manifest.drops as Drop[];
 const BY_REF = new Map(DROPS.map((d) => [d.order_ref, d]));
 
+interface Review {
+  path: string;
+  value: string;
+  confidence: number | null;
+  flagged: boolean;
+  reason: string;
+  heard: string;
+}
+
 interface Record_ {
   id: string;
   order_ref: string;
@@ -34,6 +43,18 @@ interface Record_ {
   closed: boolean;
   created_at: string;
   updated_at: string;
+  reviews?: Review[];
+}
+
+/** A field's current value as text, to tell a live doubt from one about an old value. */
+function valueNow(event: DeliveryEvent, path: string): string {
+  const v = path
+    .split(".")
+    .reduce<unknown>(
+      (n, k) => (n && typeof n === "object" ? (n as Record<string, unknown>)[k] : undefined),
+      event,
+    );
+  return v === undefined || v === null ? "" : String(v);
 }
 
 /** Turn an enum into something a person reads without translating it in their head. */
@@ -78,7 +99,15 @@ function Hear({ capture, turn }: { capture: string; turn: number }) {
 }
 
 /** What the driver said. The only column they can change, and the only one asked for. */
-function Stated({ event, capture }: { event: DeliveryEvent; capture: string }) {
+function Stated({
+  event,
+  capture,
+  reviews,
+}: {
+  event: DeliveryEvent;
+  capture: string;
+  reviews: Review[];
+}) {
   const bits: [string, string, string][] = [];
   if (event.outcome) bits.push(["outcome", plain(event.outcome), "outcome"]);
   if (event.recipient?.name) bits.push(["took it", event.recipient.name, "recipient.name"]);
@@ -106,10 +135,24 @@ function Stated({ event, capture }: { event: DeliveryEvent; capture: string }) {
     <>
       {bits.map(([k, v, path]) => {
         const turn = event.audio_ref?.[path];
+        // Only a verdict on the value as it stands now. A driver who corrected
+        // the name has a new value, and the old doubt no longer applies to it.
+        const review = reviews.find((r) => r.path === path && r.value === String(v));
         return (
           <p key={k} style={S.pair}>
             <span style={S.k}>{k}</span>
-            <span>{v}</span>
+            <span style={review?.flagged ? S.doubt : undefined}>{v}</span>
+            {review?.flagged && (
+              <span
+                style={S.check}
+                title={
+                  "Second opinion heard: “" + review.heard + "”" +
+                  (review.confidence !== null ? " (confidence " + review.confidence + ")" : "")
+                }
+              >
+                check: {review.reason}
+              </span>
+            )}
             {turn ? <Hear capture={capture} turn={turn} /> : null}
           </p>
         );
@@ -227,13 +270,16 @@ export default function Board() {
                   >
                     {r.closed ? "closed" : r.complete ? "complete" : "in progress"}
                   </span>
+                  {(r.reviews ?? []).some(
+                    (rv) => rv.flagged && valueNow(r.event, rv.path) === rv.value,
+                  ) && <span style={S.tagReview}>needs review</span>}
                   <span style={S.when}>{timeOf(r.updated_at)}</span>
                 </div>
 
                 <div style={S.cols}>
                   <section style={S.col}>
                     <p style={S.colHead}>Stated — the driver&apos;s words</p>
-                    <Stated event={r.event} capture={r.id} />
+                    <Stated event={r.event} capture={r.id} reviews={r.reviews ?? []} />
                   </section>
                   <section style={S.col}>
                     <p style={S.colHead}>Observed — the device</p>
@@ -305,6 +351,16 @@ const S: Record<string, React.CSSProperties> = {
   tagComplete: {
     fontSize: ".65rem", letterSpacing: ".1em", textTransform: "uppercase",
     padding: ".15rem .4rem", borderRadius: 2, background: "#E8F0E9", color: "#2F6B4F",
+  },
+  tagReview: {
+    fontSize: ".65rem", letterSpacing: ".1em", textTransform: "uppercase",
+    padding: ".15rem .4rem", borderRadius: 2, background: "#F6DDD6", color: "#A33B22",
+    fontWeight: 700,
+  },
+  doubt: { textDecoration: "underline wavy #C06E05", textUnderlineOffset: 3 },
+  check: {
+    fontSize: ".68rem", color: "#A33B22", background: "#F6DDD6",
+    padding: ".05rem .35rem", borderRadius: 2, whiteSpace: "nowrap", cursor: "help",
   },
   tagClosed: {
     fontSize: ".65rem", letterSpacing: ".1em", textTransform: "uppercase",

@@ -8,6 +8,7 @@ const nextConfig: NextConfig = {
   outputFileTracingIncludes: {
     "/api/events": ["./db/schema.sql"],
     "/api/audio": ["./db/schema.sql"],
+    "/api/review": ["./db/schema.sql", "./regions/*.json"],
   },
 };
 

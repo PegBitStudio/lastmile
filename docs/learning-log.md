@@ -75,3 +75,8 @@ Format:
   not both exist. Merging them hit the 100 keyterm cap at 109, so something had to go. Street and
   area names stayed; first names were cut first. A wrong name is one bad record. A wrong street is
   wrong every single day.
+- 2026-09-15 — Dami — The Voice Agent API gives the transcript as plain text with no confidence at
+  all, so a confident name and a guessed one look identical in the record. The pre-recorded API
+  scores every word (0.40 to 1.00 on the sample). We already keep each cited turn as a WAV, so a
+  second model reviews it. Two AssemblyAI models disagreeing turned out to be the best "not sure"
+  signal we have.

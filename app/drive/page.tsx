@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { VoiceSession, type SessionEvent } from "@/lib/voice-session";
 import { DeliveryDraft, handleTool } from "@/lib/tools";
 import { changedFields, encodeWav } from "@/lib/turn-audio";
+import { isReviewed, valuesAt } from "@/lib/review";
 import type { DeliveryEvent, ManifestDrop, MissingField } from "@/lib/requirements";
 import {
   currentSpeed,
@@ -176,8 +177,9 @@ export default function Drive() {
   const [saved, setSaved] = useState<"off" | "saving" | "ok" | "failed">("off");
   /** The driver turn that just ended. A tool call that follows it is citing it. */
   const lastTurn = useRef<{ index: number; text: string } | null>(null);
-  /** Turns already uploaded for this capture, so a turn is sent once. */
-  const uploaded = useRef<Set<number>>(new Set());
+  /** Turns already uploaded for this capture, so a turn is sent once. Each maps to
+   *  its upload, so a review can wait for the audio to land before asking for it. */
+  const uploaded = useRef<Map<number, Promise<boolean>>>(new Map());
 
   const drop = DROPS[dropIndex];
   const pack = packFor(regionId);
@@ -271,7 +273,7 @@ export default function Drive() {
         setDropIndex(i);
         draft.current = new DeliveryDraft(DROPS[i], PACKS[DROPS[i].region ?? ""]);
         captureId.current = crypto.randomUUID();
-        uploaded.current = new Set();
+        uploaded.current = new Map();
       }
     }, regionId);
 
@@ -283,6 +285,10 @@ export default function Drive() {
       if (fields.length) {
         draft.current.cite(fields, lastTurn.current.index);
         uploadTurn(lastTurn.current.index, lastTurn.current.text);
+        reviewTurn(
+          lastTurn.current.index,
+          valuesAt(draft.current.event as Record<string, unknown>, fields),
+        );
       }
     }
     setEvent({ ...draft.current.event });
@@ -342,15 +348,43 @@ export default function Drive() {
     const clip = turn ? rec.clip(turn) : null;
     if (!clip || clip.length === 0) return;
 
-    uploaded.current.add(index);
     const wav = encodeWav(clip, rec.rate);
     const url =
       "/api/audio?capture=" + id + "&turn=" + index + "&heard=" + encodeURIComponent(heard);
-    void fetch(url, {
+    const upload = fetch(url, {
       method: "POST",
       headers: { "content-type": "audio/wav" },
       body: new Blob([wav.buffer as ArrayBuffer], { type: "audio/wav" }),
-    }).catch(() => uploaded.current.delete(index)); // let a later citation retry it
+    })
+      .then((r) => r.ok)
+      .catch(() => {
+        uploaded.current.delete(index); // let a later citation retry it
+        return false;
+      });
+    uploaded.current.set(index, upload);
+  }
+
+  /**
+   * Ask for a second opinion on the fields one turn just set.
+   *
+   * Waits for that turn's audio to finish uploading, then goes in the background.
+   * The driver is never kept waiting; a flag, if there is one, appears on the
+   * board a few seconds later. Spec §3.3.
+   */
+  function reviewTurn(index: number, fields: Record<string, unknown>) {
+    const id = captureId.current;
+    const upload = uploaded.current.get(index);
+    const checkable = Object.keys(fields).filter((p) => isReviewed(p));
+    if (!id || !upload || checkable.length === 0) return;
+
+    void upload.then((ok) => {
+      if (!ok) return;
+      return fetch("/api/review", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ capture: id, turn: index, region: regionId, fields }),
+      }).catch(() => {});
+    });
   }
 
   async function start() {
@@ -367,7 +401,7 @@ export default function Drive() {
     setComplete(false);
     setClosed(false);
     captureId.current = crypto.randomUUID();
-    uploaded.current = new Set();
+    uploaded.current = new Map();
     lastTurn.current = null;
     draft.current = new DeliveryDraft(drop, PACKS[drop.region ?? ""]);
 

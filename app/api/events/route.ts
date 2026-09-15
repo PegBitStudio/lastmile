@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { configured, listEvents, saveEvent } from "@/lib/db";
+import { configured, listEvents, listReviews, saveEvent } from "@/lib/db";
 import { checkWrite } from "@/lib/events";
 
 /**
@@ -62,9 +62,15 @@ export async function GET(request: Request) {
   const limit = Number(new URL(request.url).searchParams.get("limit") ?? 50);
 
   try {
+    const records = await listEvents(Number.isFinite(limit) ? limit : 50);
+    // The second opinions, grouped by capture, so the board can mark each field.
+    const reviews = await listReviews(records.map((r) => r.id));
+    const byCapture: Record<string, typeof reviews> = {};
+    for (const review of reviews) (byCapture[review.capture_id] ??= []).push(review);
+
     return NextResponse.json({
       configured: true,
-      records: await listEvents(Number.isFinite(limit) ? limit : 50),
+      records: records.map((r) => ({ ...r, reviews: byCapture[r.id] ?? [] })),
     });
   } catch (err) {
     console.error("[events] read failed", err);

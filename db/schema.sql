@@ -53,7 +53,29 @@ create table if not exists turn_audio (
   primary key (capture_id, turn_index)
 );
 
--- Lock both tables away from Supabase's public API.
+-- A second opinion on the words a record depends on. Spec §3.3.
+--
+-- The Voice Agent API gives text with no confidence attached, so each cited turn is
+-- transcribed once more by a model that scores every word, and each free-text
+-- field is checked against it. Kept apart from delivery_events on purpose: the
+-- driver page rewrites that row on every tool call, and a review written into it
+-- would be overwritten by the next one.
+create table if not exists field_review (
+  capture_id  uuid        not null,
+  path        text        not null,
+  turn_index  integer     not null,
+  value       text        not null,
+  confidence  real,
+  found       boolean     not null,
+  flagged     boolean     not null,
+  reason      text        not null default '',
+  -- What the second model heard, so a dispatcher can compare the two by eye.
+  heard       text        not null default '',
+  reviewed_at timestamptz not null default now(),
+  primary key (capture_id, path)
+);
+
+-- Lock the tables away from Supabase's public API.
 --
 -- Supabase publishes every table in `public` through its REST API, reachable with
 -- the project's anon key — and that key is public by design. Row level security
@@ -64,3 +86,4 @@ create table if not exists turn_audio (
 -- Harmless on any other Postgres; there it simply has no API to close.
 alter table delivery_events enable row level security;
 alter table turn_audio      enable row level security;
+alter table field_review    enable row level security;
