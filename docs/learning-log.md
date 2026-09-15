@@ -71,3 +71,7 @@ Format:
   dispatcher board has been empty. It degrades so politely that nothing looked broken. A feature
   that fails silently needs a test that looks for it, not a demo.
 
+- 2026-09-15 — Dami — Two people writing the same region pack produced two good packs that could
+  not both exist. Merging them hit the 100 keyterm cap at 109, so something had to go. Street and
+  area names stayed; first names were cut first. A wrong name is one bad record. A wrong street is
+  wrong every single day.

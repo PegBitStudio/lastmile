@@ -57,3 +57,21 @@ test("every alias points at a real relationship value", () => {
     }
   }
 });
+
+test("all three packs are present and named, so the buttons are not blank", () => {
+  assert.deepEqual(
+    PACKS.map((p) => p.id),
+    ["ng-lagos", "pk-lahore", "uk-london"],
+  );
+  for (const p of PACKS) assert.ok(p.label && p.label.trim(), p.id + " has no label");
+});
+
+test("the London pack teaches porter and buzzer", () => {
+  const uk = localWordsPrompt(packFor("uk-london")!);
+  assert.match(uk, /"porter" means concierge/);
+  assert.match(uk, /buzzer/);
+});
+
+test("every region on the route has six stops", () => {
+  for (const p of PACKS) assert.equal(stopsFor(p.id, DROPS).length, 6, p.id);
+});

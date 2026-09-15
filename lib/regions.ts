@@ -13,6 +13,7 @@
 
 import lagos from "../regions/ng-lagos.json" with { type: "json" };
 import lahore from "../regions/pk-lahore.json" with { type: "json" };
+import london from "../regions/uk-london.json" with { type: "json" };
 
 export interface Pack {
   id: string;
@@ -24,7 +25,7 @@ export interface Pack {
   keyterms?: string[];
 }
 
-export const PACKS: Pack[] = [lagos as Pack, lahore as Pack];
+export const PACKS: Pack[] = [lagos as Pack, lahore as Pack, london as Pack];
 
 export function packFor(id: string | null | undefined): Pack | undefined {
   return PACKS.find((p) => p.id === id);

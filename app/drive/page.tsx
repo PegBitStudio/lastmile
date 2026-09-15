@@ -36,6 +36,7 @@ const AGENT_IDS = {
   byRegion: {
     "ng-lagos": process.env.NEXT_PUBLIC_AGENT_ID_NG_LAGOS,
     "pk-lahore": process.env.NEXT_PUBLIC_AGENT_ID_PK_LAHORE,
+    "uk-london": process.env.NEXT_PUBLIC_AGENT_ID_UK_LONDON,
   },
 };
 

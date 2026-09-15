@@ -57,3 +57,8 @@ docs/working-plan.html
 docs/hackathon-brief.md
 docs/lastmile-partner-brief.html
 .claude/
+
+# python
+__pycache__/
+*.pyc
+measurement/audio*/

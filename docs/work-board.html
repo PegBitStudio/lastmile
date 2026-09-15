@@ -117,7 +117,7 @@ footer{border-top:1px solid var(--rule);margin-top:2rem;padding-top:.9rem;font-f
 <div class="wrap" id="app"></div>
 
 <script id="boot">
-const STATE = /*S*/{"v":1,"updated":"2026-09-14","blockers":{"D":"","Y":""},"tasks":[
+const STATE = /*S*/{"v":1,"updated":"2026-09-15","blockers":{"D":"","Y":""},"tasks":[
 {"id":"n1","w":"now","o":"D","s":"done","t":1,"x":"Send Yashfa the three Discord messages"},
 {"id":"n2","w":"now","o":"B","s":"done","t":1,"x":"AssemblyAI account through the event's tracked signup link","n":"Log out of any old account first and accept cookies, or the $50 credit does not attach","d":"2026-09-07"},
 {"id":"n3","w":"now","o":"B","s":"done","t":1,"x":"Run the voice agent quickstart locally and hear it reply"},
@@ -134,8 +134,8 @@ const STATE = /*S*/{"v":1,"updated":"2026-09-14","blockers":{"D":"","Y":""},"tas
 {"id":"a8","w":"w1","o":"D","s":"done","t":0,"d":"2026-09-10","x":"Delivery event schema committed as v1"},
 {"id":"a9","w":"w1","o":"Y","s":"todo","t":1,"x":"Read the spec and the architecture doc","n":"Post questions as you go. Do not save them up"},
 {"id":"a10","w":"w1","o":"Y","s":"done","t":1,"d":"2026-09-10","x":"Lahore pack first draft: 30 to 50 keyterms","n":"39 Lahore keyterms from Yashfa, committed as regions/pk-lahore.json with vocabulary and aliases"},
-{"id":"a11","w":"w1","o":"Y","s":"todo","t":0,"x":"Decide: word error rate, or exact match on the address only"},
-{"id":"a12","w":"w1","o":"Y","s":"todo","t":0,"x":"Decide: Urdu script keyterms, or is romanised enough"},
+{"id":"a11","w":"w1","o":"Y","s":"done","t":0,"d":"2026-09-15","x":"Decide: word error rate, or exact match on the address only","n":"Both: exact match is the headline, WER the diagnostic. Her script reports each"},
+{"id":"a12","w":"w1","o":"Y","s":"done","t":0,"d":"2026-09-15","x":"Decide: Urdu script keyterms, or is romanised enough","n":"Romanised. Yashfa's pack settled it"},
 {"id":"b1","w":"w2","o":"D","s":"done","t":0,"d":"2026-09-10","x":"The safety gate: no session unless the vehicle is stopped","n":"Three states, not two. A device that cannot report speed answers unknown, and unknown allows"},
 {"id":"b2","w":"w2","o":"D","s":"done","t":0,"d":"2026-09-10","x":"Speed override for the demo","n":"coords.speed is null on most laptops. Without this the opening shot of the video cannot be filmed"},
 {"id":"b3","w":"w2","o":"D","s":"done","t":0,"d":"2026-09-10","x":"Manifest on screen, current stop selected, tap to change it","n":"A tappable route, locked while a report is open. Cash stops are marked, because that changes what the agent must ask"},
@@ -147,12 +147,12 @@ const STATE = /*S*/{"v":1,"updated":"2026-09-14","blockers":{"D":"","Y":""},"tas
 {"id":"b9","w":"w2","o":"D","s":"done","t":0,"d":"2026-09-10","x":"/board with the three evidence columns, refreshing every 2 seconds","n":"Three columns kept visibly apart. A far GPS reading is flagged, never blocking. Layout checked with stubbed data; not yet seen with a real database"},
 {"id":"b5a","w":"w2","o":"D","s":"done","t":1,"d":"2026-09-14","x":"Run the database round trip once against a real Postgres","n":"Checked against a real Postgres"},
 {"id":"b10","w":"w2","o":"B","s":"done","t":0,"d":"2026-09-14","x":"Talk to two people who have actually run last-mile","n":"Dami's own experience, written up in docs/interviews.md. One outside chat still worth having"},
-{"id":"b11","w":"w2","o":"Y","s":"todo","t":0,"x":"Lahore pack finished and committed as JSON"},
-{"id":"b12","w":"w2","o":"Y","s":"todo","t":0,"x":"UK / London pack written"},
+{"id":"b11","w":"w2","o":"Y","s":"done","t":0,"d":"2026-09-15","x":"Lahore pack finished and committed as JSON","n":"Merged with Dami's draft, 100 keyterms, at the API cap"},
+{"id":"b12","w":"w2","o":"Y","s":"done","t":0,"d":"2026-09-15","x":"UK / London pack written","n":"Written by Yashfa, wired in with six London stops and its own agent"},
 {"id":"b13","w":"w2","o":"Y","s":"todo","t":0,"x":"Recording setup working: quiet room, phone mic, consistent method"},
 {"id":"b14","w":"w2","o":"Y","s":"todo","t":0,"x":"First 20 Lahore addresses recorded, with the correct text written out"},
-{"id":"b15","w":"w2","o":"Y","s":"todo","t":0,"x":"Measurement script: audio in, transcript out, comparison as CSV"},
-{"id":"c1","w":"w3","o":"D","s":"todo","t":0,"x":"Lagos pack written"},
+{"id":"b15","w":"w2","o":"Y","s":"done","t":0,"d":"2026-09-15","x":"Measurement script: audio in, transcript out, comparison as CSV","n":"Runs each clip twice, keyterms on and off, and writes the frozen CSV columns"},
+{"id":"c1","w":"w3","o":"D","s":"done","t":0,"d":"2026-09-15","x":"Lagos pack written","n":"Lagos pack written and live on its own agent"},
 {"id":"c2","w":"w3","o":"D","s":"done","t":0,"d":"2026-09-14","x":"Region switcher in the interface","n":"One agent per region, because keyterms live on the agent. Screen warns if a region has no agent of its own"},
 {"id":"c3","w":"w3","o":"D","s":"todo","t":0,"x":"Road-noise testing. Tune silence threshold and barge-in","n":"Starting values now set in agents/driver.json: vad_threshold 0.4, min_silence 900, max_silence 2200, interrupt_response true. They are guesses until tested against real noise"},
 {"id":"c4","w":"w3","o":"D","s":"todo","t":0,"x":"Record the backup demo video of the full flow","n":"Before we need it"},
