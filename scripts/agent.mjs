@@ -15,6 +15,31 @@
 
 import { readFile } from "node:fs/promises";
 
+/**
+ * Read .env.local, the same file Next reads.
+ *
+ * Without this the key has to be exported in the shell, and the Unix way of doing
+ * that on one line does not work in PowerShell. Putting it in a file that git
+ * already ignores is one less thing to get wrong.
+ */
+async function loadEnvLocal() {
+  let text;
+  try {
+    text = await readFile(".env.local", "utf8");
+  } catch {
+    return;
+  }
+  for (const line of text.split(/\r?\n/)) {
+    const m = /^\s*([A-Z0-9_]+)\s*=\s*(.*)$/.exec(line);
+    if (!m) continue;
+    const value = m[2].trim().replace(/^["']|["']$/g, "");
+    // A real environment variable always wins over the file.
+    if (value && process.env[m[1]] === undefined) process.env[m[1]] = value;
+  }
+}
+
+await loadEnvLocal();
+
 const BASE = "https://agents.assemblyai.com/v1/agents";
 const key = process.env.ASSEMBLYAI_API_KEY;
 

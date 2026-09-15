@@ -10,7 +10,7 @@
     "tools:sync": "node --experimental-strip-types scripts/sync-tools.mjs",
     "agent:create": "node --experimental-strip-types scripts/agent.mjs create",
     "agent:update": "node --experimental-strip-types scripts/agent.mjs update",
-    "agent:list": "node scripts/agent.mjs list"
+    "agent:list": "node --experimental-strip-types scripts/agent.mjs list"
   },
   "dependencies": {
     "next": "15.5.25",

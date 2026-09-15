@@ -8,11 +8,15 @@ in the history, next to the code that depends on it.
 
 ## Create or update the agent
 
-Set your key first. It is never committed.
+Put your key in `.env.local`, in the project root. Git ignores that file, and the
+script reads it, so nothing has to be typed into a terminal.
 
-```bash
-export ASSEMBLYAI_API_KEY=your_key_here
 ```
+ASSEMBLYAI_API_KEY=your_key_here
+```
+
+The commands below are written for PowerShell, which is what Windows uses.
+`REGION=x npm run ...` is Linux syntax and will not work there.
 
 **Create** — do this once, then keep the id it returns:
 
@@ -36,15 +40,15 @@ and the driver screen picks the right one when you switch country.
 A region pack is merged in at send time: its keyterms, plus a short "local words"
 section added to the prompt so the model knows a chowkidar is security.
 
-```bash
-REGION=ng-lagos  npm run agent:create   # put the id in NEXT_PUBLIC_AGENT_ID_NG_LAGOS
-REGION=pk-lahore npm run agent:create   # put the id in NEXT_PUBLIC_AGENT_ID_PK_LAHORE
+```powershell
+$env:REGION="ng-lagos";  npm run agent:create   # id goes in NEXT_PUBLIC_AGENT_ID_NG_LAGOS
+$env:REGION="pk-lahore"; npm run agent:create   # id goes in NEXT_PUBLIC_AGENT_ID_PK_LAHORE
 ```
 
 Update each one the same way, with its own id:
 
-```bash
-REGION=pk-lahore AGENT_ID=the_lahore_id npm run agent:update
+```powershell
+$env:REGION="pk-lahore"; $env:AGENT_ID="the_lahore_id"; npm run agent:update
 ```
 
 Set both ids in `.env.local` and in Vercel. A region without its own id falls back
