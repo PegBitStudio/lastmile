@@ -11,6 +11,7 @@
  */
 
 import {
+  FAR_FROM_DROP_M,
   toolResult,
   type DeliveryEvent,
   type ManifestDrop,
@@ -193,6 +194,8 @@ export class DeliveryDraft {
   event: DeliveryEvent;
   /** Set once close_session has been accepted. The record is final after this. */
   closed = false;
+  /** The distance has been mentioned. Once is information; twice is an accusation. */
+  private saidFar = false;
   // Written out longhand rather than as constructor parameter properties, because
   // node --experimental-strip-types removes types without rewriting anything, and
   // a parameter property is a type annotation that has to become an assignment.
@@ -260,7 +263,24 @@ export class DeliveryDraft {
       ...stated
     } = args;
     this.event = merge(this.event, stated);
-    return toolResult(this.event, this.drop, this.pack);
+    const result = toolResult(this.event, this.drop, this.pack);
+
+    // The phone thinks the driver is nowhere near the address on the manifest.
+    // Worth saying out loud once, because the usual cause is a wrong address in
+    // the system and the driver is the only person who can tell us. It is never
+    // a challenge to their account, and it never holds the record up.
+    const far = this.event.observed?.gps_delta_m;
+    if (!this.saidFar && typeof far === "number" && far > FAR_FROM_DROP_M) {
+      this.saidFar = true;
+      result.instruction =
+        "First, say once: the phone puts you about " +
+        Math.round(far / 10) * 10 +
+        " metres from the address on the manifest. Ask if they want that noted, and " +
+        "put whatever they say in location.notes. Do not argue and do not ask twice. " +
+        "Then: " +
+        result.instruction;
+    }
+    return result;
   }
 
   /**

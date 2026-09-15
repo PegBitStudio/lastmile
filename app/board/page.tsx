@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import type { DeliveryEvent, ManifestDrop, MissingField } from "@/lib/requirements";
+import { FAR_FROM_DROP_M, type DeliveryEvent, type ManifestDrop, type MissingField } from "@/lib/requirements";
 import manifest from "@/data/manifest.fixture.json";
 
 /**
@@ -123,7 +123,7 @@ function Observed({ event }: { event: DeliveryEvent }) {
   const o = event.observed;
   if (!o) return <p style={S.nothing}>—</p>;
 
-  const far = typeof o.gps_delta_m === "number" && o.gps_delta_m > 250;
+  const far = typeof o.gps_delta_m === "number" && o.gps_delta_m > FAR_FROM_DROP_M;
   return (
     <>
       {o.stationary && (

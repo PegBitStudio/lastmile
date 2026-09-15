@@ -250,3 +250,32 @@ test("a lookup only searches the region the agent is serving", () => {
   };
   assert.equal(ok.found, true);
 });
+
+test("being far from the address is mentioned once, and never blocks the record", () => {
+  const d = new DeliveryDraft(plain);
+  d.observe({ gps_delta_m: 640 });
+
+  const first = d.apply({ outcome: "rescheduled" });
+  assert.match(first.instruction, /640 metres from the address/);
+  assert.match(first.instruction, /Do not argue/);
+
+  // Said once. A second mention reads as an accusation.
+  const second = d.apply({ next_action: "reattempt_tomorrow" });
+  assert.doesNotMatch(second.instruction, /metres from the address/);
+
+  // Advisory only: the record is complete and closes normally.
+  assert.equal(second.complete, true);
+  assert.equal(d.close({}).closed, true);
+});
+
+test("a normal distance is never mentioned", () => {
+  const d = new DeliveryDraft(plain);
+  d.observe({ gps_delta_m: 40 });
+  assert.doesNotMatch(d.apply({ outcome: "rescheduled" }).instruction, /metres/);
+});
+
+test("no position at all is not treated as far away", () => {
+  const d = new DeliveryDraft(plain);
+  d.observe({ stationary: "unknown" });
+  assert.doesNotMatch(d.apply({ outcome: "rescheduled" }).instruction, /metres/);
+});

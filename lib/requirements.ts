@@ -44,6 +44,19 @@ export type NextAction =
 
 export type PaymentMethod = "cash" | "card" | "transfer" | "none";
 
+/**
+ * How far from the manifest address counts as "somewhere else".
+ *
+ * A phone's own error is tens of metres, and a big estate is a hundred across, so
+ * anything under this is normal life. 250 m is a first guess that needs one real
+ * test before the video — open decision 2 in the plan.
+ *
+ * It is advisory in every direction. It never blocks a record, never contradicts
+ * the driver, and the agent mentions it once at most. Two independent columns; the
+ * dispatcher decides. Spec §3.2.
+ */
+export const FAR_FROM_DROP_M = 250;
+
 /** The machine-observed column. Written by the app from the device, never by the
  *  agent and never by the driver. The follow-up table never asks about any of it. */
 export interface Observed {
