@@ -1,0 +1,359 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lastmile — Live voice test</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<style>
+:root{
+  --paper:#F4F5F2; --surface:#FFFFFF; --surface-2:#ECEEE9;
+  --ink:#14171A; --ink-soft:#3E4650; --mute:#7C7A73; --rule:#D4D6CF;
+  --amber:#C06E05; --amber-soft:#F5E3C6;
+  --moss:#2F6B4F;  --moss-soft:#D8E6DD;
+  --rust:#A33B22;  --rust-soft:#F6DDD6;
+  --display:"Archivo Narrow","Arial Narrow",Helvetica,sans-serif;
+  --body:"Source Serif 4",Georgia,"Times New Roman",serif;
+  --mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  --gutter:clamp(1rem,3.5vw,2.5rem);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#101316; --surface:#171B1F; --surface-2:#1E242A;
+  --ink:#ECEEE9; --ink-soft:#B4BCC4; --mute:#878E94; --rule:#2C333A;
+  --amber:#E9A23B; --amber-soft:#3A2C13;
+  --moss:#6FBF95;  --moss-soft:#17301F;
+  --rust:#E38166;  --rust-soft:#3A1C14;
+}}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--body);line-height:1.55;-webkit-font-smoothing:antialiased}
+.wrap{max-width:52rem;margin:0 auto;padding:0 var(--gutter) 5rem}
+
+.top{position:sticky;top:0;z-index:30;background:var(--paper);border-bottom:2px solid var(--ink);padding:.9rem 0 .7rem;margin-bottom:1.5rem}
+.toprow{display:flex;flex-wrap:wrap;align-items:baseline;gap:.4rem 1.25rem}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(1.4rem,4vw,1.9rem);letter-spacing:-.015em;margin:0;line-height:1}
+.label{font-family:var(--mono);font-size:.625rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mute);margin:0}
+.score{margin-left:auto;font-family:var(--mono);font-size:.6875rem;letter-spacing:.08em;text-transform:uppercase;color:var(--mute)}
+.score b{font-family:var(--display);font-size:1.05rem;color:var(--ink);letter-spacing:0}
+.score .bad b{color:var(--rust)}
+
+h2{font-family:var(--display);font-weight:700;font-size:1.15rem;letter-spacing:-.01em;margin:0}
+h3{font-family:var(--display);font-weight:600;font-size:.95rem;margin:1.25rem 0 .4rem}
+p{margin:.55rem 0}
+.lede{font-size:1.05rem;color:var(--ink-soft)}
+code,kbd{font-family:var(--mono);font-size:.85em;background:var(--surface-2);padding:.1rem .3rem;border-radius:2px}
+a{color:var(--amber)}
+
+.note{border-left:3px solid var(--amber);background:var(--amber-soft);padding:.7rem .9rem;border-radius:0 3px 3px 0;margin:1rem 0;font-size:.95rem}
+.alarm{border-left:3px solid var(--rust);background:var(--rust-soft);padding:.7rem .9rem;border-radius:0 3px 3px 0;margin:1rem 0;font-size:.95rem}
+.alarm strong,.note strong{font-weight:600}
+
+.setup{border:1px solid var(--rule);background:var(--surface);border-radius:3px;padding:.9rem 1rem;margin:1.25rem 0 2rem}
+.setup ol{margin:.4rem 0 0;padding-left:1.1rem}
+.setup li{margin:.3rem 0}
+
+/* a test */
+.test{border:1px solid var(--rule);background:var(--surface);border-radius:4px;margin:0 0 1rem;overflow:hidden}
+.test.pass{border-color:var(--moss)}
+.test.fail{border-color:var(--rust)}
+.thead{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.7rem .95rem;border-bottom:1px solid var(--rule);background:var(--surface-2)}
+.num{font-family:var(--display);font-weight:700;font-size:.75rem;width:1.5rem;height:1.5rem;flex:none;border-radius:50%;background:var(--ink);color:var(--paper);display:inline-flex;align-items:center;justify-content:center}
+.tname{font-family:var(--display);font-weight:600;font-size:1rem}
+.marks{margin-left:auto;display:flex;gap:.35rem}
+.mark{font-family:var(--mono);font-size:.625rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .55rem;border:1px solid var(--rule);border-radius:2px;background:none;color:var(--mute);cursor:pointer}
+.mark:hover{color:var(--ink);border-color:var(--ink)}
+.mark[aria-pressed="true"].ok{background:var(--moss);border-color:var(--moss);color:#fff}
+.mark[aria-pressed="true"].no{background:var(--rust);border-color:var(--rust);color:#fff}
+.mark:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.tbody{padding:.85rem .95rem}
+
+.say{font-family:var(--display);font-size:1.1rem;font-weight:600;background:var(--surface-2);border-left:3px solid var(--ink);padding:.6rem .8rem;border-radius:0 3px 3px 0;margin:.7rem 0}
+.say::before{content:"Say: ";font-family:var(--mono);font-size:.625rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);display:block;margin-bottom:.2rem}
+
+ul.expect{list-style:none;margin:.5rem 0;padding:0}
+ul.expect li{position:relative;padding-left:1.4rem;margin:.28rem 0;font-size:.95rem}
+ul.expect li::before{content:"→";position:absolute;left:0;color:var(--moss);font-family:var(--mono)}
+ul.expect li.bad::before{content:"×";color:var(--rust)}
+
+textarea{width:100%;margin-top:.6rem;font-family:var(--body);font-size:.92rem;color:var(--ink);background:var(--paper);border:1px solid var(--rule);border-radius:3px;padding:.5rem .6rem;resize:vertical;min-height:2.6rem}
+textarea:focus-visible{outline:2px solid var(--amber);outline-offset:1px}
+
+.tools{display:flex;flex-wrap:wrap;gap:.5rem;margin:1.5rem 0}
+button.act{font-family:var(--mono);font-size:.6875rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;background:none;color:var(--mute);border:1px solid var(--rule);border-radius:2px;padding:.45rem .75rem;cursor:pointer}
+button.act:hover{color:var(--ink);border-color:var(--ink)}
+button.act:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+
+footer{border-top:1px solid var(--rule);margin-top:2.5rem;padding-top:.9rem;font-family:var(--mono);font-size:.625rem;letter-spacing:.09em;text-transform:uppercase;color:var(--mute);display:flex;flex-wrap:wrap;gap:.5rem 1.5rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div class="toprow">
+    <h1>Live voice test</h1>
+    <p class="label">Lastmile &middot; 10 minutes</p>
+    <span class="score" id="score"></span>
+  </div>
+</header>
+
+<p class="lede">Nothing in this project has ever heard a real human voice. Everything is built and
+unit-tested, which is not the same thing.</p>
+
+<div class="setup">
+  <p class="label">Before you start</p>
+  <ol>
+    <li>Run <code>npm run dev</code></li>
+    <li>Driver screen: <code>http://localhost:3000/drive</code></li>
+    <li>Board, in a second window: <code>http://localhost:3000/board</code></li>
+  </ol>
+  <p style="margin-bottom:0;font-size:.92rem;color:var(--ink-soft)">If the board says
+  <em>"No database on this deployment"</em>, stop. <code>DATABASE_URL</code> is missing from
+  <code>.env.local</code> and nothing will save.</p>
+</div>
+
+<!-- 1 -->
+<section class="test" data-id="gate">
+  <div class="thead">
+    <span class="num">1</span><span class="tname">The gate holds</span>
+    <span class="marks"><button class="mark ok" type="button" aria-pressed="false">Pass</button><button class="mark no" type="button" aria-pressed="false">Fail</button></span>
+  </div>
+  <div class="tbody">
+    <p>Open <code>/drive?speed=36</code></p>
+    <ul class="expect">
+      <li>Red bar: <em>"Waiting until you've stopped &mdash; 36 km/h"</em></li>
+      <li>A black <strong>SIMULATED SPEED</strong> tag</li>
+      <li>The button is grey and dead</li>
+    </ul>
+    <p>Now change it to <code>/drive?speed=0</code></p>
+    <ul class="expect">
+      <li>Green bar, and the button turns black: <em>"Report a drop"</em></li>
+    </ul>
+    <textarea placeholder="What happened instead?"></textarea>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="test" data-id="core">
+  <div class="thead">
+    <span class="num">2</span><span class="tname">One sentence, one question</span>
+    <span class="marks"><button class="mark ok" type="button" aria-pressed="false">Pass</button><button class="mark no" type="button" aria-pressed="false">Fail</button></span>
+  </div>
+  <div class="tbody">
+    <p>Stay on <code>?speed=0</code>. Leave <strong>Nigeria / Lagos</strong> selected, tap the first
+    stop, press <strong>Report a drop</strong>, and wait for <em>"Listening. Go ahead."</em></p>
+    <p>Then speak normally. Do not slow down for the machine.</p>
+    <p class="say">Customer wasn't in, I left it with the gateman at the side gate.</p>
+    <ul class="expect">
+      <li>Your words appear on screen as you speak</li>
+      <li>The record fills in: outcome, who took it, entrance</li>
+      <li>It asks <strong>one</strong> question, and it is about the <strong>name</strong></li>
+      <li class="bad">It does <strong>not</strong> ask what happened, where, or which stop</li>
+    </ul>
+    <p class="say">His name is Musa.</p>
+    <ul class="expect">
+      <li>It reads the record back <strong>once</strong></li>
+      <li>It stops listening by itself &mdash; you never press Stop</li>
+      <li>Within 2 seconds the record is on the board, tagged <strong>closed</strong></li>
+    </ul>
+    <div class="alarm"><strong>This is the one that matters.</strong> If it asks about something you
+    already said, the missing-field list is not reaching it. That is the whole product failing, and
+    I need to know at once.</div>
+    <textarea placeholder="What happened instead?"></textarea>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="test" data-id="board">
+  <div class="thead">
+    <span class="num">3</span><span class="tname">The board tells the truth</span>
+    <span class="marks"><button class="mark ok" type="button" aria-pressed="false">Pass</button><button class="mark no" type="button" aria-pressed="false">Fail</button></span>
+  </div>
+  <div class="tbody">
+    <p>Find that record on the board.</p>
+    <ul class="expect">
+      <li><strong>Stated</strong> shows your words</li>
+      <li><strong>Observed</strong> shows <code>stationary</code> and the time &mdash;
+          <code>unknown</code> is correct on a laptop</li>
+      <li><strong>Proof</strong> says <em>"not captured in this build"</em></li>
+      <li>A <strong>hear</strong> button sits beside the name. Press it: you should hear yourself</li>
+    </ul>
+    <div class="note">Wait about 10 seconds and look again. If the second model was unsure of
+    "Musa", the card gets a red <strong>NEEDS REVIEW</strong> tag and the name is underlined.
+    Either result is fine &mdash; just tell me which one you got.</div>
+    <textarea placeholder="Flagged, or not? Anything odd?"></textarea>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="test" data-id="region">
+  <div class="thead">
+    <span class="num">4</span><span class="tname">A different country</span>
+    <span class="marks"><button class="mark ok" type="button" aria-pressed="false">Pass</button><button class="mark no" type="button" aria-pressed="false">Fail</button></span>
+  </div>
+  <div class="tbody">
+    <p>Back on the driver screen, tap <strong>Pakistan / Lahore</strong>. The route changes to the
+    Lahore stops. Tap one and press <strong>Report a drop</strong>.</p>
+    <p class="say">Nobody was home, gave it to the chowkidar at the main gate. His name is Bilal.</p>
+    <ul class="expect">
+      <li>"chowkidar" is transcribed correctly &mdash; not "chalk a dar"</li>
+      <li>The record says the relationship is <strong>security</strong></li>
+      <li>Nothing else is asked, because you gave everything</li>
+    </ul>
+    <p style="font-size:.92rem;color:var(--ink-soft)">This is the region pack earning its keep, and
+    it is the strongest twenty seconds of the video.</p>
+    <textarea placeholder="What did it write down?"></textarea>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="test" data-id="cash">
+  <div class="thead">
+    <span class="num">5</span><span class="tname">Cash</span>
+    <span class="marks"><button class="mark ok" type="button" aria-pressed="false">Pass</button><button class="mark no" type="button" aria-pressed="false">Fail</button></span>
+  </div>
+  <div class="tbody">
+    <p>Tap <strong>Nigeria / Lagos</strong>, then the stop marked <strong>COLLECT 18,500</strong>.</p>
+    <p class="say">Delivered to the customer, Folake. She only had ten thousand, paid cash.</p>
+    <ul class="expect">
+      <li>It asks <strong>what happens next</strong>, and nothing else</li>
+      <li class="bad">It does <strong>not</strong> ask why the money was short &mdash; it already knows</li>
+      <li>The board shows <code>collected 10000 of 18500 — short</code></li>
+    </ul>
+    <textarea placeholder="What happened instead?"></textarea>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="test" data-id="phone">
+  <div class="thead">
+    <span class="num">6</span><span class="tname">The phone</span>
+    <span class="marks"><button class="mark ok" type="button" aria-pressed="false">Pass</button><button class="mark no" type="button" aria-pressed="false">Fail</button></span>
+  </div>
+  <div class="tbody">
+    <p>Test 2 again &mdash; on your phone, on mobile data, on the Vercel URL. Allow the microphone
+    and the location when asked.</p>
+    <ul class="expect">
+      <li>The agent is audible through the phone speaker</li>
+      <li>The gate shows a real speed rather than <code>unknown</code></li>
+    </ul>
+    <textarea placeholder="What happened instead?"></textarea>
+  </div>
+</section>
+
+<h3>If something goes wrong</h3>
+<p>Send all three. Any one alone is usually not enough.</p>
+<ul class="expect">
+  <li><strong>What you said, and what it said back</strong> &mdash; copy the lines off the screen</li>
+  <li><strong>The browser console</strong> &mdash; press <kbd>F12</kbd>, click Console, copy anything red</li>
+  <li><strong>The terminal</strong> running <code>npm run dev</code> &mdash; the last 20 lines</li>
+</ul>
+<p>The most useful sentence you can send is <em>"it asked me X after I had already said Y"</em>,
+because that names the failure exactly.</p>
+
+<div class="tools">
+  <button class="act" type="button" id="copy">Copy results</button>
+  <button class="act" type="button" id="reset">Clear</button>
+</div>
+
+<p style="font-size:.95rem;color:var(--ink-soft)">If tests 1 to 3 pass, the demo can be filmed.
+If test 2 fails, nothing else matters until it is fixed.</p>
+
+<footer>
+  <span>Lastmile &middot; live voice test</span>
+  <span>Same content as docs/live-test.md</span>
+  <span>Marks save in this browser only</span>
+</footer>
+
+</div>
+
+<script>
+(function () {
+  var KEY = "lastmile-live-test-v1";
+  var tests = Array.prototype.slice.call(document.querySelectorAll(".test"));
+
+  var saved = {};
+  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { saved = {}; }
+
+  function save() {
+    var out = {};
+    tests.forEach(function (t) {
+      var id = t.dataset.id;
+      out[id] = { mark: t.dataset.mark || "", note: t.querySelector("textarea").value };
+    });
+    try { localStorage.setItem(KEY, JSON.stringify(out)); } catch (e) { /* private window */ }
+  }
+
+  function paint(t) {
+    var mark = t.dataset.mark || "";
+    t.classList.toggle("pass", mark === "ok");
+    t.classList.toggle("fail", mark === "no");
+    t.querySelectorAll(".mark").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.classList.contains(mark)));
+    });
+  }
+
+  function tally() {
+    var pass = 0, fail = 0;
+    tests.forEach(function (t) {
+      if (t.dataset.mark === "ok") pass++;
+      if (t.dataset.mark === "no") fail++;
+    });
+    document.getElementById("score").innerHTML =
+      "<b>" + pass + "</b> passed &nbsp; <span class='" + (fail ? "bad" : "") + "'><b>" +
+      fail + "</b> failed</span> &nbsp; of " + tests.length;
+  }
+
+  tests.forEach(function (t) {
+    var id = t.dataset.id;
+    if (saved[id]) {
+      t.dataset.mark = saved[id].mark || "";
+      t.querySelector("textarea").value = saved[id].note || "";
+    }
+    paint(t);
+
+    t.querySelectorAll(".mark").forEach(function (b) {
+      b.addEventListener("click", function () {
+        var want = b.classList.contains("ok") ? "ok" : "no";
+        // Clicking the mark it already has clears it, so a mis-tap is undoable.
+        t.dataset.mark = t.dataset.mark === want ? "" : want;
+        paint(t); tally(); save();
+      });
+    });
+
+    t.querySelector("textarea").addEventListener("input", save);
+  });
+
+  tally();
+
+  document.getElementById("copy").addEventListener("click", function () {
+    var lines = ["Lastmile live voice test — " + new Date().toISOString().slice(0, 10), ""];
+    tests.forEach(function (t, i) {
+      var mark = t.dataset.mark === "ok" ? "PASS" : t.dataset.mark === "no" ? "FAIL" : "not run";
+      var note = t.querySelector("textarea").value.trim();
+      lines.push((i + 1) + ". " + t.querySelector(".tname").textContent + " — " + mark);
+      if (note) lines.push("   " + note);
+    });
+    var text = lines.join("\n");
+    var done = function () {
+      var b = document.getElementById("copy");
+      b.textContent = "Copied";
+      setTimeout(function () { b.textContent = "Copy results"; }, 1500);
+    };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () { window.prompt("Copy this:", text); });
+    else window.prompt("Copy this:", text);
+  });
+
+  document.getElementById("reset").addEventListener("click", function () {
+    tests.forEach(function (t) {
+      t.dataset.mark = "";
+      t.querySelector("textarea").value = "";
+      paint(t);
+    });
+    tally(); save();
+  });
+})();
+</script>
+</body>
+</html>
