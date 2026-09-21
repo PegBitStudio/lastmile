@@ -80,3 +80,7 @@ Format:
   scores every word (0.40 to 1.00 on the sample). We already keep each cited turn as a WAV, so a
   second model reviews it. Two AssemblyAI models disagreeing turned out to be the best "not sure"
   signal we have.
+- 2026-09-21 — Dami — Without keyterms, two of twenty Lahore addresses came back in Devanagari
+  script: the recogniser heard South Asian speech and stopped transcribing English. With the pack
+  on, both were perfect. The region pack is not only spelling help, it keeps the recogniser in the
+  right language.

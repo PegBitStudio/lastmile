@@ -1,0 +1,21 @@
+pack_id,utterance_id,ground_truth,transcript_no_keyterms,transcript_with_keyterms,score_before,score_after,exact_before,exact_after
+pk-lahore,LHR-01,"24-A, Block H, Johar Town, Lahore","24A, Block H, Johar Town, Lahore.","24A, Block H, Johar Town, Lahore.",0.2857,0.2857,No,No
+pk-lahore,LHR-02,"House 17, Street 6, Phase 5, DHA Lahore","House 17, Street 6, Phase 5, DH, Lahore.","House 17, Street 6, Phase 5, DHA Lahore.",0.125,0.0,No,Yes
+pk-lahore,LHR-03,"Flat 8, Block C, Gulberg III, Lahore","Flat 8, Block C, Gulberg 3, Lahore.","Flat 8, Block C, Gulberg III, Lahore.",0.1429,0.0,No,Yes
+pk-lahore,LHR-04,"House 42, Street 11, Model Town, Lahore","House 42, Street 11, Model Town, Lahore.","House 42, Street 11, Model Town, Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-05,"Apartment 12, Block E, Wapda Town, Lahore",अपार्टमेंट टwelve ब्लॉक ई वॉप डे टाउन लाहौर,"Apartment 12, Block E, Wapda Town, Lahore.",2.4286,0.0,No,Yes
+pk-lahore,LHR-06,"House 9, Street 4, Valencia Town, Lahore","House 9, Street 4, Valencia Town, Lahore.","House 9, Street 4, Valencia Town, Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-07,"Shop 14, Liberty Market, Gulberg, Lahore","Shop 14, Liberty Market, Gulberg, Lahore.","Shop 14, Liberty Market, Gulberg, Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-08,"Office 5, MM Alam Road, Gulberg III, Lahore","Office 5, M.M. Alam Road, Gulberg 3, Lahore.","Office 5, MM Alam Road, Gulberg III, Lahore.",0.375,0.0,No,Yes
+pk-lahore,LHR-09,"House 31, Street 8, Garden Town, Lahore","House 31, Street 8, Garden Town, Lahore.","House 31, Street 8, Garden Town, Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-10,"Flat 3, Block B, Faisal Town, Lahore","Flat 3, Block B, Faisal Town, Lahore.","Flat 3, Block B, Faisal Town, Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-11,"House 18, Street 2, Phase 6, DHA Lahore","House 18, Street 2, Phase 6, DHA, Lahore.","House 18, Street 2, Phase 6, DHA Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-12,"Apartment 7, Block F, Bahria Town Lahore",एपार्टमेंट सेवन ब्लॉक एफ बाहरी टाउन लाहौर।,"Apartment 7, Block F, Bahria Town, Lahore.",2.4286,0.0,No,Yes
+pk-lahore,LHR-13,"House 55, Street 9, Askari 10, Lahore","House 55, Street 9, Askari 10, Lahore.","House 55, Street 9, Askari 10, Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-14,"Shop 6, Main Boulevard, DHA Phase 4, Lahore","Shop 6, Main Boulevard, DHA Phase 4, Lahore.","Shop 6, Main Boulevard, DHA Phase 4, Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-15,"House 27, Street 5, Lake City, Lahore","House 27, Street 5, Lake City, Lahore.","House 27, Street 5, Lake City, Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-16,"Flat 15, Block D, Model Town Extension, Lahore","Flat 15, Block D, Model Town Extension, Lahore.","Flat 15, Block D, Model Town Extension, Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-17,"Office 21, Emporium Mall, Johar Town, Lahore","Office 21, Emporium Mall, Johar Town, Lahore.","Office 21, Emporium Mall, Johar Town, Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-18,"House 63, Street 7, Township, Lahore","House 63, Street 7, Township Lahore.","House 63, Street 7, Township Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-19,"Flat 4, Block A, Gulberg III, near Liberty Market, Lahore","Flat 4, Block A, Gulbeg 3, near Liberty Market, Lahore.","Flat 4, Block A, Gulberg III, near Liberty Market, Lahore.",0.2,0.0,No,Yes
+pk-lahore,LHR-20,"House 36, Street 10, Wapda Town, near Canal Road, Lahore","House 36, Street 10, Wobdetown, near Canal Road, Lahore.","House 36, Street 10, Wapda Town, near Canal Road, Lahore.",0.2,0.0,No,Yes
