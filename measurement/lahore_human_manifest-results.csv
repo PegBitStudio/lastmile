@@ -1,0 +1,6 @@
+pack_id,utterance_id,ground_truth,transcript_no_keyterms,transcript_with_keyterms,score_before,score_after,exact_before,exact_after
+pk-lahore,LHR-01,"24-A, Block H, Johar Town, Lahore","24A Block H, Johar Town, Lahore.","24A Block H, Johar Town, Lahore.",0.0,0.0,Yes,Yes
+pk-lahore,LHR-02,"House number 17, street number 6, Phase 5, DHA Lahore","House number 17, street number 6, Phase 5, DHL Award.","House number 17, street number 6, Phase 5, DHA Lahore.",0.2,0.0,No,Yes
+pk-lahore,LHR-03,"Flat number 8, Block C, Gulberg III, Lahore","Flat number 8, Block C, Gulberg 3, Lahore.","Flat number 8, Block C, Gulberg III, Lahore.",0.125,0.0,No,Yes
+pk-lahore,LHR-04,"House number 42, street number 11, Model Town, Lahore","House number 48, street number 11, Model Town, Lahore.","House number 48, street number 11, Model Town, Lahore.",0.1111,0.1111,No,No
+pk-lahore,LHR-05,"Apartment number 12, Block E, Wapda Town, Lahore","Apartment number 12, Block E, Wapda Town, Lahore.","Apartment number 12, Block E, Wapda Town, Lahore.",0.0,0.0,Yes,Yes

@@ -62,3 +62,6 @@ docs/lastmile-partner-brief.html
 __pycache__/
 *.pyc
 measurement/audio*/
+
+# measurement working files
+measurement/audio-human/

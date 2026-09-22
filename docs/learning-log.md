@@ -84,3 +84,11 @@ Format:
   script: the recogniser heard South Asian speech and stopped transcribing English. With the pack
   on, both were perfect. The region pack is not only spelling help, it keeps the recogniser in the
   right language.
+- 2026-09-22 — Dami — On Yashfa's own voice, "DHA Lahore" came out as "DHL Award" with keyterms
+  off: the largest housing authority in Pakistan turned into a courier company, inside a delivery
+  app. Real speech gives a smaller gap than synthetic speech (40 to 80 percent, against 65 to 100),
+  and the real one is the number we should show.
+- 2026-09-22 — Dami — A scoring bug made every result look worse than it was: "24-A" and "24A"
+  were treated as different addresses because the normaliser split on the hyphen. It hit both
+  columns equally, so the comparison held, but each absolute number was wrong. Worth checking a
+  normaliser against its own edge cases before trusting any of its output.

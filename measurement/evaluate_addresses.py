@@ -47,6 +47,9 @@ TIMEOUT = 60
 def normalize(text: str) -> str:
     """Safe normalization for address matching; preserves word/number identity."""
     text = unicodedata.normalize("NFKC", text or "").casefold()
+    # Hyphens and apostrophes join a word rather than break it: "24-A" and "24A"
+    # are the same address, and splitting them scored a correct transcript wrong.
+    text = re.sub(r"[-‐-―'’]", "", text)
     text = re.sub(r"[^\w\s]", " ", text, flags=re.UNICODE)
     return re.sub(r"\s+", " ", text).strip()
 
