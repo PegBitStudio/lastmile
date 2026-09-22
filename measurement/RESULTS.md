@@ -3,30 +3,44 @@
 Every clip is transcribed twice: once with the pack's 100 Lahore keyterms, once
 without. Nothing else changes between the two runs.
 
-## Real voice — Yashfa, Lahore, 5 addresses
+## 1. Synthetic voice — 20 addresses, made first
 
-| | Keyterms off | Keyterms on |
-|---|---|---|
-| **Addresses fully correct** | **40%** | **80%** |
-| Average word error rate | 8.7% | 2.2% |
-
-## Synthetic voice — 20 addresses
+Text-to-speech stand-ins, generated on 2026-09-21 because no human recordings
+existed yet and the slide could not wait for them.
 
 | | Keyterms off | Keyterms on |
 |---|---|---|
 | **Addresses fully correct** | **65%** | **100%** |
 | Average word error rate | 29.5% | 0.0% |
 
+## 2. Real voice — Yashfa, Lahore, 5 addresses
+
+Recorded 2026-09-21 by a Lahore speaker reading her own city's addresses. This is
+the set that counts.
+
+| | Keyterms off | Keyterms on |
+|---|---|---|
+| **Addresses fully correct** | **40%** | **80%** |
+| Average word error rate | 8.7% | 2.2% |
+
 Run 2026-09-22. Model `universal-3-5-pro`. Rows in the two `-results.csv` files.
 
-**Lead with the human numbers.** The synthetic set is larger, and the gap is wider
-there, but a real Lahore speaker reading her own city's addresses is the evidence
-that counts. The synthetic set exists because it was made before her recordings
-arrived, and it stays because 20 clips show more failure modes than 5.
+**Both sets, in the order they happened.** The synthetic set came first and is
+larger, so it shows more failure modes. The real voice came a day later and is the
+evidence that counts — and note that its gap is *smaller*. Synthetic speech is
+cleaner than a person, which is why its keyterms-on score reaches a perfect 100%.
+**Quote the human numbers. Use the synthetic ones to show the failures.**
 
 ---
 
 ## What broke without the pack
+
+**On the synthetic voice**, two clips came back in **Devanagari script** — the
+recogniser heard South Asian speech and stopped transcribing English at all:
+
+> `अपार्टमेंट टwelve ब्लॉक ई वॉप डे टाउन लाहौर`
+
+Also `Wapda Town` → **`Wobdetown`**, `Gulberg` → **`Gulbeg`**, `DHA` → **`DH`**.
 
 **On the real voice:**
 
@@ -38,14 +52,6 @@ company, and "Lahore" became "Award". In a delivery app, of all the wrong words 
 choose.
 
 > *"Flat number 8, Block C, **Gulberg III**"* → **off:** `Gulberg 3`
-
-**On the synthetic voice**, two clips came back in **Devanagari script** with
-keyterms off — the recogniser heard South Asian speech and stopped transcribing
-English at all:
-
-> `अपार्टमेंट टwelve ब्लॉक ई वॉप डे टाउन लाहौर`
-
-Also `Wapda Town` → **`Wobdetown`**, `Gulberg` → **`Gulbeg`**, `DHA` → **`DH`**.
 
 A dispatcher searching for Wapda Town finds nothing. The parcel is lost inside the
 system even though the driver said the right thing.
