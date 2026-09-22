@@ -92,3 +92,8 @@ Format:
   were treated as different addresses because the normaliser split on the hyphen. It hit both
   columns equally, so the comparison held, but each absolute number was wrong. Worth checking a
   normaliser against its own edge cases before trusting any of its output.
+- 2026-09-22 — Dami — Keyterms can make recognition worse. London scored 60 percent with the pack
+  against 65 without, and one clip explained it all: the pack listed "W1", so the postcode "W11"
+  came back as "W1 1". A keyterm that is a prefix of a longer word can split that word. Dropping
+  the bare postcodes restored the score exactly. Without the keyterms-off control run we would
+  have shipped a pack that quietly damaged one of our three markets.

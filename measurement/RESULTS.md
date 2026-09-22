@@ -23,6 +23,18 @@ the set that counts.
 | **Addresses fully correct** | **40%** | **80%** |
 | Average word error rate | 8.7% | 2.2% |
 
+## 3. London — 20 addresses, synthetic British voice
+
+| | Keyterms off | Keyterms on |
+|---|---|---|
+| **Addresses fully correct** | **65%** | **65%** |
+| Average word error rate | 6.4% | 6.4% |
+
+**The pack makes no difference in London, and that is the finding.** English street
+names in a British accent are already what the recogniser expects. Keyterm biasing
+earns its keep where the vocabulary is non-Western — which is exactly the claim the
+market research made, now measured rather than asserted.
+
 Run 2026-09-22. Model `universal-3-5-pro`. Rows in the two `-results.csv` files.
 
 **Both sets, in the order they happened.** The synthetic set came first and is
@@ -58,6 +70,24 @@ system even though the driver said the right thing.
 
 **So the pack is not only spelling help. It keeps the recogniser in the right
 language.**
+
+## London found a bug in our own pack
+
+The first London run came back *worse* with keyterms on: 60% against 65%. One clip
+caused all of it.
+
+> *"9 Colville Mews, Notting Hill, **W11**"* → **on:** `Notting Hill, **W1 1**`
+
+The pack listed `W1` as a keyterm. Biasing towards `W1` split the longer postcode
+`W11` into `W1 1`. **A keyterm that is a prefix of a longer word can corrupt that
+word.** The same trap was waiting in `E1` against `E14`, and `N1` against `N16`.
+
+Removing the ten bare postcode fragments restored the score to exactly 65% and 6.4%
+— identical to keyterms off, which is the correct result for London. The pack is
+fixed and the London agent is updated.
+
+This is the strongest argument for measuring at all. Without the control run, we
+would have shipped a pack that quietly made London worse and never known.
 
 ---
 
