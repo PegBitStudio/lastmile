@@ -51,11 +51,23 @@ Exact match should go **up**. WER should go **down**.
 
 Report both. Lead with exact match.
 
+## Who records which pack
+
+A region pack is a claim about how people speak in one place, so the voice has to
+come from someone who lives there. A Lahore speaker reading Lagos addresses tests a
+Pakistani accent on Nigerian place names, which is nobody's real situation.
+
+| Pack | Recorded by | Sheet |
+|---|---|---|
+| Lahore | Yashfa | `lahore_recording_manifest.xlsx`, and her own clips in `lahore_human_manifest.xlsx` |
+| Lagos | Dami | `lagos_recording_manifest.xlsx` |
+| London | Nobody on the team | Generated voice, labelled as such |
+
 ## Do the same for every pack
 
 ```powershell
 python measurement/evaluate_addresses.py --audio-dir ./measurement/audio-lagos --manifest ./measurement/lagos_recording_manifest.xlsx --pack ./regions/ng-lagos.json
 ```
 
-Lagos and London need their own manifests and their own 20 recordings. Copy the
-Lahore sheet and replace the addresses.
+The sheet names the file it expects for each line — `los-01.m4a` and so on. Rename
+your recordings to match, or change the sheet: whichever is quicker.

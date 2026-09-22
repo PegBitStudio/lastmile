@@ -77,9 +77,24 @@ both sets were re-run.
 and not human. Synthetic speech is cleaner than a person at a kerb, which is why its
 keyterms-on score reaches 100%. Treat the gap as the finding, never the number.
 
-## Still to do
+## Still to do, and who can do it
 
-- 15 more real Lahore clips, to match the synthetic set size.
-- Lagos and London have no recordings at all.
-- A noisy-street set. Yashfa tested in noise informally on 2026-09-21 and reported it
-  worked, but nothing was measured.
+A region pack is a claim about how people speak in one place, so **the recordings
+have to come from someone who lives there.** Yashfa reading Lagos addresses would
+measure nothing — it would test a Pakistani speaker on Nigerian place names, which
+is not a case any driver is in.
+
+| Pack | Who records it | State |
+|---|---|---|
+| Lahore | Yashfa | 5 done, 15 to go |
+| Lagos | Dami | 20 to record — sheet ready at `lagos_recording_manifest.xlsx` |
+| London | Nobody on the team | Generated voice, labelled as such on the slide |
+
+**London is the honest gap.** Neither of us is a London speaker. We use a
+text-to-speech voice, say so plainly, and treat it as a demonstration that the pack
+loads and changes the vocabulary — not as evidence about recognition.
+
+Also outstanding:
+
+- A noisy-street set. Yashfa tested in noise informally on 2026-09-21 and reported
+  it worked, but nothing was measured.
