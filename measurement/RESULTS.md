@@ -3,6 +3,21 @@
 Every clip is transcribed twice: once with the pack's 100 Lahore keyterms, once
 without. Nothing else changes between the two runs.
 
+## The three regions, side by side
+
+| Region | Voice | Off | On | Gap |
+|---|---|---|---|---|
+| **Lagos** | Dami, Nigerian | 65% | **90%** | **+25** |
+| **Lahore** | Yashfa, Pakistani | 75% | **85%** | **+10** |
+| **London** | Synthetic British | 65% | **60%** | **−5** |
+
+Addresses fully correct, same agent, same clips, keyterms the only difference.
+
+**The pack pays where the vocabulary is furthest from English, does less where it
+is closer, and slightly hurts where the words are already native.** That is the
+claim the market research made in week one, now measured — including where it goes
+against us.
+
 ## 1. Synthetic voice — 20 addresses, made first
 
 Text-to-speech stand-ins, generated on 2026-09-21 because no human recordings
@@ -65,7 +80,24 @@ They score zero, so part of that set's jump from 65% to 100% is the recogniser
 guessing a language rather than the pack doing work. The real-voice set has none
 of this, which is one more reason to lead with it.
 
-## 3. London — 20 addresses, synthetic British voice
+## 3. Real voice — Dami, Lagos, 20 addresses
+
+Recorded by a Lagos speaker reading his own city's addresses, 23 September.
+
+| | Keyterms off | Keyterms on |
+|---|---|---|
+| **Addresses fully correct** | **65%** | **90%** |
+| Average word error rate | 7.3% | 1.6% |
+
+**The largest gain of any set: +25 points.** Without the pack the recogniser wrote
+"Blog si Banana Island ikuii" for Block C, Banana Island, Ikoyi, and "Shongotedo"
+for Sangotedo. With it, both are right.
+
+The spoken-conventions scoring changes nothing here — 65% to 90% either way —
+because these errors are real mis-hearings of place names, not a writing
+convention.
+
+## 4. London — 20 addresses, synthetic British voice
 
 | | Keyterms off | Keyterms on |
 |---|---|---|
