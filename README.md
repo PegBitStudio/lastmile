@@ -106,17 +106,53 @@ follow-up logic, or the agent.
 
 ## Architecture in short
 
+### The loop, which is the product
+
+The agent is never told what to ask. Our code works out which fields are still
+empty and hands it that list on every single turn.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant D as Driver
+    participant A as AssemblyAI Voice Agent
+    participant T as Our follow-up table
+
+    D->>A: "Couldn't deliver, left it with the gateman"
+    loop until nothing is missing
+    A->>T: log_delivery_event — only what it heard
+    T-->>A: still missing: the name. Ask for that one thing
+    A->>D: "Who took it?"
+    D->>A: "Ademola"
+    end
+    A->>T: log_delivery_event — recipient.name
+    T-->>A: nothing missing
+    A->>D: reads the record back, then closes
 ```
-Driver's phone (browser)
-        │  microphone, over one WebSocket
-        ▼
-AssemblyAI Voice Agent API        <- speech to text, turn-taking, LLM, speech out
-        │  tool calls (JSON Schema)
-        ▼
-our client-side tool handlers  ──▶  the driver's screen
-        │
-        ▼
-   Postgres  ──▶  /board  (dispatcher view)
+
+Say all of it in one breath — *"left it with Ademola the gateman at the black gate"* —
+and the first answer is already "nothing missing", so it asks nothing. No prompt
+changes to make that happen.
+
+### Where things run
+
+```mermaid
+flowchart TB
+    GATE{"Is the van<br/>stopped?"}
+    GATE -- no --> SHUT["Microphone stays shut"]
+    GATE -- yes --> MIC["Microphone, 24 kHz"]
+
+    MIC <-- "one WebSocket" --> API["AssemblyAI<br/>Voice Agent API"]
+    MIC --> CUT["Each turn kept<br/>as its own clip"]
+
+    TOKEN["/api/token<br/>the key never reaches the browser"] -.-> MIC
+
+    CUT -- "only turns a field cites" --> AUDIO["/api/audio"]
+    API -- "every tool call" --> EVENTS["/api/events"]
+    REVIEW["/api/review<br/>a second model checks a doubtful name"] --> DB
+    EVENTS --> DB[("Postgres")]
+    AUDIO --> DB
+    DB --> BOARD["/board — stated · observed · proof<br/>press play to hear the driver"]
 ```
 
 **Stack:** Next.js on Vercel · Postgres · two routes, `/drive` and `/board`.
