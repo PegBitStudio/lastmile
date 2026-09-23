@@ -13,15 +13,44 @@ existed yet and the slide could not wait for them.
 | **Addresses fully correct** | **65%** | **100%** |
 | Average word error rate | 29.5% | 0.0% |
 
-## 2. Real voice — Yashfa, Lahore, 5 addresses
+## 2. Real voice — Yashfa, Lahore, 19 addresses
 
-Recorded 2026-09-21 by a Lahore speaker reading her own city's addresses. This is
-the set that counts.
+Recorded by a Lahore speaker reading her own city's addresses. **This is the set
+that counts**, and it is the one to put on the slide.
 
 | | Keyterms off | Keyterms on |
 |---|---|---|
-| **Addresses fully correct** | **40%** | **80%** |
-| Average word error rate | 8.7% | 2.2% |
+| **Addresses fully correct** | **26%** | **37%** |
+| Average word error rate | 16.9% | 13.3% |
+
+Nineteen of the twenty: LHR-12, Bahria Town, has no recording yet.
+
+**The first five clips said 40% to 80%.** With nineteen it is 26% to 37%. The
+smaller number is the true one: five clips is too few to measure anything, and the
+first five happened to be the ones the pack helps most. Reporting the flattering
+number would have been the easiest mistake in this project to make.
+
+### What is actually going wrong, which is not what we expected
+
+Most of the remaining error is not a mis-heard place name. It is how an address is
+said out loud against how it is written down:
+
+| Said | Written in the sheet |
+|---|---|
+| "House **number** 9, street **number** 4" | "House 9, Street 4" |
+| "Gulberg **Phase 3**" | "Gulberg **III**" |
+| "Office **number** 5" | "Office 5" |
+
+The recogniser heard those clips correctly. They score as failures because the
+words differ from the sheet. Keyterms cannot fix that, and no pack ever will.
+
+So the honest reading is: **the pack helps with local names, and roughly half of
+what is left is a scoring convention, not a recognition problem.** Normalising
+spoken numbers and ordinals before comparing would separate the two. Both runs
+would gain equally, so the gap between them — the thing the claim rests on — would
+not be flattered by it.
+
+That is Yashfa's call, since the scoring is hers.
 
 ## 3. London — 20 addresses, synthetic British voice
 
