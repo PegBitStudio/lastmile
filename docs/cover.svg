@@ -1,0 +1,98 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+  <!--
+    The submission cover, 16:9.
+
+    It is seen first as a small card in a gallery of a few hundred entries, so it
+    is built to survive being 300 pixels wide: one name, one sentence, one number.
+    Everything else is detail for the people who open it.
+
+    Source of truth. docs/cover.png is generated from this by scripts/cover.mjs.
+  -->
+  <defs>
+    <style>
+      .display { font-family: "Segoe UI", Arial, Helvetica, sans-serif; font-weight: 700; }
+      .body    { font-family: Georgia, "Times New Roman", serif; }
+      .mono    { font-family: Consolas, "Courier New", monospace; }
+    </style>
+  </defs>
+
+  <rect width="1920" height="1080" fill="#F4F5F2"/>
+  <rect x="0" y="0" width="1920" height="14" fill="#14171A"/>
+
+  <!-- eyebrow -->
+  <text class="mono" x="120" y="150" font-size="26" letter-spacing="6" fill="#7C7A73">
+    VOICE-FIRST DELIVERY EXCEPTION REPORTING
+  </text>
+
+  <!-- the name, sized to read in a thumbnail -->
+  <text class="display" x="114" y="330" font-size="190" letter-spacing="-6" fill="#14171A">Lastmile</text>
+
+  <text class="display" x="120" y="420" font-size="54" fill="#3E4650">
+    The driver talks. The record writes itself.
+  </text>
+
+  <!-- the exchange: the whole product in four lines -->
+  <g>
+    <rect x="120" y="500" width="6" height="250" fill="#C06E05"/>
+    <text class="mono" x="160" y="536" font-size="22" letter-spacing="4" fill="#7C7A73">DRIVER</text>
+    <text class="body" x="160" y="590" font-size="46" fill="#14171A" font-style="italic">
+      “Couldn’t deliver, left it with the gateman.”
+    </text>
+    <text class="mono" x="160" y="660" font-size="22" letter-spacing="4" fill="#2F6B4F">AGENT</text>
+    <text class="body" x="160" y="714" font-size="46" fill="#2F6B4F" font-style="italic">
+      “Who took it?”
+    </text>
+  </g>
+
+  <text class="display" x="120" y="800" font-size="32" fill="#7C7A73">
+    It asks only for what is missing. Say it all at once and it asks nothing.
+  </text>
+
+  <!-- the record, filling in -->
+  <g>
+    <rect x="1180" y="180" width="620" height="470" rx="4" fill="#FFFFFF" stroke="#D4D6CF" stroke-width="2"/>
+    <rect x="1180" y="180" width="620" height="66" fill="#ECEEE9"/>
+    <text class="mono" x="1212" y="222" font-size="22" letter-spacing="4" fill="#7C7A73">DELIVERY RECORD</text>
+    <text class="mono" x="1690" y="222" font-size="22" letter-spacing="2" fill="#2F6B4F">LG-4412</text>
+
+    <text class="mono" x="1212" y="312" font-size="26" fill="#7C7A73">outcome</text>
+    <text class="display" x="1400" y="312" font-size="30" fill="#14171A">left with a third party</text>
+
+    <text class="mono" x="1212" y="392" font-size="26" fill="#7C7A73">took it</text>
+    <text class="display" x="1400" y="392" font-size="30" fill="#14171A">Ademola</text>
+    <rect x="1636" y="366" width="130" height="36" rx="3" fill="#F5E3C6" stroke="#C06E05" stroke-width="2"/>
+    <text class="mono" x="1655" y="392" font-size="21" letter-spacing="2" fill="#C06E05">▶ HEAR</text>
+
+    <text class="mono" x="1212" y="472" font-size="26" fill="#7C7A73">entrance</text>
+    <text class="display" x="1400" y="472" font-size="30" fill="#14171A">the black gate</text>
+
+    <line x1="1212" y1="516" x2="1768" y2="516" stroke="#D4D6CF" stroke-width="2"/>
+    <text class="mono" x="1212" y="566" font-size="26" fill="#7C7A73">stationary</text>
+    <text class="display" x="1400" y="566" font-size="30" fill="#2F6B4F">yes</text>
+    <text class="mono" x="1212" y="616" font-size="26" fill="#7C7A73">distance</text>
+    <text class="display" x="1400" y="616" font-size="30" fill="#14171A">12 m</text>
+  </g>
+
+  <!-- the measured claim -->
+  <g>
+    <line x1="1180" y1="714" x2="1800" y2="714" stroke="#14171A" stroke-width="3"/>
+    <text class="mono" x="1180" y="766" font-size="24" letter-spacing="4" fill="#7C7A73">
+      LAGOS ADDRESSES HEARD CORRECTLY
+    </text>
+    <text class="display" x="1180" y="866" font-size="96" fill="#7C7A73">65%</text>
+    <text class="display" x="1392" y="866" font-size="86" fill="#7C7A73">→</text>
+    <text class="display" x="1512" y="866" font-size="96" fill="#2F6B4F">90%</text>
+    <text class="body" x="1180" y="918" font-size="28" fill="#3E4650">
+      with the local word list switched on
+    </text>
+  </g>
+
+  <!-- footer -->
+  <line x1="120" y1="960" x2="1800" y2="960" stroke="#D4D6CF" stroke-width="2"/>
+  <text class="mono" x="120" y="1012" font-size="24" letter-spacing="3" fill="#7C7A73">
+    BUILT ON ASSEMBLYAI · LAGOS · LAHORE · LONDON
+  </text>
+  <text class="mono" x="1800" y="1012" font-size="24" letter-spacing="3" fill="#7C7A73" text-anchor="end">
+    LABLAB.AI VOICE AGENT HACKATHON 2026
+  </text>
+</svg>
