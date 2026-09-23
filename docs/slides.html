@@ -1,0 +1,236 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Lastmile — deck</title>
+<!--
+  The deck. Source of truth for the words is docs/slides.md; this is the built
+  version of it.
+
+  To export the PDF the submission form wants: open this file, print, landscape,
+  A4, margins none, background graphics ON.
+
+  It is one file with no network calls, so it renders the same on a plane as on a
+  desk. Same palette and same fonts as docs/cover.svg.
+
+  Rebuild docs/chart-regions.png first —
+      python measurement/chart.py && npm run cover
+  so that slide 5 matches the results files.
+-->
+<style>
+  :root {
+    --ink: #14171A; --slate: #3E4650; --mute: #7C7A73;
+    --rule: #D4D6CF; --paper: #F4F5F2; --card: #FFFFFF;
+    --amber: #C06E05; --up: #1F6FB2; --down: #B3402A;
+    --display: "Segoe UI", Arial, Helvetica, sans-serif;
+    --body: Georgia, "Times New Roman", serif;
+    --mono: Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  /* Snap one slide per scroll, so the deck can be screen-recorded for the video
+     by pressing Page Down — no half-slides, no drifting. */
+  html { scroll-snap-type: y mandatory; }
+  body { margin: 0; background: #8A8D87; font-family: var(--body); }
+
+  .slide {
+    position: relative;
+    width: 1280px; height: 720px;   /* 16:9 */
+    margin: 24px auto; padding: 72px 88px;
+    background: var(--paper); color: var(--ink);
+    overflow: hidden; scroll-snap-align: center;
+    display: flex; flex-direction: column;
+  }
+  .slide::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 10px; background: var(--ink);
+  }
+  .n {
+    position: absolute; right: 44px; bottom: 34px;
+    font-family: var(--mono); font-size: 16px; color: var(--mute); letter-spacing: 2px;
+  }
+  .eyebrow {
+    font-family: var(--mono); font-size: 17px; letter-spacing: 5px;
+    color: var(--mute); text-transform: uppercase; margin-bottom: 30px;
+  }
+  h1 { font-family: var(--display); font-size: 132px; letter-spacing: -4px; margin: 0; }
+  h2 { font-family: var(--display); font-size: 52px; line-height: 1.12; margin: 0 0 14px; }
+  .lede { font-family: var(--display); font-size: 38px; color: var(--slate); margin: 0; }
+  .note { font-size: 27px; line-height: 1.45; color: var(--slate); margin: 0; }
+  .mono { font-family: var(--mono); }
+  .fill { flex: 1; }
+
+  /* slide 1 */
+  .title-foot {
+    font-family: var(--mono); font-size: 19px; letter-spacing: 3px;
+    color: var(--mute); border-top: 2px solid var(--rule); padding-top: 22px;
+  }
+
+  /* slide 2 — the record with holes in it */
+  .record { background: var(--card); border: 2px solid var(--rule); padding: 14px 38px; }
+  .row { display: flex; align-items: baseline; padding: 7px 0; border-bottom: 1px solid var(--rule); }
+  .row:last-child { border-bottom: 0; }
+  .key { font-family: var(--mono); font-size: 23px; color: var(--mute); width: 250px; flex: none; }
+  .val { font-family: var(--display); font-size: 27px; }
+  .blank .val { color: var(--mute); font-style: italic; font-family: var(--body); }
+  .blank .key { color: var(--down); }
+
+  /* slide 3 — the loop */
+  .loop { display: flex; align-items: stretch; gap: 12px; margin: 10px 0 26px; }
+  .step {
+    flex: 1; background: var(--card); border: 2px solid var(--rule);
+    border-top: 6px solid var(--rule); padding: 18px 18px 20px;
+  }
+  .step.ours { border-top-color: var(--amber); }
+  .step .k { font-family: var(--mono); font-size: 15px; letter-spacing: 3px; color: var(--mute); }
+  .step .t { font-family: var(--display); font-size: 23px; line-height: 1.25; margin-top: 12px; }
+  .arrow { align-self: center; font-size: 32px; color: var(--mute); }
+
+  /* slide 4 — three columns */
+  .cols { display: flex; gap: 22px; margin: 6px 0 30px; }
+  .col { flex: 1; background: var(--card); border: 2px solid var(--rule); padding: 26px 28px; }
+  .col h3 {
+    font-family: var(--mono); font-size: 18px; letter-spacing: 4px; color: var(--mute);
+    text-transform: uppercase; margin: 0 0 16px;
+  }
+  .col p { font-size: 24px; line-height: 1.5; margin: 0; color: var(--slate); }
+
+  /* slide 5 — the chart, full bleed */
+  .slide.bleed { padding: 0; }
+  .slide.bleed img { width: 100%; height: 100%; object-fit: contain; background: var(--paper); }
+
+  /* slide 6 — is / is not */
+  .pair { display: flex; gap: 30px; margin-top: 10px; }
+  .pair > div { flex: 1; }
+  .pair h3 { font-family: var(--display); font-size: 34px; margin: 0 0 16px; }
+  .is h3 { color: var(--up); } .isnt h3 { color: var(--down); }
+  .pair p { font-size: 26px; line-height: 1.5; color: var(--slate); }
+  .bar { height: 6px; margin-bottom: 20px; }
+  .is .bar { background: var(--up); } .isnt .bar { background: var(--down); }
+
+  /* slide 7 */
+  ol.next { margin: 18px 0 0; padding: 0; list-style: none; counter-reset: n; }
+  ol.next li {
+    counter-increment: n; font-family: var(--display); font-size: 36px;
+    padding: 22px 0 22px 84px; border-bottom: 1px solid var(--rule); position: relative;
+  }
+  ol.next li::before {
+    content: counter(n); position: absolute; left: 0; top: 20px;
+    font-family: var(--mono); font-size: 30px; color: var(--amber);
+  }
+  .closer {
+    font-family: var(--display); font-size: 32px; color: var(--ink);
+    border-left: 6px solid var(--amber); padding-left: 24px; margin-top: 30px;
+  }
+
+  @page { size: A4 landscape; margin: 0; }
+  @media print {
+    body { background: #fff; }
+    .slide { margin: 0; page-break-after: always; width: 100%; height: 100vh; }
+    .slide:last-child { page-break-after: auto; }
+  }
+</style>
+</head>
+<body>
+
+<!-- 1 -->
+<section class="slide">
+  <div class="eyebrow">Voice-first delivery exception reporting</div>
+  <h1>Lastmile</h1>
+  <p class="lede" style="margin-top:18px">The driver talks. The record writes itself.</p>
+  <div class="fill"></div>
+  <div class="title-foot">Built on AssemblyAI · Lagos · Lahore · London · lablab.ai Voice Agent Hackathon 2026</div>
+  <div class="n">1</div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <h2 style="font-size:46px">The outcome always gets recorded.<br>The story never does.</h2>
+  <p class="note" style="margin-bottom:14px">The scanner will not let a driver move on without an outcome. It asks for nothing else.</p>
+  <div class="record">
+    <div class="row"><div class="key">outcome</div><div class="val">not delivered</div></div>
+    <div class="row"><div class="key">reason</div><div class="val">customer not in</div></div>
+    <div class="row"><div class="key">time</div><div class="val">14:32</div></div>
+    <div class="row blank"><div class="key">who took it</div><div class="val">nothing recorded</div></div>
+    <div class="row blank"><div class="key">which entrance</div><div class="val">nothing recorded</div></div>
+    <div class="row blank"><div class="key">did they sign</div><div class="val">nothing recorded</div></div>
+  </div>
+  <div class="fill"></div>
+  <p class="note"><b>Three weeks later a customer says nothing arrived.</b> The three blanks are the only thing that would have settled it.</p>
+  <div class="n">2</div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <h2>The agent is never told what to ask</h2>
+  <p class="note">It is handed the list of still-empty fields on every turn, and only decides <i>how</i> to ask.</p>
+  <div class="loop">
+    <div class="step"><div class="k">DRIVER</div><div class="t">“Left it with the gateman”</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="k">AGENT</div><div class="t">Logs only what it actually heard</div></div>
+    <div class="arrow">→</div>
+    <div class="step ours"><div class="k">OUR CODE</div><div class="t">Still missing: the name. Ask for that one thing</div></div>
+    <div class="arrow">→</div>
+    <div class="step"><div class="k">AGENT</div><div class="t">“Who took it?”</div></div>
+  </div>
+  <p class="note">The loop runs until nothing is missing, then it reads the record back and closes.</p>
+  <div class="fill"></div>
+  <p class="note"><b>Say all of it in one breath</b> — <i>“left it with Ademola the gateman at the black gate”</i> — and the first answer is already <span class="mono">nothing missing</span>, so it asks nothing. No prompt was changed to make that happen.</p>
+  <div class="n">3</div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <h2>Three columns, kept apart on purpose</h2>
+  <p class="note">Collapsing them is how a delivery record starts to lie.</p>
+  <div class="cols">
+    <div class="col"><h3>Stated</h3><p>What the driver said. In their words, and in their voice.</p></div>
+    <div class="col"><h3>Observed</h3><p>What the phone saw. Time, location, distance from the address, whether the vehicle was stopped.</p></div>
+    <div class="col"><h3>Proof</h3><p>What the customer gave. Usually nothing — and we say so, rather than leave it looking settled.</p></div>
+  </div>
+  <div class="fill"></div>
+  <p class="note"><b>A field can cite the turn of audio it came from.</b> Only cited turns ever leave the phone; everything else is thrown away when the session ends. The privacy rule is enforced by what uploads, not by a promise.</p>
+  <div class="n">4</div>
+</section>
+
+<!-- 5 -->
+<section class="slide bleed">
+  <img src="chart-regions.png" alt="Addresses heard correctly, with the local word list off and on. Lagos 65 to 90 per cent. Lahore 75 to 85. London 65 down to 60.">
+  <div class="n">5</div>
+</section>
+
+<!-- 6 -->
+<section class="slide">
+  <h2>What it is, and what it is not</h2>
+  <div class="pair">
+    <div class="is">
+      <div class="bar"></div>
+      <h3>What it is</h3>
+      <p>An evidence layer beside the scanner a carrier already runs.</p>
+      <p>A structured record, with the driver's own audio attached to the field it proves.</p>
+    </div>
+    <div class="isnt">
+      <div class="bar"></div>
+      <h3>What it is not</h3>
+      <p>Proof of delivery. A driver's recording is a statement by someone with an interest in it.</p>
+      <p>Scans, photos and signatures are the proof — and those tools already exist.</p>
+    </div>
+  </div>
+  <div class="fill"></div>
+  <p class="note"><b>Bought by the operations manager with 20–200 drivers</b>, who loses money on failed deliveries and on disputes, and has nothing but a dropdown to show for either.</p>
+  <div class="n">6</div>
+</section>
+
+<!-- 7 -->
+<section class="slide">
+  <h2>Next</h2>
+  <ol class="next">
+    <li>Scan the parcel instead of tapping it — plenty of drivers do not read easily</li>
+    <li>Capture that survives losing signal</li>
+    <li>A fourth region: a JSON file and an afternoon</li>
+  </ol>
+  <div class="fill"></div>
+  <p class="closer">Every transcript behind the numbers is in the repository.</p>
+  <div class="n">7</div>
+</section>
+
+</body>
+</html>

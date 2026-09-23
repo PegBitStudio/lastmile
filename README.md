@@ -225,6 +225,9 @@ browser tab costs real money.
 | [`docs/lastmile-spec.md`](docs/lastmile-spec.md) | What we are building. Schema, follow-up table, region packs, tools |
 | [`docs/architecture.md`](docs/architecture.md) | How it works. The control loop, the LLM choice, why there is no RAG |
 | [`docs/learning-log.md`](docs/learning-log.md) | What we learned while building, one line at a time |
+| [`docs/slides.md`](docs/slides.md) · [`slides.html`](docs/slides.html) | The deck, and the printable version of it |
+| [`docs/video-script.md`](docs/video-script.md) | The demo video, beat by beat |
+| [`docs/recording-plan.md`](docs/recording-plan.md) | Who records what, in what order, and with what settings |
 
 ## What we learned about the Voice Agent API
 

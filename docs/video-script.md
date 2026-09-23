@@ -2,108 +2,130 @@
 
 Target **4:20**, hard limit 5:00. MP4, under 300 MB.
 
-Presentation is a quarter of the score, and it is the quarter most teams lose. The
-rule for every shot below: **show the thing working, then say why it matters.**
+**Yashfa narrates the whole video.** Every word below marked **VOICE** is hers.
+Nobody else speaks, with one exception, and it is not narration: inside the demo
+the driver says a line out loud, because that is the product being used. That
+voice is the app's user. Yashfa's is the film's.
+
+Presentation is a quarter of the score, and it is the quarter most teams lose.
+The rule for every shot: **show the thing working, then say why it matters.**
 Never the other way round, and never say anything the screen is not already
 proving.
 
-Record the demo in one take if you can. A cut in the middle of a voice
-conversation looks like a cut that hides a failure.
+Read [recording-plan.md](recording-plan.md) before you record anything. It has
+the order the pieces must be made in, and the settings.
 
 ---
 
-## Before you press record
+## How to read this script
 
-- [ ] `npm run dev`, or use the live URL. Both work; local has no cold start
-- [ ] Phone on the desk, screen recording on, **notifications off**
-- [ ] The backup take already recorded, in case the live one fails
-- [ ] Say the numbers out loud once. 90, 85, 60. You will fluff them otherwise
+Every beat has three parts.
 
-Two voices is better than one. Dami narrates and drives; Yashfa takes 2:35–3:05,
-which is her work. A second voice wakes a tired judge up at exactly the right moment.
+- **SCREEN** — what Dami captures, with no talking over it.
+- **VOICE** — what Yashfa reads. Word for word. This is the only spoken track.
+- **LENGTH** — how long the finished beat runs.
+
+Slide numbers refer to [slides.md](slides.md). Where a beat says *Slide 3*, the
+screen is the deck, not the app.
 
 ---
 
-## 0:00–0:20 · The problem, from the kerb
+## 0:00–0:18 · The gap · Slide 1, then Slide 2 · 18s
 
-**Shot:** a phone in one hand, a parcel under the other arm. A locked gate if you
-can film one.
+**SCREEN:** Slide 1 (the title) for three seconds, then Slide 2 — the delivery
+record with three fields filled and the story missing.
 
-> A driver finishes thirty stops a day. Six or eight go wrong. The customer is out,
-> the gate is locked, a neighbour takes the parcel.
+**VOICE:**
+
+> A delivery driver finishes thirty stops a day. Six or eight of them go wrong.
+> The customer is out. The gate is locked. A neighbour takes the parcel.
 >
-> The outcome gets recorded, because the scanner will not let them move on. What
-> never gets recorded is the story. Which gate. Whose name. Whether he signed.
+> The outcome always gets recorded, because the scanner will not let the driver
+> move on without it. What never gets recorded is the story. Which gate. Whose
+> name. Whether anyone signed.
 >
 > Three weeks later a customer says nothing arrived, and that story is the only
 > thing that would have settled it.
 
-**Do not say "AI" yet.** Twenty seconds on the problem buys you the next four minutes.
+**Do not say "AI" yet.** Eighteen seconds on the problem buys the next four minutes.
 
 ---
 
-## 0:20–0:35 · The agent refuses to start
+## 0:18–0:33 · It refuses to start · 15s
 
-**Shot:** the driver screen while moving. "Waiting until you've stopped." Press the
-button; nothing happens. Then stop, and the microphone opens.
+**SCREEN:** the driver screen while the phone is moving. It reads *waiting until
+you've stopped*. Press the button — nothing happens. Then stop. The microphone
+opens.
+
+**VOICE:**
 
 > It will not talk to a driver who is driving.
 >
 > A back-and-forth conversation with someone at the wheel is a liability no fleet
-> would sign off. So it waits until the van stops. Park, speak, go.
+> would sign off, so it waits until the vehicle stops. Park, speak, go.
 
-Fifteen seconds, and it is the one guardrail nobody else will have.
+The one guardrail nobody else in the gallery will have. Fifteen seconds is enough.
 
 ---
 
-## 0:35–1:40 · The loop, in one take
+## 0:33–1:35 · The loop, in one take · 62s
 
-**Shot:** one continuous recording of the driver screen. Speak normally, with
-background noise if you have it.
+**SCREEN:** one continuous recording of the driver screen. No cuts. A cut in the
+middle of a voice conversation looks like a cut that hides a failure.
 
-Say this, in one breath:
+Dami speaks the driver's lines into the phone. First stop, one sentence:
 
 > *"Couldn't deliver, customer wasn't in, left it with the gateman."*
 
-The agent asks for the name. Answer. It asks which gate. Answer. It reads the
-record back and stops.
+The agent asks for the name. Answer it. It asks which gate. Answer it. It reads
+the record back and stops.
 
-Then **do it again on a second stop**, and this time say everything at once:
+Then a second stop, and this time everything at once:
 
 > *"Left it with Ademola the gateman at the black gate."*
 
 **It asks nothing.** It confirms and closes.
 
-> Nothing changed between those two runs. No different prompt, no second agent.
->
-> Our code works out which fields are still empty and hands the agent that list on
-> every single turn. The agent only decides how to ask. Say everything at once and
-> there is nothing left to ask, so it asks nothing.
+**VOICE**, laid over both runs:
 
-That contrast **is** the product. Give it room.
+> Nothing changed between those two conversations. No different prompt. No second
+> agent.
+>
+> Our code works out which fields are still empty, and hands the agent that list
+> on every single turn. The agent only decides how to ask. Say everything at once
+> and there is nothing left to ask — so it asks nothing.
+
+That contrast **is** the product. Do not rush it, and do not talk across the
+agent's own replies — leave the agent's voice audible.
 
 ---
 
-## 1:40–2:10 · The record, and the driver's own voice
+## 1:35–2:05 · The record, and the driver's own voice · 30s
 
-**Shot:** switch to `/board`. The record is already there.
+**SCREEN:** switch to `/board`. The record is already there. Then click the ▶
+next to a field and let the driver's own voice play out loud.
 
-> Three columns, kept apart on purpose. What the driver said. What the phone saw —
-> time, location, how far from the address. What the customer gave, which is
-> nothing, and we say so.
+**VOICE:**
 
-**Click the ▶ next to a field.** Let the driver's own voice play.
+> Three columns, kept apart on purpose. What the driver said. What the phone saw
+> — the time, the location, how far from the address. And what the customer gave,
+> which is nothing, and we say so.
+
+*(let the clip play — silence over it)*
 
 > That is the part a carrier pays for. Not a text box somebody typed. The driver
 > saying who took it, at the stop, kept against the field it proves.
 >
-> We only keep the clips a field actually cites. Everything else stays on the phone.
+> Only the clips a field actually cites ever leave the phone. Everything else is
+> thrown away.
 
 ---
 
-## 2:10–2:35 · Two countries, same code
+## 2:05–2:25 · Two countries, one codebase · 20s
 
-**Shot:** the region switch. Pick Lahore. Report a drop using a Lahore address.
+**SCREEN:** the region switch. Pick Lahore. Report a drop using a Lahore address.
+
+**VOICE:**
 
 > Same code. A different word list.
 >
@@ -111,75 +133,91 @@ That contrast **is** the product. Give it room.
 
 ---
 
-## 2:35–3:05 · The measurement — Yashfa
+## 2:25–3:05 · What we measured · Slide 5 · 40s
 
-**Shot:** the results table, on screen, large.
+**SCREEN:** `docs/chart-regions.png`, full screen, held still. Do not animate it.
+Let the reader read it.
+
+**VOICE:**
 
 > We did not want to claim that word lists help. We measured it.
 >
-> Sixty recordings in our own voices, each transcribed twice. The word list is the
-> only thing that changes between the two runs.
-
-| | Off | On |
-|---|---|---|
-| Lagos | 65% | **90%** |
-| Lahore | 75% | **85%** |
-| London | 65% | **60%** |
-
-> Lagos goes from 65 to 90. Lahore, 75 to 85.
+> Sixty recordings, in our own voices — mine in Lahore, my teammate's in Lagos.
+> Each one transcribed twice. The word list is the only thing that changes
+> between the two runs.
 >
-> And London gets slightly worse. We are showing you that because it is the finding:
-> biasing helps where the words are far from English, and gets in the way where they
+> Lagos goes from sixty-five per cent of addresses heard correctly, to ninety.
+> Lahore, seventy-five to eighty-five.
+>
+> And London gets slightly worse. Sixty-five down to sixty.
+>
+> We are showing you that because it is the finding. Biasing the recogniser pays
+> where the words are furthest from English, and gets in the way where they
 > already are English.
 
-**Say the London number out loud.** A team that reports a result against itself is a
-team whose other numbers you believe.
+**Say the London number clearly.** A team that reports a result against itself is
+a team whose other numbers you believe. This is the most valuable forty seconds
+in the video.
 
 ---
 
-## 3:05–3:25 · When it is not sure
+## 3:05–3:22 · When it is not sure · 17s
 
-**Shot:** a record flagged **needs review**.
+**SCREEN:** a record flagged **needs review**.
 
-> A wrong name written silently is worse than no record. When the recogniser is
-> unsure, a second model checks the words the record depends on, and the record is
-> flagged rather than accepted.
+**VOICE:**
 
----
-
-## 3:25–4:10 · Who buys it, and what it is not
-
-**Shot:** the board, stationary. Talking head is fine here.
-
-> This is not proof of delivery, and we do not claim it is. A driver's recording is
-> a statement by someone with an interest. Real proof is a scan, a photo, a
-> signature — and those tools already exist.
+> A wrong name written down silently is worse than no record at all.
 >
-> What did not exist is the story next to them. This is an evidence layer that sits
-> beside the scanner a carrier already runs, and hands back a structured record with
-> the audio attached.
->
-> The buyer is the operations manager with twenty to two hundred drivers, who loses
-> money on failed deliveries and disputes and has nothing but a dropdown to show for
-> them.
+> When the recogniser is unsure, a second model checks the words the record
+> depends on, and the record is flagged rather than accepted.
 
 ---
 
-## 4:10–4:20 · What is next
+## 3:22–4:05 · Who buys it, and what it is not · Slide 6 · 43s
 
-> Next: scan the parcel instead of tapping it, which matters because plenty of
-> drivers do not read easily. Offline capture. And the fourth region pack, which is
-> a JSON file and an afternoon.
+**SCREEN:** Slide 6 — what this is, and what it is not, side by side.
 
-End on the board with a real record on it. No logo animation. No music sting.
+**VOICE:**
+
+> This is not proof of delivery, and we do not claim it is. A driver's recording
+> is a statement by someone with an interest in it. Real proof is a scan, a
+> photo, a signature, and those tools already exist.
+>
+> What did not exist is the story that sits next to them. This is an evidence
+> layer beside the scanner a carrier already runs, and it hands back a structured
+> record with the audio attached.
+>
+> The buyer is the operations manager with twenty to two hundred drivers, who
+> loses money on failed deliveries and on disputes, and has nothing but a dropdown
+> to show for either.
+
+---
+
+## 4:05–4:20 · What is next · Slide 7 · 15s
+
+**SCREEN:** Slide 7, then cut back to the board with a real record on it, and
+hold there while the last line is read.
+
+**VOICE:**
+
+> Next: scanning the parcel instead of tapping it, which matters because plenty of
+> drivers do not read easily. Capture that survives losing signal. And a fourth
+> region, which is a JSON file and an afternoon.
+>
+> Everything you have seen is in the repository, including every transcript the
+> measurement is built on.
+
+End on the board. No logo animation, no music sting, no fade.
 
 ---
 
 ## Things that lose marks
 
 - Explaining the architecture before showing it work
-- A silent screen recording with a voiceover bolted on afterwards
+- A silent screen recording with a voiceover bolted on afterwards that does not line up
 - Saying "as you can see" while the screen shows something else
-- Reading the schema out loud
+- Reading the schema, or any code, out loud
+- Talking over the agent's replies in the demo — the judge needs to hear it work
 - Any claim the video does not then demonstrate
-- Going over five minutes. It is a hard limit
+- Going over five minutes. It is a hard limit, not a target
