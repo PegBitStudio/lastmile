@@ -10,8 +10,27 @@ say it.
 Built on the [AssemblyAI Voice Agent API](https://www.assemblyai.com/) for the lablab.ai
 AssemblyAI Voice Agent Hackathon, September 2026.
 
-> **Status: in development.** The build window is Sep 1–30, 2026. This README is filled in as the
-> project is built.
+**Live:** [lastmile-peach.vercel.app/drive](https://lastmile-peach.vercel.app/drive) ·
+[the dispatcher board](https://lastmile-peach.vercel.app/board)
+
+## The claim, measured
+
+Local place names are what a recogniser gets wrong. Each region ships a list of local
+terms, handed to the recogniser *before* it listens. We measured what that is worth:
+sixty recordings, each transcribed twice, the word list the only difference.
+
+| Region | Voice | Word list off | on | Gain |
+|---|---|---|---|---|
+| **Lagos** | Nigerian, ours | 65% | **90%** | **+25** |
+| **Lahore** | Pakistani, ours | 75% | **85%** | **+10** |
+| **London** | synthetic British | 65% | **60%** | **−5** |
+
+*Addresses transcribed fully correctly.* Word error rate in Lagos falls from 7.3% to 1.6%.
+
+**The pack pays most where the vocabulary is furthest from English, and slightly hurts
+where the words are already native.** London is in the table because a result that goes
+against us is what makes the other two worth believing. Method and every transcript:
+[`measurement/RESULTS.md`](measurement/RESULTS.md).
 
 ---
 
@@ -117,8 +136,42 @@ Three things worth knowing up front, because they are the decisions people ask a
 
 ## Quickstart
 
-> Filled in once the app runs. It will be: clone, `npm install`, set two environment variables,
-> `npm run dev`.
+Thirty seconds to a talking agent, if you have an AssemblyAI key.
+
+```bash
+git clone https://github.com/PegBitStudio/lastmile && cd lastmile
+npm install
+```
+
+Put your key in `.env.local`, which git ignores:
+
+```
+ASSEMBLYAI_API_KEY=your_key_here
+```
+
+Create an agent for each region. The command prints an id; each one goes in the same file:
+
+```powershell
+$env:REGION="ng-lagos";  npm run agent:create   # -> NEXT_PUBLIC_AGENT_ID_NG_LAGOS
+$env:REGION="pk-lahore"; npm run agent:create   # -> NEXT_PUBLIC_AGENT_ID_PK_LAHORE
+$env:REGION="uk-london"; npm run agent:create   # -> NEXT_PUBLIC_AGENT_ID_UK_LONDON
+```
+
+Then:
+
+```bash
+npm run dev     # http://localhost:3000/drive
+```
+
+Press **Report a drop** and say *"couldn't deliver, left it with the gateman"*.
+
+`DATABASE_URL` is optional. Set it to any Postgres and records reach
+[`/board`](https://lastmile-peach.vercel.app/board); leave it out and the app still runs,
+and says so. Tables are created on first write.
+
+```bash
+npm test        # 133 tests, no network needed
+```
 
 **Never commit the AssemblyAI API key.** The browser gets a short-lived token minted by a server
 route. The key stays on the server.
@@ -139,7 +192,35 @@ browser tab costs real money.
 
 ## What we learned about the Voice Agent API
 
-> Written up at the end of the build, from `docs/learning-log.md`.
+Twenty-two notes written as they happened, in
+[`docs/learning-log.md`](docs/learning-log.md). The ones we would want to have been told:
+
+**Billing is on connection time, not speech.** A forgotten browser tab costs money. Every
+path out of a session ends in `close_session`, including a `pagehide` listener.
+
+**Agents are created by API, not in a dashboard.** `POST /v1/agents`, and update is `PUT` —
+`PATCH` is refused. That turned out to be a gift: the prompt lives in
+[`agents/driver.json`](agents/driver.json), in git, and changes show up in a diff.
+
+**Keyterms live on the agent, not the session**, capped at 100. So switching region means
+switching agent. We run one per country rather than rewriting the agent mid-route.
+
+**`turn_detection` defaults are tuned for a quiet room.** Left null, the agent cut the
+driver off mid-address. Raising `vad_threshold` and `min_silence` is what makes a noisy
+street usable — see the values in `agents/driver.json`.
+
+**Browser tokens are single use and last 60 seconds.** Fetch one immediately before opening
+the socket, not once at page load.
+
+**The transcript arrives as plain text with no confidence score.** To flag a doubtful name
+we re-transcribe the cited turn with a second model and compare — `/api/review`.
+
+**Keyterms can make recognition worse.** London scored 60% with the pack against 65%
+without. Biasing towards words the model already knows pulls correct guesses off course.
+
+**Without keyterms, two Lahore addresses came back in Devanagari.** The recogniser
+switched language rather than mis-spelling a word. Forcing the locale fixes it — and a
+scorer that does not expect it will silently record a zero.
 
 ## Team
 
