@@ -13,17 +13,17 @@ existed yet and the slide could not wait for them.
 | **Addresses fully correct** | **65%** | **100%** |
 | Average word error rate | 29.5% | 0.0% |
 
-## 2. Real voice — Yashfa, Lahore, 19 addresses
+## 2. Real voice — Yashfa, Lahore, all 20 addresses
 
 Recorded by a Lahore speaker reading her own city's addresses. **This is the set
 that counts**, and the one for the slide.
 
 | | Keyterms off | Keyterms on |
 |---|---|---|
-| **Addresses fully correct** | **74%** | **84%** |
-| Average word error rate | 4.8% | 2.0% |
+| **Addresses fully correct** | **75%** | **85%** |
+| Average word error rate | 4.6% | 1.9% |
 
-Nineteen of twenty: LHR-12, Bahria Town, has no recording yet.
+Complete: twenty of twenty.
 
 ### Two numbers, and why the smaller pair was wrong
 
@@ -46,17 +46,24 @@ runs.
 
 | Scoring | Keyterms off | on | Gap |
 |---|---|---|---|
-| Strict, as written | 26% | 37% | **+11** |
-| Spoken conventions ignored | 74% | 84% | **+11** |
+| Strict, as written | 30% | 40% | **+10** |
+| Spoken conventions ignored | 75% | 85% | **+10** |
 
 That is the check that matters. A change to scoring that moved the gap would be
 flattering the claim; this one only removes noise sitting on top of both runs.
-Word error rate more than halves, 4.8% to 2.0%, because the pack fixes the words
+Word error rate more than halves, 4.6% to 1.9%, because the pack fixes the words
 that remain.
 
-**Five clips said 40% to 80%.** Nineteen say 74% to 84%. The bigger set is the
+**Five clips said 40% to 80%.** Twenty say 75% to 85%. The bigger set is the
 honest one: five clips measure nothing, and those five happened to be the ones the
 pack helps most.
+
+### A caveat on the synthetic set above
+
+Two of its clips came back written in Hindi script, on the keyterms-off run only.
+They score zero, so part of that set's jump from 65% to 100% is the recogniser
+guessing a language rather than the pack doing work. The real-voice set has none
+of this, which is one more reason to lead with it.
 
 ## 3. London — 20 addresses, synthetic British voice
 
