@@ -54,10 +54,34 @@ def normalize(text: str) -> str:
     return re.sub(r"\s+", " ", text).strip()
 
 
-def levenshtein_words(reference: str, hypothesis: str) -> tuple[int, int, int]:
+# How an address is said out loud, against how it is written down. Nobody writes
+# "House number 9", and everybody says it. Scoring that as a miss measures a
+# writing convention, not the recogniser.
+#
+# Every rule below is applied to BOTH sides and to BOTH runs, so the gap between
+# keyterms on and off — the only thing the claim rests on — cannot be flattered by
+# any of it. Deliberately short: each rule is one we watched cost a real clip.
+SPOKEN_FILLERS = {"number", "no", "nos", "phase"}
+ROMAN = {"ii": "2", "iii": "3", "iv": "4", "v": "5", "vi": "6",
+         "vii": "7", "viii": "8", "ix": "9", "x": "10"}
+WORD_ORDINALS = {"first": "1", "second": "2", "third": "3", "fourth": "4", "fifth": "5"}
+
+
+def normalize_spoken(text: str) -> str:
+    """normalize(), plus the ways an address is spoken rather than written."""
+    out = []
+    for word in normalize(text).split():
+        if word in SPOKEN_FILLERS:
+            continue  # "house number 9" is "house 9"
+        out.append(ROMAN.get(word, WORD_ORDINALS.get(word, word)))
+    return " ".join(out)
+
+
+def levenshtein_words(reference: str, hypothesis: str, norm=None) -> tuple[int, int, int]:
     """Return substitutions, deletions, insertions using word-level edit distance."""
-    ref = normalize(reference).split()
-    hyp = normalize(hypothesis).split()
+    norm = norm or normalize
+    ref = norm(reference).split()
+    hyp = norm(hypothesis).split()
     n, m = len(ref), len(hyp)
 
     # dp[i][j] = (cost, S, D, I)
@@ -155,11 +179,17 @@ def transcribe(audio_url: str, api_key: str, keyterms: list[str], language: str)
         time.sleep(3)
 
 
-def score(reference: str, hypothesis: str) -> dict:
-    """Exact match and WER for one pair. Yashfa's scoring, unchanged."""
-    exact = normalize(reference) == normalize(hypothesis)
-    subs, dels, ins = levenshtein_words(reference, hypothesis)
-    ref_words = len(normalize(reference).split())
+def score(reference: str, hypothesis: str, spoken: bool = False) -> dict:
+    """Exact match and WER for one pair. Yashfa's scoring, unchanged.
+
+    `spoken` adds the layer above, which treats "House number 9" and "House 9" as
+    the same address. It never changes which run wins, because it is applied to
+    both of them.
+    """
+    norm = normalize_spoken if spoken else normalize
+    exact = norm(reference) == norm(hypothesis)
+    subs, dels, ins = levenshtein_words(reference, hypothesis, norm)
+    ref_words = len(norm(reference).split())
     return {
         "exact": exact,
         "wer": (subs + dels + ins) / ref_words if ref_words else 0.0,
@@ -204,6 +234,15 @@ def main():
         choices=["both", "on", "off"],
         default="both",
         help="both (default) measures what the pack is worth. on or off is one side only.",
+    )
+    parser.add_argument(
+        "--spoken",
+        action="store_true",
+        help=(
+            "Score how an address is said, not how it is written: ignore a spoken "
+            "'number', and treat Gulberg III and Gulberg 3 as one place. Applied to "
+            "both runs, so the gap between keyterms on and off is unchanged."
+        ),
     )
     parser.add_argument(
         "--csv",
@@ -268,7 +307,7 @@ def main():
         for run in runs:
             print(f"[{test_id}] transcribing, {run} ...")
             transcript = transcribe(audio_url, api_key, keyterms if run == ON else [], language)
-            result = score(reference, transcript)
+            result = score(reference, transcript, spoken=args.spoken)
 
             ws.cell(row, cols[run]["transcript"]).value = transcript
             ws.cell(row, cols[run]["exact"]).value = "Yes" if result["exact"] else "No"

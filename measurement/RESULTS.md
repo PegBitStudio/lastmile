@@ -16,53 +16,71 @@ existed yet and the slide could not wait for them.
 ## 2. Real voice — Yashfa, Lahore, 19 addresses
 
 Recorded by a Lahore speaker reading her own city's addresses. **This is the set
-that counts**, and it is the one to put on the slide.
+that counts**, and the one for the slide.
 
 | | Keyterms off | Keyterms on |
 |---|---|---|
-| **Addresses fully correct** | **26%** | **37%** |
-| Average word error rate | 16.9% | 13.3% |
+| **Addresses fully correct** | **74%** | **84%** |
+| Average word error rate | 4.8% | 2.0% |
 
-Nineteen of the twenty: LHR-12, Bahria Town, has no recording yet.
+Nineteen of twenty: LHR-12, Bahria Town, has no recording yet.
 
-**The first five clips said 40% to 80%.** With nineteen it is 26% to 37%. The
-smaller number is the true one: five clips is too few to measure anything, and the
-first five happened to be the ones the pack helps most. Reporting the flattering
-number would have been the easiest mistake in this project to make.
+### Two numbers, and why the smaller pair was wrong
 
-### What is actually going wrong, which is not what we expected
+The first scoring said 26% against 37%. Almost every failure looked like this:
 
-Most of the remaining error is not a mis-heard place name. It is how an address is
-said out loud against how it is written down:
-
-| Said | Written in the sheet |
+| She said | The sheet said |
 |---|---|
 | "House **number** 9, street **number** 4" | "House 9, Street 4" |
 | "Gulberg **Phase 3**" | "Gulberg **III**" |
-| "Office **number** 5" | "Office 5" |
 
-The recogniser heard those clips correctly. They score as failures because the
-words differ from the sheet. Keyterms cannot fix that, and no pack ever will.
+The recogniser heard those correctly. They were scored as failures because nobody
+writes an address the way they say it. That measured our spreadsheet, not the
+model.
 
-So the honest reading is: **the pack helps with local names, and roughly half of
-what is left is a scoring convention, not a recognition problem.** Normalising
-spoken numbers and ordinals before comparing would separate the two. Both runs
-would gain equally, so the gap between them — the thing the claim rests on — would
-not be flattered by it.
+So scoring now ignores a spoken "number" and treats Gulberg III and Gulberg 3 as
+one place — `--spoken`, in `evaluate_addresses.py`. Every rule is applied to both
+runs.
 
-That is Yashfa's call, since the scoring is hers.
+**The gap did not move: +11 points either way.**
+
+| Scoring | Keyterms off | on | Gap |
+|---|---|---|---|
+| Strict, as written | 26% | 37% | **+11** |
+| Spoken conventions ignored | 74% | 84% | **+11** |
+
+That is the check that matters. A change to scoring that moved the gap would be
+flattering the claim; this one only removes noise sitting on top of both runs.
+Word error rate more than halves, 4.8% to 2.0%, because the pack fixes the words
+that remain.
+
+**Five clips said 40% to 80%.** Nineteen say 74% to 84%. The bigger set is the
+honest one: five clips measure nothing, and those five happened to be the ones the
+pack helps most.
 
 ## 3. London — 20 addresses, synthetic British voice
 
 | | Keyterms off | Keyterms on |
 |---|---|---|
-| **Addresses fully correct** | **65%** | **65%** |
-| Average word error rate | 6.4% | 6.4% |
+| **Addresses fully correct** | **65%** | **60%** |
+| Average word error rate | 6.4% | 8.1% |
 
-**The pack makes no difference in London, and that is the finding.** English street
-names in a British accent are already what the recogniser expects. Keyterm biasing
-earns its keep where the vocabulary is non-Western — which is exactly the claim the
-market research made, now measured rather than asserted.
+**The pack makes London slightly worse, and that is the finding.** English street
+names in a British accent are already what the recogniser expects, so a hundred
+biasing terms can only pull a correct guess off course. Keyterm biasing earns its
+keep where the vocabulary is non-Western — exactly the claim the market research
+made, now measured rather than asserted, and measured against itself rather than
+only where it flatters us.
+
+## How to check any of this
+
+Every transcript is kept, so the scoring can be re-run for nothing:
+
+```powershell
+python measurement/rescore.py measurement/lahore_human_manifest-results.csv
+```
+
+It prints both scorings side by side for whichever set you point it at.
 
 Run 2026-09-22. Model `universal-3-5-pro`. Rows in the two `-results.csv` files.
 
