@@ -7,9 +7,9 @@ reads at a steady pace on the day — people slow down, pause, breathe, take a
 second go at a line. That is where the other forty seconds go. The gap between
 4:00 and 5:00 is not spare room to fill; it is the safety margin.
 
-**Yashfa reads every word marked VOICE.** The only other voice in the video is
-the driver talking to the app inside the demo, which is the product being used,
-not narration.
+**Yashfa makes the whole video: every word of narration and every screen.** In
+the demo she also plays the driver, reporting Lahore deliveries in her own voice,
+and the narration says so, so nobody is confused about who is speaking.
 
 How to record all of this is in [recording-plan.md](recording-plan.md).
 
@@ -19,8 +19,8 @@ How to record all of this is in [recording-plan.md](recording-plan.md).
 
 Every beat has three parts:
 
-- **SCREEN** — what is on screen. Dami captures it, silently.
-- **VOICE** — what Yashfa reads, word for word.
+- **SCREEN** — what is on screen.
+- **VOICE** — what Yashfa reads as narration, word for word.
 - **Time** — how long the beat is *planned* to run.
 
 The word count next to each beat is the budget. At a normal pace, about two words
@@ -49,6 +49,10 @@ record with three fields filled and three left blank.
 **SCREEN:** the driver screen while the phone is moving: *waiting until you've
 stopped*. The button does nothing. Then the phone stops, and the microphone opens.
 
+Film this as a **passenger** in a car or rickshaw, outdoors, location on. Never
+while driving yourself. Indoors the phone often cannot tell its speed and will
+simply let you talk, so this shot has to be outside.
+
 **VOICE:**
 
 > First, it will not talk to a driver who is driving. The microphone stays shut
@@ -58,42 +62,46 @@ stopped*. The button does nothing. Then the phone stops, and the microphone open
 
 ---
 
-## 3 · The conversation — 0:29 to 1:39 · 34 words
+## 3 · The conversation — 0:29 to 1:39 · 38 words
 
 The one beat where the picture sets the length, not the voice. Most of these
-seventy seconds are the app itself talking. **Yashfa stays quiet while the agent
-speaks** — the judges need to hear it work.
+seventy seconds are the app itself talking. **Stay quiet in the narration while
+the agent speaks** — the judges need to hear it work.
 
 **SCREEN:** one unbroken recording of the driver screen. No cuts.
 
-First stop. Dami says, into the phone:
+First stop — tap **LH-7701** (Bilal Ahmed, DHA Phase 5), then say:
 
-> *"Couldn't deliver, customer wasn't in, left it with the gateman."*
+> *"Couldn't deliver. Bilal wasn't home, so I left it with the chowkidar."*
 
-The agent asks for the name. He answers. It asks which gate. He answers. It reads
-the record back.
+The agent asks what is missing — the chowkidar's name, then which gate. Answer
+simply: *"Rashid."* … *"The main gate, Block J."* It reads the record back.
 
-Second stop, everything in one go:
+Second stop — tap **LH-7703** (Usman Tariq, Johar Town), and say it all at once:
 
-> *"Left it with Ademola the gateman at the black gate."*
+> *"Usman wasn't in. Left it with Imran, the chowkidar, at the back gate."*
 
 The agent asks nothing. It confirms and closes.
 
 **VOICE** — one line before the first stop:
 
-> Here is a failed delivery, reported by voice.
+> Here is a failed delivery in Lahore. I am playing the driver.
 
 — and this after the second stop closes:
 
 > Nothing changed between those two. Our code tells the agent which fields are
 > still empty. Say everything at once, and there is nothing left to ask.
 
+If the agent asks something different from what is written here, answer it
+naturally. The script describes what usually happens; the take only has to be
+real.
+
 ---
 
 ## 4 · The record — 1:39 to 2:04 · 38 words
 
-**SCREEN:** `/board`, with the record already there. Then press ▶ next to a field
-and let the driver's voice play, out loud.
+**SCREEN:** `/board`, with the record from beat 3 already there. Press ▶ next to
+the chowkidar's name and let the recording play, out loud.
 
 **VOICE:**
 
@@ -107,14 +115,16 @@ and let the driver's voice play, out loud.
 
 ---
 
-## 5 · Another city — 2:04 to 2:16 · 20 words
+## 5 · Three cities — 2:04 to 2:16 · 22 words
 
-**SCREEN:** switch the region to Lahore. Report a drop with a Lahore address.
+**SCREEN:** the city buttons at the top of the driver screen. Tap Lagos, then
+London, then back to Lahore, slowly, so each list of stops changes on screen. No
+new report — just the switch.
 
 **VOICE:**
 
-> Same code in Lahore — only the word list changes. Adding a new city is one small
-> file, not new code.
+> One app, three cities: Lagos, Lahore, London. Only the word list changes. A new
+> city is one small file, not new code.
 
 ---
 
@@ -147,7 +157,9 @@ way is a team whose other numbers get believed.
 
 ## 7 · When it is not sure — 3:01 to 3:13 · 23 words
 
-**SCREEN:** a record flagged **needs review**.
+**SCREEN:** a record flagged **needs review**. The one kept on the board for this
+is **LH-7703 from 21 September**, flagged on the name *Ali*. If a new take of
+beat 3 gets flagged on its own, use that instead — it is better.
 
 **VOICE:**
 
@@ -191,7 +203,7 @@ Measured from the words above, at about two words a second:
 
 | | Planned | Read 20% slower |
 |---|---|---|
-| Voice only, all beats | 2:41 | 3:13 |
+| Voice only, all beats | 2:44 | 3:17 |
 | Whole video | **3:54** | **4:10** |
 
 Then add what always happens on the day: the live conversation in beat 3 runs
@@ -201,7 +213,7 @@ seconds under the limit.
 
 If the finished cut comes out over **4:50**, cut in this order — never from beat 6:
 
-1. Beat 5 (another city) — the chart already names Lahore
+1. Beat 5 (three cities) — the chart already names them
 2. Beat 7 (when it is not sure) — useful, but the least visual beat
 3. The second sentence of beat 8
 

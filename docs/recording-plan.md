@@ -1,44 +1,69 @@
 # How we record this
 
-One video, one voice. **Yashfa reads every word of narration.** Dami captures
-every screen, silently. Nobody records anything until this page has been read,
-because the order matters more than the equipment.
+**Yashfa records the video: all of the narration, and all of the app on screen.**
+She also plays the driver in the demo, reporting Lahore deliveries in her own
+voice. Dami handles what needs the code: the fixes, the slides, a backup demo,
+and putting the video together.
 
 There are no interviews with delivery drivers in this plan. We cut that.
 
 | | Yashfa | Dami |
 |---|---|---|
-| Records | all narration, as audio only | all screens, as silent video |
-| Speaks on camera | never — voice only | never |
-| Speaks at all | the whole script | only the driver's lines *inside* the demo |
-| Edits | reviews the cut | assembles it |
+| Voice | all narration, and the driver in the demo | none |
+| Screens | the driver screen and the board, on her own phone and laptop | the slides and the chart — still images, no app |
+| Also | watches the final cut and says yes | the fixes before filming, a backup demo, the edit |
 
-### The one voice that is not Yashfa's
+Why this split: the app shots and the voice belong together, and one person in one
+room can match them without sending files between Lagos and Lahore. The slides are
+still pictures that need the code on a laptop, so they sit with Dami.
 
-Inside the demo, somebody has to talk to the app for it to do anything, and that
-person is Dami, because the addresses are Lagos addresses and it is his phone.
-That is not narration — it is the product being used, the same as a mouse click.
-Yashfa's voice is the film's voice; his is a driver's.
+---
 
-If a judge could mistake one for the other we have edited it badly. The fix is
-level: narration sits clearly on top, the demo audio sits under it.
+## Step 0 · A 20-minute test, before anything else
+
+Yashfa opens the live site on her phone and does **one** Lahore report, start to
+finish. Check three things:
+
+1. **The agent's voice comes through clearly** on the phone's speaker
+2. **The replies come back quickly** — no long silences after she stops talking
+3. **The report appears on the board** when she opens it on her laptop
+
+All three work → carry on with this plan.
+Any one fails → tell Dami the same day. The fallback is the earlier split: Dami
+records the app, Yashfa records the voice only.
 
 ---
 
 ## The order. Do not swap these around.
 
-**1 · Yashfa records the narration first.**
-**2 · Dami captures the screens to fit the narration.**
-**3 · Dami assembles, Yashfa reviews, one of us uploads.**
+1. **Dami** clears the board and does the fixes (below), then tells Yashfa it is ready
+2. **Yashfa** records the narration
+3. **Yashfa** records the app screens, with her narration playing in one earphone
+4. **Dami** records the slides, puts it all together; Yashfa watches and says yes
 
-Voice first, always. If the screens are cut first, the narration has to be rushed
-or padded to fit them, and rushed narration is audible. If the voice exists first,
-every screen capture has a known length to hit, and the demo can simply be taken
-again until one of the takes fits.
+Voice before screens. A screen recording can be taken again until it fits the
+voice. A voice squeezed to fit a screen always sounds rushed.
+
+The one exception is beat 3, the conversation — there the app sets the length, and
+the two short narration lines go around it afterwards.
 
 ---
 
-# Part 1 · Yashfa — the narration
+# Part 1 · Dami, before Yashfa films
+
+- [ ] **Clear the old test records from the board**, so the camera sees a clean
+      board and not the same order four times. **Keep one:** LH-7703 from
+      21 September, flagged on the name *Ali*. Beat 7 needs a flagged record, and
+      that is the only kind that cannot be made on demand.
+- [ ] **Replace the AssemblyAI key** and redeploy.
+- [ ] **Do the token fix**, so only our own site can start a voice session.
+- [ ] **Record one backup demo** of your own, in Lagos. If Yashfa's conversation
+      take fails on the day, this goes in instead.
+- [ ] Send Yashfa the live link and tell her the board is ready.
+
+---
+
+# Part 2 · Yashfa — the narration
 
 ## Before you start
 
@@ -46,156 +71,130 @@ again until one of the takes fits.
   not a bathroom, not a room with a hard floor and bare walls.
 - **Phone off the desk.** Hold it, or stand it on a folded towel. A phone lying on
   a table picks up every knock through the wood.
-- Fan off. Air conditioning off. Fridge, if you can hear it, off. Window shut.
+- Fan off. Air conditioning off. Window shut.
 - Phone in aeroplane mode so nothing buzzes mid-line.
-- Mouth about a hand's width from the microphone, slightly off to the side, so the
-  hard *p* and *b* sounds do not thump.
+- Mouth about a hand's width from the microphone, slightly off to the side.
 
-Any voice recorder app is fine. If it offers a quality setting, pick the highest
-one. **Do not** use a "voice note" that compresses hard, and do not record the
-narration inside a video call.
+Any voice recorder app is fine. Pick the highest quality it offers. Do not record
+inside a video call or as a WhatsApp voice note — both squash the sound.
 
-## Record this first, before anything else
+## Record this first
 
-Stay completely silent and record **ten seconds of nothing**. Name it
-`00-room.m4a`. That is the sound of your room, and it lets the editor subtract it
-from every other file. It takes ten seconds and it is the single biggest
-difference between narration that sounds home-made and narration that does not.
+Stay completely silent and record **ten seconds of nothing**. Name it `00-room`.
+It lets the editor take the room's hum out of every other file.
 
 ## How to read it
 
-- **Slower than feels right.** Everyone reads a script about 20% too fast. You are
-  not running out of time — the script is already timed with room in it.
-- **Stop fully between paragraphs.** Two seconds of silence. Those gaps are where
-  the editor cuts, and without them the whole beat has to be used or dropped whole.
-- **Numbers get said as words.** "sixty-five per cent", not "65%". "seventy-five to
-  eighty-five". Say them slightly slower than the sentence around them.
-- **Fluffed a line? Do not start the file again.** Stop, count two seconds, and say
-  the whole sentence again from its beginning. The editor keeps the good one. Never
-  restart from mid-sentence.
-- Read it out loud once all the way through before you record anything. Change any
-  word that does not sit right in your mouth — it is your voice, so it should be
-  words you would actually say. Tell Dami what you changed so the deck matches.
+- **Read the whole script out loud once** before recording anything. Change any
+  word that does not feel right in your mouth, keep it about the same length, and
+  tell Dami what changed so the slides match.
+- **Slower than feels right.** Everyone reads a script too fast. The script already
+  has room in it.
+- **Stop for two seconds between paragraphs.** That is where the editor cuts.
+- **Numbers as words:** "sixty-five per cent", not "65%".
+- **Tripped on a line? Don't stop the file.** Pause, count two, and say the whole
+  sentence again from its start. The editor keeps the good one.
 
 ## The files
 
-One file per beat of [video-script.md](video-script.md). Name them exactly:
+One file per beat of [video-script.md](video-script.md):
 
 ```
-00-room.m4a          ten seconds of silence
-01-problem.m4a       0:00–0:17   the problem
-02-waits.m4a         0:17–0:29   it waits until you stop
-03-conversation.m4a  0:29–1:39   two short lines only — the app does the talking
-04-record.m4a        1:39–2:04   the record
-05-city.m4a          2:04–2:16   another city
-06-measured.m4a      2:16–3:01   what we measured  <- the most important
-07-unsure.m4a        3:01–3:13   when it is not sure
-08-who.m4a           3:13–3:40   who it is for
-09-next.m4a          3:40–3:54   next
+00-room          ten seconds of silence
+01-problem       0:00–0:17   the problem
+02-waits         0:17–0:29   it waits until you stop
+03-conversation  0:29–1:39   two short lines only — the app does the talking
+04-record        1:39–2:04   the record
+05-cities        2:04–2:16   three cities
+06-measured      2:16–3:01   what we measured  <- the most important
+07-unsure        3:01–3:13   when it is not sure
+08-who           3:13–3:40   who it is for
+09-next          3:40–3:54   next
 ```
 
-**Record `06-measured` twice**, as two separate takes, on different days if you
-can. It is the beat the marks turn on, and having a second take costs you two
-minutes now and saves the whole video later.
+**Record `06-measured` twice**, as two separate files. It is the beat the marks
+turn on.
 
-After each file, play it back once with headphones on. Listening for: a hum
-underneath, a word that came out mumbled, and whether you sound like you believe
-it. If any of those three fail, record it again immediately — it is much harder to
-match your own tone a day later.
-
-## What you do not have to do
-
-- Not on camera. Not once.
-- Not matching anything to picture. The picture gets made to fit you.
-- Not any of the screen capture, and none of the editing.
+Listen back to each file with earphones. Redo it straight away if there is a hum,
+a mumbled word, or it doesn't sound like you mean it.
 
 ---
 
-# Part 2 · Dami — the screens
-
-Every capture is **silent to the viewer** except the demo, where the app and the
-driver can be heard under the narration. Play Yashfa's matching audio file in
-headphones while you capture, so you know exactly how long the shot must last.
+# Part 3 · Yashfa — the screens
 
 ## Set the phone up once
 
-- Do Not Disturb **on**. One WhatsApp banner across the middle of the demo and the
+- **Do Not Disturb on.** One notification across the middle of the demo and the
   take is gone.
-- Screen recording on, highest quality the phone offers.
-- Brightness to maximum — screen recordings come out darker than they look.
-- Battery above 50%, or the low-battery banner appears at the worst moment.
-- Close every other app so nothing repaints in the background.
-- Use the live URL, not `localhost`, so a judge watching sees the thing they can
-  themselves open. Warm it up with one throwaway session first so there is no cold
-  start on the take.
+- Screen recording on, highest quality, **with sound**. On Android, pick *media
+  and microphone* if it asks. On an iPhone, press and hold the record button in
+  Control Centre and turn the microphone on. Both the agent's voice and yours must
+  be in the recording — test ten seconds and play it back before the real take.
+- Brightness to full. Battery above half. Every other app closed.
+- Open the live site once before the first take so it is warmed up.
 
-## The shot list
+## The shots
 
-| File | Beat | Length | What has to be visible |
+| File | Beat | Length | What has to be on screen |
 |---|---|---|---|
-| `s02-waits.mp4` | 0:17–0:29 | 12s | Moving: *waiting until you've stopped*. Press the button, nothing happens. Then stationary, and the microphone opens. All three in one take. |
-| `s03-conversation.mp4` | 0:29–1:39 | ~70s | **One unbroken take.** Two stops: the first answered piece by piece, the second said all at once so it asks nothing. |
-| `s04-board.mp4` | 1:39–2:04 | 25s | `/board` with the record on it. Then ▶ pressed, and the driver's own voice playing out loud. |
-| `s05-city.mp4` | 2:04–2:16 | 12s | The region switch, Lahore picked, a Lahore address reported. |
-| `s07-unsure.mp4` | 3:01–3:13 | 12s | A record flagged **needs review**, held still long enough to read. |
-| `s09-end.mp4` | 3:47–3:54+ | 10s | The board, still, with a real record on it. Last frame of the video — record extra, it gets trimmed. |
+| `s02-waits` | 0:17–0:29 | 12s | As a **passenger**, outdoors, location on: *waiting until you've stopped*, the button doing nothing, then the vehicle stops and the microphone opens. Never while driving yourself. |
+| `s03-conversation` | 0:29–1:39 | ~70s | **One unbroken take.** Two Lahore stops, LH-7701 then LH-7703, exactly as the script describes. |
+| `s04-board` | 1:39–2:04 | 25s | The board on your laptop, the record from the conversation on it. Press ▶ next to the chowkidar's name and let it play out loud. |
+| `s05-cities` | 2:04–2:16 | 12s | The city buttons: Lagos, London, back to Lahore — slowly, so the list of stops changes each time. |
+| `s07-unsure` | 3:01–3:13 | 12s | The record flagged **needs review**, held still long enough to read. |
+| `s09-end` | the last 10s | 10s | The board at rest, a real record on it. Record extra — it gets trimmed. |
 
-**`s03-conversation.mp4` is the video.** Give it as many takes as it needs. A cut in the
-middle of a voice conversation looks like a cut hiding a failure, so it has to be
-one take from the first word to the record being read back.
+For the board shots, record the laptop screen: on Windows, **Win + Alt + R**
+starts and stops a recording; on a Mac, **Shift + Cmd + 5**.
 
-When you speak the driver's lines, speak normally — at a stop, not into a
-microphone. A bit of street behind you helps. Do not perform it.
+## The conversation is the video
 
-## The deck and the chart
-
-The deck is [slides.html](slides.html). It snaps one slide per scroll, so:
-
-1. Rebuild the chart first, or slide 5 will show an old number:
-   ```bash
-   python measurement/chart.py && npm run cover
-   ```
-2. Open `docs/slides.html`, press <kbd>F11</kbd> for full screen, hide the
-   bookmarks bar.
-3. Screen-record while pressing <kbd>Page Down</kbd> once per slide, holding each
-   one for about five seconds. One file, `deck.mp4`. The editor takes the stills
-   it needs out of it.
-
-Slides 1, 2, 5, 6 and 7 appear in the video. Slides 3 and 4 are for the PDF only —
-the video shows those things happening instead of drawing them, which is better,
-but a judge clicking through a PDF cannot see that, so the deck covers it.
-
-For the submission PDF: same file, print, **landscape, A4, margins none,
-background graphics on**. Check slide 5 actually rendered the chart before you
-upload it.
+- Take it as many times as it needs. **Never cut in the middle** — a cut in a
+  conversation looks like it hides a failure.
+- Speak the driver's lines normally, as if standing at a gate. Don't perform them.
+- Quiet room, but not silent — a little background sound is fine and real.
+- If the agent asks something the script didn't expect, answer it naturally. A real
+  take beats a perfect one.
+- When you have a good take, **stop**. Don't chase a better one past the second
+  good take.
 
 ---
 
-# Part 3 · Putting it together
+# Part 4 · Dami — slides and putting it together
 
-1. Lay all ten narration files end to end, in order, on the top audio track. That
-   is the spine. Voice alone should come to about 2:40–3:15. If it is over 3:30,
-   something is being read too slowly — fix it now, before any picture exists.
-2. Drop each screen capture under its matching narration and trim it to fit.
-   Picture bends to voice. Voice never bends to picture.
-3. Demo audio (the agent's replies, the driver's lines) sits **under** the
-   narration — quiet enough not to fight it, loud enough that a judge can hear the
-   agent actually speak. In the two places the script says *let it play*, drop the
-   narration out entirely and let the app be heard on its own.
-4. Subtract `00-room.m4a` with whatever noise-reduction the editor has, then
-   normalise the whole voice track so it is one level throughout.
-5. **Subtitles, burned in.** Two of the three judges will watch this with the sound
-   off at some point. Check every proper noun by hand — auto-subtitles get
-   *Ademola*, *Lahore* and *AssemblyAI* wrong almost every time, and a
-   misspelt *AssemblyAI* in a video judged by AssemblyAI is an expensive typo.
-6. Export 1080p, MP4, under 300 MB. Watch it once all the way through on a phone
-   before uploading. If anything is unreadable at phone size, it is unreadable.
+## The slides and the chart
+
+1. Rebuild the chart, so slide 5 shows the current numbers:
+   ```bash
+   python measurement/chart.py && npm run cover
+   ```
+2. Open `docs/slides.html`, press <kbd>F11</kbd>, and screen-record while pressing
+   <kbd>Page Down</kbd> once per slide, about five seconds each.
+3. For the PDF the form wants: same file, print, **landscape, A4, margins none,
+   background graphics on**. Check slide 5 shows the chart, not a blank.
+
+## The edit
+
+1. **Lay Yashfa's voice files end to end first.** Voice alone should come to about
+   2:45–3:20. If it is over 3:30, a beat is being read too slowly.
+2. **Put each screen under its voice, and trim the picture to fit.** Picture bends,
+   never the voice. Beat 3 is the exception: the conversation plays in full.
+3. **Drop the narration out completely** while the agent speaks and while a clip
+   plays on the board.
+4. Take the room hum out using `00-room`, then set the whole voice track to one
+   level.
+5. **Burn in subtitles and check the names by hand.** Auto-subtitles get
+   *chowkidar*, *Lahore* and *AssemblyAI* wrong — and a misspelt *AssemblyAI* in a
+   video judged by AssemblyAI is a costly typo.
+6. Export 1080p MP4, under 300 MB. Watch it once on a phone before uploading.
+
+---
 
 ## Before it is final, both of us confirm
 
 - [ ] Under 5:00. It is a hard limit, not a target
-- [ ] The London number is said out loud, and it is on screen
-- [ ] The agent can be heard speaking at least once, not just described
+- [ ] "No change at all" for London is said out loud, and the chart is on screen
+- [ ] The agent can be heard speaking, not just described
 - [ ] No claim is made that the picture does not then show
 - [ ] Yashfa has watched it end to end and is happy her name is on it
-- [ ] A backup copy exists somewhere that is not one laptop
+- [ ] A copy is saved somewhere other than one laptop
