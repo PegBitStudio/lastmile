@@ -30,7 +30,7 @@ Nothing else. Three seconds.
 
 ---
 
-## Slide 2 · The gap · *0:03–0:18*
+## Slide 2 · The gap · *0:03–0:17*
 
 A delivery record, drawn the way the industry actually keeps it.
 
@@ -84,7 +84,7 @@ Under it, the rule that decides what uploads:
 
 ---
 
-## Slide 5 · What we measured · *2:25–3:05*
+## Slide 5 · What we measured · *2:16–3:01*
 
 `docs/chart-regions.png`, full bleed, and nothing else on the slide. No title over
 it — the chart already has one, and the narration carries the rest.
@@ -94,7 +94,7 @@ cannot drift from the claim. Rebuild it before you export the PDF.
 
 ---
 
-## Slide 6 · What this is, and what it is not · *3:22–4:05*
+## Slide 6 · What this is, and what it is not · *3:13–3:40*
 
 Two columns, side by side, equal weight. The right-hand column is the one that
 earns the marks.
@@ -113,7 +113,7 @@ Footer line:
 
 ---
 
-## Slide 7 · Next · *4:05–4:20*
+## Slide 7 · Next · *3:40–3:47*
 
 Three items, no more:
 

@@ -83,15 +83,15 @@ One file per beat of [video-script.md](video-script.md). Name them exactly:
 
 ```
 00-room.m4a          ten seconds of silence
-01-gap.m4a           0:00–0:18   the gap
-02-refuses.m4a       0:18–0:33   it refuses to start
-03-loop.m4a          0:33–1:35   the loop          <- the longest
-04-record.m4a        1:35–2:05   the record and the voice
-05-regions.m4a       2:05–2:25   two countries
-06-measured.m4a      2:25–3:05   what we measured  <- the most important
-07-review.m4a        3:05–3:22   when it is not sure
-08-buyer.m4a         3:22–4:05   who buys it
-09-next.m4a          4:05–4:20   what is next
+01-problem.m4a       0:00–0:17   the problem
+02-waits.m4a         0:17–0:29   it waits until you stop
+03-conversation.m4a  0:29–1:39   two short lines only — the app does the talking
+04-record.m4a        1:39–2:04   the record
+05-city.m4a          2:04–2:16   another city
+06-measured.m4a      2:16–3:01   what we measured  <- the most important
+07-unsure.m4a        3:01–3:13   when it is not sure
+08-who.m4a           3:13–3:40   who it is for
+09-next.m4a          3:40–3:54   next
 ```
 
 **Record `06-measured` twice**, as two separate takes, on different days if you
@@ -133,14 +133,14 @@ headphones while you capture, so you know exactly how long the shot must last.
 
 | File | Beat | Length | What has to be visible |
 |---|---|---|---|
-| `s02-gate.mp4` | 0:18–0:33 | 15s | Moving: *waiting until you've stopped*. Press the button, nothing happens. Then stationary, and the microphone opens. Get all three in one take. |
-| `s03-loop.mp4` | 0:33–1:35 | 62s | **One unbroken take.** Two stops: the first answered piece by piece, the second said all at once so it asks nothing. |
-| `s04-board.mp4` | 1:35–2:05 | 30s | `/board` with the record on it. Then the ▶ pressed, and the driver's own voice playing out loud. |
-| `s05-region.mp4` | 2:05–2:25 | 20s | The region switch, Lahore picked, a Lahore address reported. |
-| `s07-review.mp4` | 3:05–3:22 | 17s | A record flagged **needs review**, held still long enough to read. |
-| `s09-end.mp4` | 4:05–4:20 | 8s | The board, still, with a real record on it. This is the last frame of the video. |
+| `s02-waits.mp4` | 0:17–0:29 | 12s | Moving: *waiting until you've stopped*. Press the button, nothing happens. Then stationary, and the microphone opens. All three in one take. |
+| `s03-conversation.mp4` | 0:29–1:39 | ~70s | **One unbroken take.** Two stops: the first answered piece by piece, the second said all at once so it asks nothing. |
+| `s04-board.mp4` | 1:39–2:04 | 25s | `/board` with the record on it. Then ▶ pressed, and the driver's own voice playing out loud. |
+| `s05-city.mp4` | 2:04–2:16 | 12s | The region switch, Lahore picked, a Lahore address reported. |
+| `s07-unsure.mp4` | 3:01–3:13 | 12s | A record flagged **needs review**, held still long enough to read. |
+| `s09-end.mp4` | 3:47–3:54+ | 10s | The board, still, with a real record on it. Last frame of the video — record extra, it gets trimmed. |
 
-**`s03-loop.mp4` is the video.** Give it as many takes as it needs. A cut in the
+**`s03-conversation.mp4` is the video.** Give it as many takes as it needs. A cut in the
 middle of a voice conversation looks like a cut hiding a failure, so it has to be
 one take from the first word to the record being read back.
 
@@ -174,8 +174,8 @@ upload it.
 # Part 3 · Putting it together
 
 1. Lay all ten narration files end to end, in order, on the top audio track. That
-   is the spine, and its total length is the video's length. Check it against 4:20
-   now, before any picture exists.
+   is the spine. Voice alone should come to about 2:40–3:15. If it is over 3:30,
+   something is being read too slowly — fix it now, before any picture exists.
 2. Drop each screen capture under its matching narration and trim it to fit.
    Picture bends to voice. Voice never bends to picture.
 3. Demo audio (the agent's replies, the driver's lines) sits **under** the
