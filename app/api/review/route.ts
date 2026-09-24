@@ -4,6 +4,7 @@ import { readFile } from "node:fs/promises";
 import { configured, getTurnAudio, saveReviews } from "@/lib/db";
 import { checkReviewRequest, reviewFields } from "@/lib/review";
 import { secondOpinion } from "@/lib/second-opinion";
+import { fromOwnSite } from "@/lib/same-site";
 
 /**
  * A second opinion on the fields one driver turn set.
@@ -36,6 +37,11 @@ async function keytermsFor(region: string): Promise<string[]> {
 }
 
 export async function POST(request: Request) {
+  // A review is a paid transcription. Only our own driver page may ask for one.
+  if (!fromOwnSite(request.headers, request.url)) {
+    return NextResponse.json({ error: "Reviews are only run for this site's own pages." }, { status: 403 });
+  }
+
   const apiKey = process.env.ASSEMBLYAI_API_KEY;
   if (!configured || !apiKey) {
     return NextResponse.json({

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { fromOwnSite } from "@/lib/same-site";
+
 /**
  * Mints a short-lived Voice Agent token for the browser.
  *
@@ -20,7 +22,12 @@ export const dynamic = "force-dynamic"; // never cache a single-use token
 const MAX_SESSION_SECONDS = 300;
 const TOKEN_WINDOW_SECONDS = 60;
 
-export async function GET() {
+export async function GET(request: Request) {
+  // Every token spends our credit. Only our own driver page may ask for one.
+  if (!fromOwnSite(request.headers, request.url)) {
+    return NextResponse.json({ error: "Tokens are only issued to this site's own pages." }, { status: 403 });
+  }
+
   const key = process.env.ASSEMBLYAI_API_KEY;
 
   if (!key) {
