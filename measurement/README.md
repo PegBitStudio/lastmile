@@ -57,11 +57,15 @@ A region pack is a claim about how people speak in one place, so the voice has t
 come from someone who lives there. A Lahore speaker reading Lagos addresses tests a
 Pakistani accent on Nigerian place names, which is nobody's real situation.
 
+The test is whether the pairing happens in real life, not whether the accent matches the
+map. A great many Nigerians drive deliveries in the UK, so a Nigerian voice reading London
+addresses is a real day's work, and worth measuring on its own.
+
 | Pack | Recorded by | Sheet |
 |---|---|---|
 | Lahore | Yashfa | `lahore_recording_manifest.xlsx`, and her own clips in `lahore_human_manifest.xlsx` |
 | Lagos | Dami | `lagos_recording_manifest.xlsx` |
-| London | Nobody on the team | Generated voice, labelled as such |
+| London | Generated voice, and Dami — a Nigerian voice on London addresses, which is a great deal of UK delivery work | `london_recording_manifest.xlsx` for the generated clips, `london_human_manifest.xlsx` for the human ones |
 
 ## Do the same for every pack
 

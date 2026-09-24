@@ -1,0 +1,21 @@
+pack_id,utterance_id,ground_truth,transcript_no_keyterms,transcript_with_keyterms,score_before,score_after,exact_before,exact_after
+uk-london,LDN-01,"Flat 12, Ashby Mews, Camden",Flat 12 Ashby Mills Camden,"Flat 12 Ashby Mews, Camden",0.2,0.0,No,Yes
+uk-london,LDN-02,"Unit 4, Bevin House, Shoreditch","Unit 4, Bevin House, Shoreditch.","Unit 4, Bevin House, Shoreditch.",0.0,0.0,Yes,Yes
+uk-london,LDN-03,"27 Hartland Terrace, Islington","27 Atlan Terrace, Eastlington","27 Atlan Terrace, Islington.",0.5,0.25,No,No
+uk-london,LDN-04,"Flat 9B, Marlow Point, Canary Wharf",Flat9b Malo Pointe Kanari Wharf,Flat9b Malo Pointe Kanari Wharf,0.8333,0.8333,No,No
+uk-london,LDN-05,"3 Pelham Row, Kensington","3 Pelham Row, Kensington","3 Pelham Row, Kensington.",0.0,0.0,Yes,Yes
+uk-london,LDN-06,"14 Doverfield Close, Hackney","14 Doverfield Close, Hackney","14 Doverfield Close, Hackney",0.0,0.0,Yes,Yes
+uk-london,LDN-07,"Flat 6, Sandhurst Court, Battersea, buzzer number 6","Flat 6, Sun Oaks Court, Battersea, Bursa No. 6","Flat 6, Sun Oaks Court, Battersea, buzzer number 6.",0.5,0.25,No,No
+uk-london,LDN-08,"22 Quiller Street, Fulham, SW6","22 Keeler Street, Fuham, SW6.","22 Keeler Street, Fulham, SW6.",0.4,0.2,No,No
+uk-london,LDN-09,"Flat 3, Longhurst House, Hammersmith, W6","Flat 3 Longhurst House, Amersmith W6.","Flat 3, Longhurst House, Hammersmith W6.",0.1667,0.0,No,Yes
+uk-london,LDN-10,"8 Marchmont Terrace, Westminster, SW1","8 Marshmont Terrace, Westminster SW1","8 Marshmont Terrace, Westminster SW1",0.2,0.2,No,No
+uk-london,LDN-11,"Flat 15, Kelsey Court, Chelsea, ask the porter",Flat 15 Kelsey Court Chelsea Ask the Porter,"Flat 15, Kelsey Court, Chelsea. Ask the porter.",0.0,0.0,Yes,Yes
+uk-london,LDN-12,"41 Ainsworth Road, Hackney, E8","41 Ainsworth Road, Hackney E8","41 Ainsworth Road, Hackney E8",0.0,0.0,Yes,Yes
+uk-london,LDN-13,"Flat 2, Thornbury House, Islington, N1",Flat 2 Turnberry House Inkslington N1,"Flat 2 Thornberry House, Islington N1",0.3333,0.1667,No,No
+uk-london,LDN-14,"9 Colville Mews, Notting Hill, W11","9 Colville Mews, Notting Hill W11","9 Colville Mews, Notting Hill W11",0.0,0.0,Yes,Yes
+uk-london,LDN-15,"Unit 7, Bermondsey Works, SE1","Unit 7, Bamonsay Works, SE1","Unit 7, Bamonsay Walks, SE1.",0.2,0.4,No,No
+uk-london,LDN-16,"Flat 24, Calderwood Estate, Camden, concierge desk","Flat 24, Calderwood Estate, Camden Concierge Desk","Flat 24, Calderwood Estate, Camden Concierge Desk",0.0,0.0,Yes,Yes
+uk-london,LDN-17,"6 Rosslyn Hill, Hampstead, NW3","6.Roseline Ewell, Armstead, NW3","6.Roseline Ewell, Armstead, NW3",0.6,0.6,No,No
+uk-london,LDN-18,"Flat 11, Dover House, Whitechapel, E1",Flat 11 Dover House Whitechapel E1,Flat 11 Dover House Whitechapel E1,0.0,0.0,Yes,Yes
+uk-london,LDN-19,"33 Elmfield Terrace, Fulham, leave in the safe place","33 Elmfield Terrace, Fulham LEAF IN THE SAFE PLACE",33 Elmfield Terrace Fulham Leave in the safe place,0.1111,0.0,No,Yes
+uk-london,LDN-20,"Flat 5, Garnett Court, Shoreditch, buzzer is broken","Flat 5, Garnet Court, Shoreditch. Buzzer is broken.","Flat 5, Garnet Court, Shoreditch. Buzzer is broken.",0.125,0.125,No,No

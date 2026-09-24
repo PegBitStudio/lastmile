@@ -65,3 +65,6 @@ measurement/audio*/
 
 # measurement working files
 measurement/audio-human/
+
+# Office lock files
+~$*
