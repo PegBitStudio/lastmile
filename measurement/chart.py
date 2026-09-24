@@ -100,7 +100,9 @@ def main():
     for i, (name, voice, off, on, n) in enumerate(data):
         y = top + i * gap
         rose = on >= off
-        colour = UP if rose else DOWN
+        # A row that did not move is not a win. Painting a flat result in the gain
+        # colour would let the eye count four blue rows and read four successes.
+        colour = MUTE if on == off else (UP if rose else DOWN)
         x0, x1 = x(off), x(on)
 
         add(f'  <text class="display" x="{left - 60}" y="{y + 8}" font-size="34" fill="{INK}" '

@@ -54,10 +54,10 @@
   <text class="display" x="360" y="708" font-size="34" fill="#14171A" text-anchor="end">London</text>
   <text class="mono" x="360" y="738" font-size="19" fill="#7C7A73" text-anchor="end">synthetic voice · 20 clips</text>
   <circle cx="894" cy="700" r="10" fill="#F4F5F2" stroke="#7C7A73" stroke-width="3"/>
-  <circle cx="894" cy="700" r="11" fill="#1F6FB2" stroke="#F4F5F2" stroke-width="2"/>
-  <text class="display" x="920" y="711" font-size="32" fill="#1F6FB2" text-anchor="start">65%</text>
+  <circle cx="894" cy="700" r="11" fill="#7C7A73" stroke="#F4F5F2" stroke-width="2"/>
+  <text class="display" x="920" y="711" font-size="32" fill="#7C7A73" text-anchor="start">65%</text>
   <text class="mono" x="1006" y="710" font-size="22" fill="#7C7A73" text-anchor="start">both ways</text>
-  <text class="display" x="1330" y="710" font-size="32" fill="#1F6FB2" text-anchor="end">+0</text>
+  <text class="display" x="1330" y="710" font-size="32" fill="#7C7A73" text-anchor="end">+0</text>
   <text class="mono" x="1330" y="738" font-size="18" fill="#7C7A73" text-anchor="end">points</text>
   <line x1="60" y1="814" x2="1400" y2="814" stroke="#D4D6CF" stroke-width="2"/>
   <text class="body" x="60" y="858" font-size="25" fill="#14171A">The word list pays where the words are not what the recogniser expects — and does nothing at all where they are.</text>

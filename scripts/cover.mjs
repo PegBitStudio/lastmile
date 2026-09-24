@@ -19,13 +19,24 @@ import { readFile } from "node:fs/promises";
 
 const JOBS = [
   { in: "docs/cover.svg", out: "docs/cover.png", w: 1920, h: 1080, ratio: 16 / 9 },
-  { in: "docs/chart-regions.svg", out: "docs/chart-regions.png", w: 2920, h: 1520 },
+  // No fixed size: the chart grows a row whenever we measure another region, so
+  // it is scaled from whatever the SVG says it is. Pinning width and height here
+  // silently squashed it the first time a fourth row appeared.
+  { in: "docs/chart-regions.svg", out: "docs/chart-regions.png", scale: 2 },
 ];
 
 for (const job of JOBS) {
   const svg = await readFile(job.in);
+  let [w, h] = [job.w, job.h];
+  if (!w) {
+    // Take the size off the SVG itself and multiply it, so a chart that grows a
+    // row comes out taller rather than squashed.
+    const tag = svg.toString().slice(0, 400);
+    w = Number(tag.match(/width="(\d+)"/)[1]) * job.scale;
+    h = Number(tag.match(/height="(\d+)"/)[1]) * job.scale;
+  }
   const info = await sharp(svg, { density: 96 })
-    .resize(job.w, job.h, { fit: "fill" })
+    .resize(w, h, { fit: "fill" })
     .png({ compressionLevel: 9 })
     .toFile(job.out);
 
