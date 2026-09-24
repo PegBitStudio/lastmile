@@ -1,22 +1,22 @@
 # What the region pack is worth
 
-Every clip is transcribed twice: once with the pack's 100 Lahore keyterms, once
-without. Nothing else changes between the two runs.
+Every clip is transcribed twice: once with its region's keyterms, once without.
+Nothing else changes between the two runs.
 
-## The three regions, side by side
+## The four sets, side by side
 
 | Region | Voice | Off | On | Gap |
 |---|---|---|---|---|
 | **Lagos** | Dami, Nigerian | 65% | **90%** | **+25** |
 | **Lahore** | Yashfa, Pakistani | 75% | **85%** | **+10** |
-| **London** | Synthetic British | 65% | **60%** | **−5** |
+| **London** | Dami, Nigerian, on London addresses | 40% | **55%** | **+15** |
+| **London** | Synthetic British | 65% | **65%** | **0** |
 
 Addresses fully correct, same agent, same clips, keyterms the only difference.
 
-**The pack pays where the vocabulary is furthest from English, does less where it
-is closer, and slightly hurts where the words are already native.** That is the
-claim the market research made in week one, now measured — including where it goes
-against us.
+**The pack pays where the vocabulary is furthest from what the recogniser expects,
+and does nothing where it is already native.** That is the claim the market research
+made in week one, now measured — including where it goes against us.
 
 ## 1. Synthetic voice — 20 addresses, made first
 
@@ -97,19 +97,41 @@ The spoken-conventions scoring changes nothing here — 65% to 90% either way �
 because these errors are real mis-hearings of place names, not a writing
 convention.
 
-## 4. London — 20 addresses, synthetic British voice
+## 4. London — synthetic British voice, 20 addresses
+
+Re-run on 24 September against the fixed 24-term pack.
 
 | | Keyterms off | Keyterms on |
 |---|---|---|
-| **Addresses fully correct** | **65%** | **60%** |
-| Average word error rate | 6.4% | 8.1% |
+| **Addresses fully correct** | **65%** | **65%** |
+| Average word error rate | 6.4% | 6.4% |
 
-**The pack makes London slightly worse, and that is the finding.** English street
-names in a British accent are already what the recogniser expects, so a hundred
-biasing terms can only pull a correct guess off course. Keyterm biasing earns its
-keep where the vocabulary is non-Western — exactly the claim the market research
-made, now measured rather than asserted, and measured against itself rather than
-only where it flatters us.
+**The pack changes nothing at all here, and that is the finding.** English street
+names in a British accent are already what the recogniser expects, so there is
+nothing for a biasing term to fix. Identical to the decimal place, in both columns.
+
+The earlier run of this set scored 60% and looked like active harm. That was our own
+bug, not the model's — see §6. Keyterm biasing earns its keep where the vocabulary
+is unexpected, and this row is what that claim is measured against.
+
+## 5. London — Dami, Nigerian voice on London addresses, 20 addresses
+
+Recorded 24 September. Not a mismatch: a great many Nigerians drive deliveries in
+the UK, so this is an ordinary day's work rather than a stress test.
+
+| | Keyterms off | Keyterms on |
+|---|---|---|
+| **Addresses fully correct** | **40%** | **55%** |
+| Average word error rate | 20.8% | 15.1% |
+
+**The hardest set we have, and the pack still pays.** 40% without it is worse than
+any speaker in their own city — the accent and the place names miss independently,
+and the errors are not the ones either set makes alone: `buzzer number 6` became
+`Bursa No. 6`, `Islington` became `Eastlington`, `Hammersmith` became `Amersmith`.
+
+Two clips resist the pack entirely: `Marlow Point, Canary Wharf` and `Rosslyn Hill,
+Hampstead`. Both are in the keyterm list. The audio is the limit there, not the
+vocabulary.
 
 ## How to check any of this
 
@@ -121,7 +143,8 @@ python measurement/rescore.py measurement/lahore_human_manifest-results.csv
 
 It prints both scorings side by side for whichever set you point it at.
 
-Run 2026-09-22. Model `universal-3-5-pro`. Rows in the two `-results.csv` files.
+Lahore and Lagos run 2026-09-22, London 2026-09-24. Model `universal-3-5-pro`.
+Rows in the `-results.csv` files beside each sheet.
 
 **Both sets, in the order they happened.** The synthetic set came first and is
 larger, so it shows more failure modes. The real voice came a day later and is the
@@ -172,6 +195,11 @@ Removing the ten bare postcode fragments restored the score to exactly 65% and 6
 — identical to keyterms off, which is the correct result for London. The pack is
 fixed and the London agent is updated.
 
+**Re-measured on 24 September, and it holds:** 65% and 6.4% in both columns, from a
+fresh run of the same twenty clips against the 24-term pack. The sheet from the
+broken run is kept at `source/london-prefix-postcode-bug.xlsx`, because a bug whose
+evidence you deleted is just a claim.
+
 This is the strongest argument for measuring at all. Without the control run, we
 would have shipped a pack that quietly made London worse and never known.
 
@@ -202,13 +230,15 @@ is not a case any driver is in.
 
 | Pack | Who records it | State |
 |---|---|---|
-| Lahore | Yashfa | 5 done, 15 to go |
-| Lagos | Dami | 20 to record — sheet ready at `lagos_recording_manifest.xlsx` |
-| London | Nobody on the team | Generated voice, labelled as such on the slide |
+| Lahore | Yashfa | 20 of 20, done 22 Sep |
+| Lagos | Dami | 20 of 20, done 23 Sep |
+| London | Dami, plus a synthetic voice | 20 of each, done 24 Sep |
 
-**London is the honest gap.** Neither of us is a London speaker. We use a
-text-to-speech voice, say so plainly, and treat it as a demonstration that the pack
-loads and changes the vocabulary — not as evidence about recognition.
+**London is still the honest gap, in a narrower way.** Neither of us lives in
+London. The synthetic British voice tests the pack against the accent the
+recogniser already expects; Dami's clips test it against a Nigerian driver working
+London streets, which is a real and common case but not the only one. A London-born
+speaker would complete the picture, and we do not have one.
 
 Also outstanding:
 

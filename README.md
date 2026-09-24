@@ -17,19 +17,26 @@ AssemblyAI Voice Agent Hackathon, September 2026.
 
 Local place names are what a recogniser gets wrong. Each region ships a list of local
 terms, handed to the recogniser *before* it listens. We measured what that is worth:
-sixty recordings, each transcribed twice, the word list the only difference.
+eighty recordings, each transcribed twice, the word list the only difference.
 
 | Region | Voice | Word list off | on | Gain |
 |---|---|---|---|---|
-| **Lagos** | Nigerian, ours | 65% | **90%** | **+25** |
-| **Lahore** | Pakistani, ours | 75% | **85%** | **+10** |
-| **London** | synthetic British | 65% | **60%** | **−5** |
+| **Lagos** | Dami, Nigerian | 65% | **90%** | **+25** |
+| **Lahore** | Yashfa, Pakistani | 75% | **85%** | **+10** |
+| **London** | Dami, Nigerian, on London addresses | 40% | **55%** | **+15** |
+| **London** | synthetic British | 65% | **65%** | **0** |
 
 *Addresses transcribed fully correctly.* Word error rate in Lagos falls from 7.3% to 1.6%.
 
-**The pack pays most where the vocabulary is furthest from English, and slightly hurts
-where the words are already native.** London is in the table because a result that goes
-against us is what makes the other two worth believing. Method and every transcript:
+**The pack pays where the vocabulary is furthest from the recogniser's expectations, and
+does nothing where it is already native.** A British voice reading British streets gains
+exactly nothing from the pack — and that row stays in the table, because a result that
+goes against us is what makes the other three worth believing.
+
+The other London row is the one we did not expect. A Nigerian voice reading London
+addresses is a great deal of real UK delivery work, and it is the hardest set we have:
+40% correct without the pack, worse than any region in its own city. Accent and place
+names miss independently. Method and every transcript:
 [`measurement/RESULTS.md`](measurement/RESULTS.md).
 
 ---
@@ -254,8 +261,11 @@ the socket, not once at page load.
 **The transcript arrives as plain text with no confidence score.** To flag a doubtful name
 we re-transcribe the cited turn with a second model and compare — `/api/review`.
 
-**Keyterms can make recognition worse.** London scored 60% with the pack against 65%
-without. Biasing towards words the model already knows pulls correct guesses off course.
+**A keyterm that is a prefix of a longer word can corrupt that word.** The London pack
+listed the bare postcode `W1`, and `W11` came back as `W1 1` — which dragged the whole
+set to 60% against 65% with the pack off. Dropping the ten bare postcodes put it back to
+65% exactly. Without a keyterms-off control run we would have shipped that and never
+known.
 
 **Without keyterms, two Lahore addresses came back in Devanagari.** The recogniser
 switched language rather than mis-spelling a word. Forcing the locale fixes it — and a

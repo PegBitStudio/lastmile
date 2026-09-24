@@ -142,22 +142,27 @@ Let the reader read it.
 
 > We did not want to claim that word lists help. We measured it.
 >
-> Sixty recordings, in our own voices — mine in Lahore, my teammate's in Lagos.
+> Eighty recordings, in our own voices — mine in Lahore, my teammate's in Lagos.
 > Each one transcribed twice. The word list is the only thing that changes
 > between the two runs.
 >
 > Lagos goes from sixty-five per cent of addresses heard correctly, to ninety.
 > Lahore, seventy-five to eighty-five.
 >
-> And London gets slightly worse. Sixty-five down to sixty.
+> Then we pointed it at London with a synthetic British voice, and it changed
+> nothing. Sixty-five, both ways, identical.
 >
-> We are showing you that because it is the finding. Biasing the recogniser pays
-> where the words are furthest from English, and gets in the way where they
-> already are English.
+> So we recorded London again, in a Nigerian voice — because a great many
+> Nigerians drive deliveries in Britain. That is the hardest set we have. Forty
+> per cent without the word list. Fifty-five with it.
+>
+> Biasing the recogniser pays where the words are not what it expects. Where they
+> already are what it expects, it does nothing at all.
 
-**Say the London number clearly.** A team that reports a result against itself is
-a team whose other numbers you believe. This is the most valuable forty seconds
-in the video.
+**Say the flat London number clearly.** A team that reports a result against
+itself is a team whose other numbers you believe. This is the most valuable forty
+seconds in the video — and the Nigerian-voice row is the one no other team will
+have thought to measure.
 
 ---
 

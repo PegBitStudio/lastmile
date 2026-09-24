@@ -10,7 +10,9 @@ The numbers are read from the `-results.csv` files every time, so the chart and
 the claim cannot drift apart. Nothing here is typed in by hand.
 
 Form: a dumbbell, because the job is change with direction. Bars would make the
-reader subtract three pairs in their head, and London's fall is the whole point.
+reader subtract four pairs in their head, and London's flat line is the whole
+point — a pair of dots sitting on top of each other says "no effect" faster than
+any number can.
 
 Colour: blue for a gain, rust for a fall. Not green and red — those are the pair
 a colourblind reader cannot separate. This pair was checked with the palette
@@ -31,6 +33,7 @@ ROOT = HERE.parent
 SETS = [
     ("Lagos", "Nigerian voice", "lagos_recording_manifest-results.csv"),
     ("Lahore", "Pakistani voice", "lahore_human_manifest-results.csv"),
+    ("London", "Nigerian voice", "london_human_manifest-results.csv"),
     ("London", "synthetic voice", "london_recording_manifest-results.csv"),
 ]
 
@@ -56,9 +59,12 @@ def measure():
 def main():
     data = measure()
 
-    W, H = 1460, 760
+    rows = len(data)
+    W = 1460
     left, right = 420, 1150          # plot area in x
     top, gap = 250, 150              # first row, spacing
+    last = top + (rows - 1) * gap    # y of the bottom row
+    H = last + 210                   # room for the axis, rule and caption
     x = lambda pct: left + (right - left) * pct / 100
 
     p = []
@@ -75,7 +81,8 @@ def main():
     add(f'  <text class="display" x="60" y="86" font-size="46" fill="{INK}">'
         "Addresses heard correctly, with the local word list off and on</text>")
     add(f'  <text class="body" x="60" y="130" font-size="26" fill="{MUTE}">'
-        "60 recordings, each transcribed twice. The word list is the only difference.</text>")
+        f"{sum(d[4] for d in data)} recordings, each transcribed twice. "
+        "The word list is the only difference.</text>")
 
     # Legend: two states, so one is required.
     add(f'  <circle cx="{left + 10}" cy="176" r="9" fill="{PAPER}" stroke="{MUTE}" stroke-width="3"/>')
@@ -85,9 +92,9 @@ def main():
 
     # Gridlines, recessive.
     for pct in range(0, 101, 25):
-        add(f'  <line x1="{x(pct):.0f}" y1="215" x2="{x(pct):.0f}" y2="{top + 2 * gap + 60}" '
+        add(f'  <line x1="{x(pct):.0f}" y1="215" x2="{x(pct):.0f}" y2="{last + 60}" '
             f'stroke="{RULE}" stroke-width="1"/>')
-        add(f'  <text class="mono" x="{x(pct):.0f}" y="{top + 2 * gap + 96}" font-size="20" '
+        add(f'  <text class="mono" x="{x(pct):.0f}" y="{last + 96}" font-size="20" '
             f'fill="{MUTE}" text-anchor="middle">{pct}%</text>')
 
     for i, (name, voice, off, on, n) in enumerate(data):
@@ -102,12 +109,16 @@ def main():
             f'text-anchor="end">{voice} · {n} clips</text>')
 
         # The connector carries the direction; a 2px surface gap keeps the dots clean.
+        # A row that did not move has no direction to carry, so it gets neither line
+        # nor arrowhead: two dots in the same place is the clearest way to say "nothing
+        # happened", and it is a finding, not a gap in the chart.
         sign = 1 if x1 > x0 else -1
-        add(f'  <line x1="{x0 + 12 * sign:.0f}" y1="{y}" x2="{x1 - 20 * sign:.0f}" y2="{y}" '
-            f'stroke="{colour}" stroke-width="5"/>')
-        head = 14
-        add(f'  <polygon points="{x1:.0f},{y} {x1 - head * sign:.0f},{y - 8} '
-            f'{x1 - head * sign:.0f},{y + 8}" fill="{colour}"/>')
+        if abs(x1 - x0) > 24:
+            add(f'  <line x1="{x0 + 12 * sign:.0f}" y1="{y}" x2="{x1 - 20 * sign:.0f}" y2="{y}" '
+                f'stroke="{colour}" stroke-width="5"/>')
+            head = 14
+            add(f'  <polygon points="{x1:.0f},{y} {x1 - head * sign:.0f},{y - 8} '
+                f'{x1 - head * sign:.0f},{y + 8}" fill="{colour}"/>')
 
         add(f'  <circle cx="{x0:.0f}" cy="{y}" r="10" fill="{PAPER}" stroke="{MUTE}" stroke-width="3"/>')
         add(f'  <circle cx="{x1:.0f}" cy="{y}" r="11" fill="{colour}" stroke="{PAPER}" stroke-width="2"/>')
@@ -115,10 +126,18 @@ def main():
         # Direct labels on both ends, each sitting on the outside of its own dot.
         # Centring them above the dots collides whenever the two are close, which
         # is exactly the row — London — that the reader most needs to read.
-        add(f'  <text class="mono" x="{x0 - 22 * sign:.0f}" y="{y + 9}" font-size="25" fill="{MUTE}" '
-            f'text-anchor="{"end" if rose else "start"}">{off:.0f}%</text>')
-        add(f'  <text class="display" x="{x1 + 24 * sign:.0f}" y="{y + 11}" font-size="32" fill="{colour}" '
-            f'text-anchor="{"start" if rose else "end"}">{on:.0f}%</text>')
+        if abs(x1 - x0) > 24:
+            add(f'  <text class="mono" x="{x0 - 22 * sign:.0f}" y="{y + 9}" font-size="25" fill="{MUTE}" '
+                f'text-anchor="{"end" if rose else "start"}">{off:.0f}%</text>')
+            add(f'  <text class="display" x="{x1 + 24 * sign:.0f}" y="{y + 11}" font-size="32" '
+                f'fill="{colour}" text-anchor="{"start" if rose else "end"}">{on:.0f}%</text>')
+        else:
+            # Both ends in the same place: two labels would print on top of each
+            # other. One label, saying so in words, is the readable version.
+            add(f'  <text class="display" x="{x1 + 26:.0f}" y="{y + 11}" font-size="32" '
+                f'fill="{colour}" text-anchor="start">{on:.0f}%</text>')
+            add(f'  <text class="mono" x="{x1 + 26 + 86:.0f}" y="{y + 10}" font-size="22" '
+                f'fill="{MUTE}" text-anchor="start">both ways</text>')
 
         change = on - off
         add(f'  <text class="display" x="{W - 130}" y="{y + 10}" font-size="32" fill="{colour}" '
@@ -128,8 +147,8 @@ def main():
 
     add(f'  <line x1="60" y1="{H - 96}" x2="{W - 60}" y2="{H - 96}" stroke="{RULE}" stroke-width="2"/>')
     add(f'  <text class="body" x="60" y="{H - 52}" font-size="25" fill="{INK}">'
-        "The word list pays where the words are furthest from English — and gets in the way "
-        "where they are already English.</text>")
+        "The word list pays where the words are not what the recogniser expects — and does "
+        "nothing at all where they are.</text>")
     add(f'  <text class="mono" x="60" y="{H - 20}" font-size="18" fill="{MUTE}">'
         "measurement/RESULTS.md · every transcript kept · rerun with measurement/rescore.py</text>")
     add("</svg>")

@@ -1,5 +1,5 @@
 pack_id,utterance_id,ground_truth,transcript_no_keyterms,transcript_with_keyterms,score_before,score_after,exact_before,exact_after
-uk-london,LDN-01,"Flat 12, Ashby Mews, Camden","Flat 12, Ashby Mews, Camden.","Flat 12, Ashby Mews, Camden.",0.0,0.0,Yes,Yes
+uk-london,LDN-01,"Flat 12, Ashby Mews, Camden","Flat 12 Ashby Mews, Camden.","Flat 12, Ashby Mews, Camden.",0.0,0.0,Yes,Yes
 uk-london,LDN-02,"Unit 4, Bevin House, Shoreditch","Unit 4, Bevan House, Shoreditch.","Unit 4, Bevan House, Shoreditch.",0.2,0.2,No,No
 uk-london,LDN-03,"27 Hartland Terrace, Islington","27 Heartland Terrace, Islington.","27 Heartland Terrace, Islington.",0.25,0.25,No,No
 uk-london,LDN-04,"Flat 9B, Marlow Point, Canary Wharf","Flat 9B Marlow Point, Canary Wharf.","Flat 9B Marlow Point, Canary Wharf.",0.0,0.0,Yes,Yes
@@ -11,8 +11,8 @@ uk-london,LDN-09,"Flat 3, Longhurst House, Hammersmith, W6","Flat 3, Longhurst H
 uk-london,LDN-10,"8 Marchmont Terrace, Westminster, SW1","8 Marchmont Terrace, Westminster, SW1.","8 Marchmont Terrace, Westminster, SW1.",0.0,0.0,Yes,Yes
 uk-london,LDN-11,"Flat 15, Kelsey Court, Chelsea, ask the porter","Flat 15, Kelsey Court, Chelsea, asked the porter.","Flat 15, Kelsey Court, Chelsea, asked the porter.",0.125,0.125,No,No
 uk-london,LDN-12,"41 Ainsworth Road, Hackney, E8","41 Ainsworth Road, Hackney, E8.","41 Ainsworth Road, Hackney, E8.",0.0,0.0,Yes,Yes
-uk-london,LDN-13,"Flat 2, Thornbury House, Islington, N1","Flat 2, Thornberry House, Islington N1.","Flat 2, Thornberry House, Islington, N1.",0.1667,0.1667,No,No
-uk-london,LDN-14,"9 Colville Mews, Notting Hill, W11","9 Colville Mews, Notting Hill, W11.","9 Colville Mews, Notting Hill, W11.",0.0,0.0,Yes,Yes
+uk-london,LDN-13,"Flat 2, Thornbury House, Islington, N1","Flat 2, Thornberry House, Islington, N1.","Flat 2, Thornberry House, Islington, N1.",0.1667,0.1667,No,No
+uk-london,LDN-14,"9 Colville Mews, Notting Hill, W11","9 Colville Mews, Notting Hill, W11.","9 Colville Mews, Notting Hill, W1 1.",0.0,0.3333,Yes,No
 uk-london,LDN-15,"Unit 7, Bermondsey Works, SE1","Unit 7, Bermondsey Works, SE1.","Unit 7, Bermondsey Works, SE1.",0.0,0.0,Yes,Yes
 uk-london,LDN-16,"Flat 24, Calderwood Estate, Camden, concierge desk","Flat 24, Calderwood Estate, Camden Concierge Desk.","Flat 24, Calderwood Estate, Camden Concierge Desk.",0.0,0.0,Yes,Yes
 uk-london,LDN-17,"6 Rosslyn Hill, Hampstead, NW3","6 Roslin Hill, Hampstead, NW3.","6 Roslin Hill, Hampstead, NW3.",0.2,0.2,No,No
