@@ -238,7 +238,15 @@ export default function Drive() {
           }
           // A delta is one more piece of the same sentence. A non-delta is the
           // whole sentence, so it replaces what we built up.
-          const text = e.delta ? last.text + e.text : e.text;
+          //
+          // Except that the driver's deltas are not pieces: each one is the whole
+          // sentence heard so far. Appended, "Usman was not at home" showed as
+          // "Usman, Usman.Usman wasUsman was not at home" until the final line
+          // arrived. A delta that starts with the same word as the line is a
+          // fresh snapshot, so it replaces.
+          const snapshot =
+            e.delta && who === "driver" && words(e.text)[0] === words(last.text)[0];
+          const text = e.delta && !snapshot ? last.text + e.text : e.text;
           next[next.length - 1] = { who, text, final: e.final };
           return next;
         });

@@ -9,7 +9,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { DeliveryDraft, handleTool, TOOLS } from "./tools.ts";
+import { DeliveryDraft, handleTool, TOOLS, spokenDistance } from "./tools.ts";
 import type { ManifestDrop } from "./requirements.ts";
 
 const plain: ManifestDrop = { order_ref: "LG-4412" };
@@ -256,8 +256,10 @@ test("being far from the address is mentioned once, and never blocks the record"
   d.observe({ gps_delta_m: 640 });
 
   const first = d.apply({ outcome: "rescheduled" });
-  assert.match(first.instruction, /640 metres from the address/);
+  assert.match(first.instruction, /about 640 metres from the address/);
   assert.match(first.instruction, /Do not argue/);
+  // Said, never asked: a question here adds a turn to a report that was complete.
+  assert.match(first.instruction, /not a question/);
 
   // Said once. A second mention reads as an accusation.
   const second = d.apply({ next_action: "reattempt_tomorrow" });
@@ -266,6 +268,20 @@ test("being far from the address is mentioned once, and never blocks the record"
   // Advisory only: the record is complete and closes normally.
   assert.equal(second.complete, true);
   assert.equal(d.close({}).closed, true);
+});
+
+test("a distance is said the way a person would say it", () => {
+  assert.equal(spokenDistance(640), "about 640 metres");
+  assert.equal(spokenDistance(1200), "about 1 kilometre");
+  assert.equal(spokenDistance(14890), "about 15 kilometres");
+  assert.equal(spokenDistance(9280), "about 9 kilometres");
+});
+
+test("far away in kilometres still reaches the agent once", () => {
+  const d = new DeliveryDraft(plain);
+  d.observe({ gps_delta_m: 14890 });
+  assert.match(d.apply({ outcome: "rescheduled" }).instruction, /about 15 kilometres from the address/);
+  assert.doesNotMatch(d.apply({ next_action: "reattempt_tomorrow" }).instruction, /kilometres/);
 });
 
 test("a normal distance is never mentioned", () => {

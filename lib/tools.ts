@@ -190,6 +190,16 @@ function merge(into: DeliveryEvent, patch: Record<string, unknown>): DeliveryEve
  * mis-heard order number attaches an exception to somebody else's parcel, which is
  * the one mistake in this product that cannot be walked back. See spec §3.0.
  */
+/**
+ * A distance the voice can say. Round metres close by; whole kilometres past one,
+ * because nobody at a gate needs "fourteen thousand eight hundred and ninety".
+ */
+export function spokenDistance(metres: number): string {
+  if (metres < 1000) return "about " + Math.round(metres / 10) * 10 + " metres";
+  const km = Math.round(metres / 1000);
+  return "about " + km + (km === 1 ? " kilometre" : " kilometres");
+}
+
 export class DeliveryDraft {
   event: DeliveryEvent;
   /** Set once close_session has been accepted. The record is final after this. */
@@ -269,15 +279,23 @@ export class DeliveryDraft {
     // Worth saying out loud once, because the usual cause is a wrong address in
     // the system and the driver is the only person who can tell us. It is never
     // a challenge to their account, and it never holds the record up.
+    //
+    // A statement, not a question. It used to ask "note this?", which added a
+    // turn to every far-away report and meant a driver who said everything at
+    // once was still asked something. The distance is already in the observed
+    // column; the driver only needs to hear it, and can correct it if they like.
+    //
+    // Kilometres past one, because "14890 metres" came out of the voice as
+    // "fourteen, eight, nine, zero metres".
     const far = this.event.observed?.gps_delta_m;
     if (!this.saidFar && typeof far === "number" && far > FAR_FROM_DROP_M) {
       this.saidFar = true;
       result.instruction =
-        "First, say once: the phone puts you about " +
-        Math.round(far / 10) * 10 +
-        " metres from the address on the manifest. Ask if they want that noted, and " +
-        "put whatever they say in location.notes. Do not argue and do not ask twice. " +
-        "Then: " +
+        "Say once, in passing, as a statement and not a question: the phone puts " +
+        "them " + spokenDistance(far) + " from the address on the manifest, and " +
+        "that is noted. If they say the address is wrong, put what they say in " +
+        "location.notes. Do not argue, do not ask about it, and do not mention it " +
+        "again. Then: " +
         result.instruction;
     }
     return result;
