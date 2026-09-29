@@ -11,6 +11,7 @@
  */
 
 import { TurnRecorder } from "./turn-audio";
+import { agentAudible } from "./echo";
 
 const SAMPLE_RATE = 24000;
 /** Send about 50 ms at a time. A frame per 128 samples is ~187 messages a second,
@@ -56,6 +57,8 @@ export class VoiceSession {
   private stream: MediaStream | null = null;
   private node: AudioWorkletNode | ScriptProcessorNode | null = null;
   private playHead = 0;
+  /** True while the agent is audible and the driver's audio is sent as silence. */
+  private muted = false;
   private pending: number[] = [];
   private stopped = false;
   private sent = 0;
@@ -343,7 +346,22 @@ export class VoiceSession {
     // have already decided to end, and we would pay for the answer.
     if (this.closing) return;
 
-    const chunk = this.inRate === SAMPLE_RATE ? raw : this.downsample(raw);
+    const resampled = this.inRate === SAMPLE_RATE ? raw : this.downsample(raw);
+
+    // While the agent is talking, the driver is sent as silence, so a phone that
+    // does not cancel its own speaker cannot make the agent hear itself. See
+    // lib/echo.ts. The screen says which state it is in, because a driver talking
+    // over the agent would otherwise think the app had stopped listening.
+    const ctx = this.ctxOut;
+    const talking = !!ctx && agentAudible(ctx.currentTime, this.playHead, ctx.state === "running");
+    if (talking !== this.muted) {
+      this.muted = talking;
+      this.opts?.onEvent({
+        type: "status",
+        text: talking ? "Agent speaking. Wait for it to finish." : "Listening. Go ahead.",
+      });
+    }
+    const chunk = talking ? new Float32Array(resampled.length) : resampled;
     for (let i = 0; i < chunk.length; i++) this.pending.push(chunk[i]);
     if (this.pending.length < FRAME_SAMPLES) return;
 

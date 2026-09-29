@@ -291,11 +291,12 @@ export class DeliveryDraft {
     if (!this.saidFar && typeof far === "number" && far > FAR_FROM_DROP_M) {
       this.saidFar = true;
       result.instruction =
-        "Say once, in passing, as a statement and not a question: the phone puts " +
-        "them " + spokenDistance(far) + " from the address on the manifest, and " +
-        "that is noted. If they say the address is wrong, put what they say in " +
-        "location.notes. Do not argue, do not ask about it, and do not mention it " +
-        "again. Then: " +
+        // The sentence is given word for word, spoken to the driver. Described in
+        // the third person, the agent read it out that way: "the phone puts them".
+        'Say this once, as a statement and not a question: "The phone puts you ' +
+        spokenDistance(far) + ' from the address. I have noted that." ' +
+        "If they say the address is wrong, put what they say in location.notes. " +
+        "Do not argue, do not ask about it, and do not mention it again. Then: " +
         result.instruction;
     }
     return result;

@@ -256,7 +256,7 @@ test("being far from the address is mentioned once, and never blocks the record"
   d.observe({ gps_delta_m: 640 });
 
   const first = d.apply({ outcome: "rescheduled" });
-  assert.match(first.instruction, /about 640 metres from the address/);
+  assert.match(first.instruction, /puts you about 640 metres from the address/);
   assert.match(first.instruction, /Do not argue/);
   // Said, never asked: a question here adds a turn to a report that was complete.
   assert.match(first.instruction, /not a question/);
@@ -280,7 +280,7 @@ test("a distance is said the way a person would say it", () => {
 test("far away in kilometres still reaches the agent once", () => {
   const d = new DeliveryDraft(plain);
   d.observe({ gps_delta_m: 14890 });
-  assert.match(d.apply({ outcome: "rescheduled" }).instruction, /about 15 kilometres from the address/);
+  assert.match(d.apply({ outcome: "rescheduled" }).instruction, /puts you about 15 kilometres from the address/);
   assert.doesNotMatch(d.apply({ next_action: "reattempt_tomorrow" }).instruction, /kilometres/);
 });
 
