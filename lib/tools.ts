@@ -200,12 +200,51 @@ export function spokenDistance(metres: number): string {
   return "about " + km + (km === 1 ? " kilometre" : " kilometres");
 }
 
+/** Words that describe a role, not a person. "Male guard" is a job, not a name. */
+const ROLE_WORDS = [
+  "guard", "gateman", "gate man", "security", "watchman", "chowkidar", "chokidar",
+  "chowkidaar", "darban", "neighbour", "neighbor", "receptionist", "concierge",
+  "caretaker", "porter", "doorman", "customer", "recipient",
+];
+
+function nameWords(s: string): string[] {
+  return s.toLowerCase().replace(/[^a-z ]/g, " ").split(/\s+/).filter((w) => w.length >= 3);
+}
+
+/**
+ * Is this "person who took it" really a name we can use? Returns why not, or null.
+ *
+ * Two mistakes seen in testing, both from a single ordinary sentence:
+ *
+ * - "Emeka wasn't home, so I left it with the gateman" came back with the taker
+ *   named Emeka. Emeka is the customer — the one person who, by definition, did
+ *   not take it. With the field filled, the table thought the name was known and
+ *   never asked for it, which is the whole point of the follow-up.
+ * - "I gave it to the mai guard" came back named "male guard". A role, not a name.
+ */
+export function takerNameProblem(name: string | undefined, customer: string | undefined): string | null {
+  if (!name || !name.trim()) return null;
+  const lower = " " + name.toLowerCase() + " ";
+  if (ROLE_WORDS.some((w) => lower.includes(" " + w + " ") || lower.includes(" " + w))) {
+    return '"' + name.trim() + '" is a role, not a name';
+  }
+  if (customer) {
+    const theirs = new Set(nameWords(customer));
+    if (nameWords(name).some((w) => theirs.has(w))) {
+      return name.trim() + " is the customer, who was not the one who took it";
+    }
+  }
+  return null;
+}
+
 export class DeliveryDraft {
   event: DeliveryEvent;
   /** Set once close_session has been accepted. The record is final after this. */
   closed = false;
   /** The distance has been mentioned. Once is information; twice is an accusation. */
   private saidFar = false;
+  /** A wrong taker name has been sent back once. A second time, the driver wins. */
+  private askedTaker = false;
   // Written out longhand rather than as constructor parameter properties, because
   // node --experimental-strip-types removes types without rewriting anything, and
   // a parameter property is a type annotation that has to become an assignment.
@@ -273,7 +312,26 @@ export class DeliveryDraft {
       ...stated
     } = args;
     this.event = merge(this.event, stated);
+
+    // Someone else took it, and the name written down cannot be theirs: throw it
+    // away so the table asks for it. Once only — if the driver says it again,
+    // they know something we do not, and the second check will still review it.
+    let takerProblem: string | null = null;
+    if (!this.askedTaker && this.event.outcome === "delivered_to_third_party") {
+      takerProblem = takerNameProblem(this.event.recipient?.name, this.drop.recipient_name);
+      if (takerProblem) {
+        this.askedTaker = true;
+        const { name: _dropped, ...rest } = this.event.recipient ?? {};
+        this.event = { ...this.event, recipient: rest };
+      }
+    }
+
     const result = toolResult(this.event, this.drop, this.pack);
+    if (takerProblem) {
+      result.instruction =
+        "Do not record that name: " + takerProblem + ". Ask the driver for the name " +
+        "of the person who actually took the parcel. Then: " + result.instruction;
+    }
 
     // The phone thinks the driver is nowhere near the address on the manifest.
     // Worth saying out loud once, because the usual cause is a wrong address in

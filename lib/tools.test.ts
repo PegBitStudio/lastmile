@@ -9,7 +9,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { DeliveryDraft, handleTool, TOOLS, spokenDistance } from "./tools.ts";
+import { DeliveryDraft, handleTool, TOOLS, spokenDistance, takerNameProblem } from "./tools.ts";
 import type { ManifestDrop } from "./requirements.ts";
 
 const plain: ManifestDrop = { order_ref: "LG-4412" };
@@ -282,6 +282,55 @@ test("far away in kilometres still reaches the agent once", () => {
   d.observe({ gps_delta_m: 14890 });
   assert.match(d.apply({ outcome: "rescheduled" }).instruction, /puts you about 15 kilometres from the address/);
   assert.doesNotMatch(d.apply({ next_action: "reattempt_tomorrow" }).instruction, /kilometres/);
+});
+
+test("the customer's own name is never accepted as the person who took it", () => {
+  const drop: ManifestDrop = { order_ref: "LG-4414", recipient_name: "Emeka Nwosu" };
+  const d = new DeliveryDraft(drop);
+  const r = d.apply({
+    outcome: "delivered_to_third_party",
+    recipient: { name: "Emeka", relationship: "security" },
+  });
+  // The name is gone, so the table asks for it, and the agent is told why.
+  assert.equal(d.event.recipient?.name, undefined);
+  assert.equal(d.event.recipient?.relationship, "security");
+  assert.match(r.instruction, /the customer/);
+  assert.ok(r.missing.some((m) => m.path === "recipient.name"));
+});
+
+test("a role is not a name", () => {
+  assert.match(takerNameProblem("male guard", "Chidi Okafor") ?? "", /role/);
+  assert.match(takerNameProblem("the chowkidar", "Bilal Ahmed") ?? "", /role/);
+  assert.equal(takerNameProblem("Imran", "Usman Tariq"), null);
+  assert.equal(takerNameProblem("Musa", "Chidi Okafor"), null);
+});
+
+test("the real taker's name goes straight through", () => {
+  const drop: ManifestDrop = { order_ref: "LH-7703", recipient_name: "Usman Tariq" };
+  const d = new DeliveryDraft(drop);
+  const r = d.apply({
+    outcome: "delivered_to_third_party",
+    recipient: { name: "Imran", relationship: "security" },
+    location: { entrance: "back gate" },
+  });
+  assert.equal(d.event.recipient?.name, "Imran");
+  assert.doesNotMatch(r.instruction, /Do not record that name/);
+});
+
+test("the name is sent back once; if the driver insists, it stands", () => {
+  const drop: ManifestDrop = { order_ref: "LH-7701", recipient_name: "Bilal Ahmed" };
+  const d = new DeliveryDraft(drop);
+  d.apply({ outcome: "delivered_to_third_party", recipient: { name: "Bilal", relationship: "security" } });
+  assert.equal(d.event.recipient?.name, undefined);
+  d.apply({ recipient: { name: "Bilal" } });
+  assert.equal(d.event.recipient?.name, "Bilal");
+});
+
+test("a customer who took it themselves is not second-guessed", () => {
+  const drop: ManifestDrop = { order_ref: "LG-4412", recipient_name: "Chidi Okafor" };
+  const d = new DeliveryDraft(drop);
+  d.apply({ outcome: "delivered_to_recipient", recipient: { name: "Chidi" } });
+  assert.equal(d.event.recipient?.name, "Chidi");
 });
 
 test("a normal distance is never mentioned", () => {

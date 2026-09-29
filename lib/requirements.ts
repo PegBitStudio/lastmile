@@ -105,6 +105,9 @@ export interface DeliveryEvent {
 /** One drop from data/manifest.fixture.json. Only the parts this table reads. */
 export interface ManifestDrop {
   order_ref: string;
+  /** The customer on the manifest. Used to catch their name being written down
+   *  as the person who took the parcel, which is the one name it cannot be. */
+  recipient_name?: string;
   region?: string;
   cash_on_delivery?: boolean;
   payment?: { expected_amount?: number; currency?: string };
