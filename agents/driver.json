@@ -9,8 +9,8 @@
     "keyterms": [],
     "turn_detection": {
       "vad_threshold": 0.4,
-      "min_silence": 900,
-      "max_silence": 2200,
+      "min_silence": 1600,
+      "max_silence": 3000,
       "interrupt_response": true
     }
   },
